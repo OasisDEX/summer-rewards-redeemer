@@ -34,9 +34,9 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
 
     /* @inheritdoc IAjnaRedeemer */
     function addRoot(uint256 week, bytes32 root) external onlyRole(OPERATOR_ROLE) {
-        require(week >= deploymentWeek, "redeemer/invalid-week");
+        require((week >= deploymentWeek && week <= getCurrentWeek()), "redeemer/invalid-week");
         require(weeklyRoots[week] == bytes32(0), "redeemer/root-already-added");
-        require(IAjnaDripper(drip).drip(), "redeemer/transfer-from-failed");
+        require(IAjnaDripper(drip).drip(week), "redeemer/transfer-from-failed");
         weeklyRoots[week] = root;
     }
 

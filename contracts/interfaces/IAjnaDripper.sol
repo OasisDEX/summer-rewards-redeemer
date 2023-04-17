@@ -59,5 +59,5 @@ interface IAjnaDripper {
      *
      * Emits a {Transfer} event.
      */
-    function drip() external returns (bool status);
+    function drip(uint256 week) external returns (bool status);
 }

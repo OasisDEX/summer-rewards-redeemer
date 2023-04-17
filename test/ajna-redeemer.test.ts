@@ -105,7 +105,7 @@ describe("AjnaRedeemer", () => {
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.not.reverted;
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.revertedWith(
-        "drip/already-dripped"
+        "redeemer/invalid-week"
       );
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });

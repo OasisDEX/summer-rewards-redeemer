@@ -32,8 +32,7 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     }
 
     /* @inheritdoc IAjnaDripper */
-    function drip() external onlyRole(REDEEMER_ROLE) returns (bool status) {
-        uint256 week = getCurrentWeek();
+    function drip(uint256 week) external onlyRole(REDEEMER_ROLE) returns (bool status) {
         require(weeklyDrip[week] == false, "drip/already-dripped");
         weeklyDrip[week] = true;
         status = ajnaToken.transfer(address(redeemer), weeklyAmount);
