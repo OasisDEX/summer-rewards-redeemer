@@ -10,6 +10,7 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
     address public immutable beneficiary;
     address public immutable self;
+    uint256 public immutable dripperDeploymentWeek;
     uint256 public weeklyAmount;
     uint256 public lastUpdate;
     IERC20 public immutable ajnaToken;
@@ -24,6 +25,7 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         beneficiary = _multisig;
         self = address(this);
         _setupRole(DEFAULT_ADMIN_ROLE, _multisig);
+        dripperDeploymentWeek = getCurrentWeek();
     }
 
     /* @inheritdoc IAjnaDripper */
@@ -34,6 +36,7 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     /* @inheritdoc IAjnaDripper */
     function drip(uint256 week) external onlyRole(REDEEMER_ROLE) returns (bool status) {
         require(weeklyDrip[week] == false, "drip/already-dripped");
+        require(week >= dripperDeploymentWeek && week <= getCurrentWeek(), "drip/invalid-week");
         weeklyDrip[week] = true;
         status = ajnaToken.transfer(address(redeemer), weeklyAmount);
         require(status, "drip/transfer-from-failed");
