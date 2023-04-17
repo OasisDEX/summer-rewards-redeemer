@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
       chainId: 2137,
       forking: {
         url: process.env.ALCHEMY_MAINNET_RPC_URL !== undefined ? process.env.ALCHEMY_MAINNET_RPC_URL : "",
-        blockNumber: 14833851,
+        blockNumber: 17000000,
       },
       mining: {
         auto: true,
@@ -64,6 +64,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
   },
+  defaultNetwork: "hardhat",
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",

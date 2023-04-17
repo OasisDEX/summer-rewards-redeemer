@@ -12,4 +12,8 @@ contract AjnaToken is ERC20, Ownable {
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
+
+    function burn(address to, uint256 amount) public onlyOwner {
+        _burn(to, amount);
+    }
 }
