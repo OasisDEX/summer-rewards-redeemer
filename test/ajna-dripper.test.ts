@@ -143,7 +143,7 @@ describe("AjnaDripper", () => {
   describe("drip", () => {
     it("should transfer 2000 AJNA to redeemer on addRoot and emit Transfer event", async () => {
       const { ajnaToken, ajnaRedeemer, ajnaDripper, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       const tx = await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       expect(tx)
@@ -153,22 +153,22 @@ describe("AjnaDripper", () => {
       expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.equal(ethers.utils.parseEther("2000")); // Check if the redeemer received the tokens
     });
     it("should not transfer 2000 AJNA with insufficient funds", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployBaseNoMintFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const { ajnaRedeemer, ajnaDripper, operator } = await loadFixture(deployBaseNoMintFixture);
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       const tx = ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       await expect(tx).to.be.revertedWith("ERC20: transfer amount exceeds balance");
     });
     it("should fail to call drip", async () => {
       const { ajnaRedeemer, operator, ajnaDripper } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       await expect(ajnaDripper.connect(operator).drip(currentWeek)).to.be.reverted;
     });
     it.skip("should fail to call drip - wrong week number", async () => {
       const { ajnaRedeemer, operator, ajnaDripper } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       await impersonateAccount(ajnaRedeemer.address);
@@ -176,7 +176,7 @@ describe("AjnaDripper", () => {
     });
     it.skip("should not fail to call drip by redeemer", async () => {
       const { ajnaRedeemer, operator, ajnaDripper } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
       await impersonateAccount(ajnaRedeemer.address);
@@ -184,7 +184,7 @@ describe("AjnaDripper", () => {
     });
     it.skip("should not fail to call drip by redeemer", async () => {
       const { ajnaRedeemer, operator, ajnaDripper } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
       await impersonateAccount(ajnaRedeemer.address);
@@ -195,7 +195,7 @@ describe("AjnaDripper", () => {
     it("should allow admin role to change redeemer", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
         await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
@@ -214,7 +214,7 @@ describe("AjnaDripper", () => {
     it("should not allow operator role to change redeemer", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper } =
         await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
@@ -234,7 +234,7 @@ describe("AjnaDripper", () => {
     it("should not allow adding the same weekly root with new redeemer", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
         await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
@@ -256,7 +256,7 @@ describe("AjnaDripper", () => {
     it("should not allow adding new root for next week with new redeemer -  'redeemer/invalid-week' ", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
         await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
@@ -277,7 +277,7 @@ describe("AjnaDripper", () => {
     it("should allow adding new root for next week with new redeemer - advance time by one week", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
         await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
 
