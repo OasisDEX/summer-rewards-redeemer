@@ -7,6 +7,7 @@ import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import keccak256 from "keccak256";
 import { TWO_THOUSAND, WEEK } from "../scripts/common/constants";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
@@ -26,9 +27,13 @@ async function deployTokenFixture() {
   const firstUserAddress = await firstUser.getAddress();
   const adminAddress = await admin.getAddress();
   const operatorAddress = await operator.getAddress();
-  const ajnaToken = await deployContract("AjnaToken", []);
-  const ajnaDripper = await deployContract("AjnaDripper", [ajnaToken.address, adminAddress]);
-  const ajnaRedeemer = await deployContract("AjnaRedeemer", [ajnaToken.address, operatorAddress, ajnaDripper.address]);
+  const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);
+  const ajnaDripper = await deployContract<AjnaDripper>("AjnaDripper", [ajnaToken.address, adminAddress]);
+  const ajnaRedeemer = await deployContract<AjnaRedeemer>("AjnaRedeemer", [
+    ajnaToken.address,
+    operatorAddress,
+    ajnaDripper.address,
+  ]);
   await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
@@ -259,7 +264,6 @@ describe("AjnaRedeemer", () => {
         const randomUser = ethers.provider.getSigner(dummyProcessedSnaphot[i].address);
         const randomUserAddress = await randomUser.getAddress();
         const proofForRandomUserFromDummyProcessedSnaphot = tree.getHexProof(leaves[i]);
-        // console.log(proofForRandomUserFromDummyProcessedSnaphot);
         await expect(
           ajnaRedeemer
             .connect(randomUser)
@@ -314,6 +318,15 @@ describe("AjnaRedeemer", () => {
       );
     });
   });
+  describe("AccessControl", () => {
+    it("should return no admin for DEFAULT_ADMIN_ROLE", async () => {
+      const { ajnaRedeemer } = await loadFixture(deployTokenFixture);
+
+      expect(await ajnaRedeemer.getRoleAdmin(keccak256("DEFAULT_ADMIN_ROLE"))).to.be.equal(
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      );
+    });
+  });
   describe("emergencyWithdraw", () => {
     it("should allow the operator to withdraw to dripper contract - confirm company wallet balance after", async () => {
       const { ajnaToken, ajnaRedeemer, owner, ajnaDripper, operator } = await loadFixture(deployTokenFixture);
@@ -327,20 +340,6 @@ describe("AjnaRedeemer", () => {
       const beneficiaryBalanceAfter = await ajnaToken.balanceOf(ajnaDripper.address);
 
       expect(beneficiaryBalanceAfter.sub(beneficiaryBalanceBefore)).to.eql(redeemerBalanceBefore);
-    });
-    // thats ok - no access
-    it.skip("should not allow the admin to withdraw - confirm company wallet balance after", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUser, ajnaDripper, operator } = await loadFixture(deployTokenFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      const redeemerBalanceBefore = await ajnaToken.balanceOf(ajnaRedeemer.address);
-
-      await ajnaRedeemer.connect(firstUser).emergencyWithdraw();
-      const beneficiaryBalanceAfter = await ajnaToken.balanceOf(ajnaDripper.address);
-
-      expect(beneficiaryBalanceAfter).to.eql(redeemerBalanceBefore);
     });
     it("shouldn't allow a random user to withdraw", async () => {
       const { ajnaRedeemer, randomUser, operator } = await loadFixture(deployTokenFixture);
@@ -365,15 +364,6 @@ describe("AjnaRedeemer", () => {
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("DEFAULT_ADMIN_ROLE"), firstUserAddress)).to.be
-        .reverted;
-    });
-    it.skip("should allow the admin to grant operator role", async () => {
-      const { ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployTokenFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(ajnaRedeemer.connect(firstUser).grantRole(keccak256("OPERATOR_ROLE"), firstUserAddress)).to.not.be
         .reverted;
     });
   });

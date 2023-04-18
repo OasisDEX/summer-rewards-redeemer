@@ -1,3 +1,5 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import MerkleTree from "merkletreejs";
@@ -24,4 +26,11 @@ export const createMerkleTree = (
   });
   const root = tree.getHexRoot();
   return { leaves, tree, root };
+};
+
+export const impersonate = async (address: string): Promise<SignerWithAddress> => {
+  await impersonateAccount(address);
+  const signer = await ethers.getSigner(address);
+  setBalance(address, ethers.utils.parseEther("10000"));
+  return signer;
 };
