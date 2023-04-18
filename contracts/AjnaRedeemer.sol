@@ -87,12 +87,7 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
         return MerkleProof.verify(proof, weeklyRoots[week], leaf);
     }
 
-    /**
-     * @dev Withdraw all remaining AJNA tokens from the contract in case of emergency.
-     * Only callable by users with the EMERGENCY_ROLE permission.
-     * Transfers the entire balance of the contract to the designated drip address.
-     * Emits a {Transfer} event indicating the transfer to the drip address.
-     */
+    /* @inheritdoc IAjnaRedeemer */
     function emergencyWithdraw() external onlyRole(EMERGENCY_ROLE) {
         require(
             ajnaToken.transfer(drip, ajnaToken.balanceOf(address(this))),
