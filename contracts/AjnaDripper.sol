@@ -8,24 +8,24 @@ import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
 
 contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
+    uint256 constant MAX_WEEKLY_AMOUNT = 10_000 * 10 ** 18;
     address public immutable beneficiary;
-    address public immutable self;
     uint256 public immutable dripperDeploymentWeek;
-    uint256 public weeklyAmount;
-    uint256 public lastUpdate;
     IERC20 public immutable ajnaToken;
     IAjnaRedeemer public redeemer;
+    uint256 public weeklyAmount;
+    uint256 public lastUpdate;
+
     bytes32 public constant REDEEMER_ROLE = keccak256("REDEEMER_ROLE");
 
     event Dripped(uint256 indexed week, uint256 amount);
+    event RedeemerChanged(uint256 indexed week, address indexed newRedeemer);
 
     constructor(IERC20 _ajnaToken, address _multisig) {
-        weeklyAmount = 2000 * 10 ** 18;
         ajnaToken = _ajnaToken;
         beneficiary = _multisig;
-        self = address(this);
-        _setupRole(DEFAULT_ADMIN_ROLE, _multisig);
         dripperDeploymentWeek = getCurrentWeek();
+        _setupRole(DEFAULT_ADMIN_ROLE, _multisig);
     }
 
     /* @inheritdoc IAjnaDripper */
@@ -44,25 +44,28 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     }
 
     /* @inheritdoc IAjnaDripper */
-    function changeRedeemer(IAjnaRedeemer _redeemer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeRedeemer(
+        IAjnaRedeemer _redeemer,
+        uint256 _weeklyAmount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_weeklyAmount > 0 && _weeklyAmount <= MAX_WEEKLY_AMOUNT, "drip/invalid-amount");
         revokeRole(REDEEMER_ROLE, address(redeemer));
         grantRole(REDEEMER_ROLE, address(_redeemer));
-        redeemer = _redeemer;
-    }
-
-    /* @inheritdoc IAjnaDripper */
-    function changeWeeklyAmount(uint256 _newAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(_newAmount > 0 && _newAmount < (110 * weeklyAmount) / 100, "drip/invalid-amount");
-        require(lastUpdate + 4 weeks < block.timestamp, "drip/invalid-timestamp");
-        weeklyAmount = _newAmount;
+        weeklyAmount = _weeklyAmount;
         lastUpdate = block.timestamp;
+        redeemer = _redeemer;
+        emit RedeemerChanged(getCurrentWeek(), address(_redeemer));
     }
 
     /* @inheritdoc IAjnaDripper */
-    function emergencyWithdraw() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeWeeklyAmount(uint256 _weeklyAmount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_weeklyAmount <= MAX_WEEKLY_AMOUNT, "drip/amount-exceeds-max");
         require(
-            ajnaToken.transfer(beneficiary, ajnaToken.balanceOf(address(this))),
-            "drip/transfer-failed"
+            _weeklyAmount > 0 && _weeklyAmount < (110 * weeklyAmount) / 100,
+            "drip/invalid-amount"
         );
+        require(lastUpdate + 4 weeks < block.timestamp, "drip/invalid-timestamp");
+        weeklyAmount = _weeklyAmount;
+        lastUpdate = block.timestamp;
     }
 }

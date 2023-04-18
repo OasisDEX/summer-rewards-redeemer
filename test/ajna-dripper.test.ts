@@ -3,21 +3,15 @@ import { createMerkleTree, deployContract } from "../scripts/common/helpers";
 import { dummyProcessedSnaphot } from "../scripts/common/test-data";
 import { impersonateAccount, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { zeroAddress } from "ethereumjs-util";
-import { BigNumber, Signer } from "ethers";
-import { ethers, network } from "hardhat";
-import keccak256 from "keccak256";
-import { WEEK } from "../scripts/common/constants";
-import { AjnaDripper } from "../typechain";
-import hre from "hardhat";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+import { HUNDRED_THOUSAND, TWO_THOUSAND, WEEK } from "../scripts/common/constants";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
 const leaf = leaves[1];
 const proof = tree.getHexProof(leaf);
-/* leaf and proof with index 1 -> address is the firstUser address from hardhat accounts 
- 0 indexed user is saved for the owner */
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
-// all rewards for a given week
+
 const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
 async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
@@ -28,7 +22,7 @@ async function deployBaseFixture() {
   const ajnaToken = await deployContract("AjnaToken", []);
   const ajnaDripper = await deployContract("AjnaDripper", [ajnaToken.address, adminAddress]);
   const ajnaRedeemer = await deployContract("AjnaRedeemer", [ajnaToken.address, operatorAddress, ajnaDripper.address]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
   console.table({
     ajnaToken: ajnaToken.address,
@@ -62,7 +56,7 @@ async function deployBaseNoMintFixture() {
   const ajnaToken = await deployContract("AjnaToken", []);
   const ajnaDripper = await deployContract("AjnaDripper", [ajnaToken.address, adminAddress]);
   const ajnaRedeemer = await deployContract("AjnaRedeemer", [ajnaToken.address, operatorAddress, ajnaDripper.address]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
 
   return {
     ajnaToken,
@@ -83,6 +77,7 @@ describe("AjnaDripper", () => {
   describe("changeWeeklyAmount", () => {
     it("should allow change of weekly amount by 5%", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
       await ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(105).div(100));
       const weeklyAmountAfter = await ajnaDripper.weeklyAmount();
@@ -94,6 +89,11 @@ describe("AjnaDripper", () => {
       const tx = ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(115).div(100));
       await expect(tx).to.be.revertedWith("drip/invalid-amount");
     });
+    it("should not allow change of weekly amount above max", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      const tx = ajnaDripper.connect(admin).changeWeeklyAmount(HUNDRED_THOUSAND);
+      await expect(tx).to.be.revertedWith("drip/amount-exceeds-max");
+    });
     it("should not allow change of weekly amount to 0", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
       const tx = ajnaDripper.connect(admin).changeWeeklyAmount(0);
@@ -101,6 +101,7 @@ describe("AjnaDripper", () => {
     });
     it("should not allow change changing weekly amount before 4 weeks pass", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
       await ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(105).div(100));
       const weeklyAmountAfter = await ajnaDripper.weeklyAmount();
@@ -113,31 +114,6 @@ describe("AjnaDripper", () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
       await expect(ajnaDripper.changeWeeklyAmount(weeklyAmountBefore.mul(105).div(100))).to.be.reverted;
-    });
-  });
-  describe("emergencyWithdraw", () => {
-    it("should allow the operator to withdraw to dripper contract - confirm company wallet balance after", async () => {
-      const { ajnaToken, ajnaDripper, admin, adminAddress } = await loadFixture(deployBaseFixture);
-
-      const beneficiaryBalanceBefore = await ajnaToken.balanceOf(adminAddress);
-      const dripperBalanceBefore = await ajnaToken.balanceOf(ajnaDripper.address);
-
-      await ajnaDripper.connect(admin).emergencyWithdraw();
-      const beneficiaryBalanceAfter = await ajnaToken.balanceOf(adminAddress);
-
-      expect(beneficiaryBalanceAfter.sub(beneficiaryBalanceBefore)).to.eql(dripperBalanceBefore);
-    });
-    it.skip("shouldn't allow REDEEMER_ROLE to withdraw", async () => {
-      const { ajnaRedeemer, ajnaToken, ajnaDripper } = await loadFixture(deployBaseFixture);
-
-      await impersonateAccount(ajnaRedeemer.address);
-      await expect(ajnaDripper.emergencyWithdraw()).to.be.revertedWith(
-        "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-      );
-    });
-    it("shouldn't allow a random user to withdraw", async () => {
-      const { ajnaDripper, randomUser } = await loadFixture(deployBaseFixture);
-      await expect(ajnaDripper.connect(randomUser).emergencyWithdraw()).to.be.reverted;
     });
   });
   describe("drip", () => {
@@ -208,8 +184,28 @@ describe("AjnaDripper", () => {
         operatorAddress,
         ajnaDripper.address,
       ]);
-      await expect(ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address)).to.be.not.reverted;
+      await expect(ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND)).to.be.not.reverted;
       expect(await ajnaDripper.redeemer()).to.be.equal(newAjnaRedeemer.address);
+    });
+    it("should not allow admin role to change redeemer if _weeklyAmount is above max", async () => {
+      const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
+        await loadFixture(deployBaseFixture);
+      const currentWeek = (await ajnaDripper.getCurrentWeek()).toNumber();
+
+      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+
+      await expect(ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])).to.not
+        .be.reverted;
+      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
+
+      const newAjnaRedeemer = await deployContract("AjnaRedeemer", [
+        ajnaToken.address,
+        operatorAddress,
+        ajnaDripper.address,
+      ]);
+      await expect(
+        ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, HUNDRED_THOUSAND)
+      ).to.be.revertedWith("drip/invalid-amount");
     });
     it("should not allow operator role to change redeemer", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper } =
@@ -227,7 +223,9 @@ describe("AjnaDripper", () => {
         operatorAddress,
         ajnaDripper.address,
       ]);
-      await expect(ajnaDripper.connect(operator).changeRedeemer(newAjnaRedeemer.address)).to.be.revertedWith(
+      await expect(
+        ajnaDripper.connect(operator).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND)
+      ).to.be.revertedWith(
         "AccessControl: account 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
       );
     });
@@ -247,7 +245,7 @@ describe("AjnaDripper", () => {
         operatorAddress,
         ajnaDripper.address,
       ]);
-      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address);
+      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND);
       await expect(newAjnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.revertedWith(
         "drip/already-dripped"
       );
@@ -269,7 +267,7 @@ describe("AjnaDripper", () => {
         operatorAddress,
         ajnaDripper.address,
       ]);
-      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address);
+      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND);
       await expect(newAjnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.revertedWith(
         "redeemer/invalid-week"
       );
@@ -290,7 +288,7 @@ describe("AjnaDripper", () => {
         operatorAddress,
         ajnaDripper.address,
       ]);
-      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address);
+      await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND);
       await increase(WEEK);
       await expect(newAjnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.not.reverted;
     });

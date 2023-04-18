@@ -6,8 +6,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import keccak256 from "keccak256";
-import { WEEK } from "../scripts/common/constants";
-import { AjnaToken } from "../typechain";
+import { TWO_THOUSAND, WEEK } from "../scripts/common/constants";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
@@ -30,7 +29,7 @@ async function deployTokenFixture() {
   const ajnaToken = await deployContract("AjnaToken", []);
   const ajnaDripper = await deployContract("AjnaDripper", [ajnaToken.address, adminAddress]);
   const ajnaRedeemer = await deployContract("AjnaRedeemer", [ajnaToken.address, operatorAddress, ajnaDripper.address]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
   return {

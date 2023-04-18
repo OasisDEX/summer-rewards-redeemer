@@ -3,9 +3,6 @@ pragma solidity 0.8.19;
 import { IAjnaRedeemer } from "./IAjnaRedeemer.sol";
 
 interface IAjnaDripper {
-    // @deprecated
-    function emergencyWithdraw() external;
-
     /**
      * @dev Gets the current week number since the UNIX epoch.
      *
@@ -20,33 +17,43 @@ interface IAjnaDripper {
     function getCurrentWeek() external view returns (uint256);
 
     /**
-     * @dev Changes the weekly amount of tokens to be distributed, given new input '_newAmount' and updates the 'lastUpdate' timestamp.
-     * @param _newAmount The new value representing the weekly amount of tokens to be distributed.
+     * @dev Changes the weekly drip amount, subject to admin access control.
      *
      * Requirements:
-     * - Only the user with 'DEFAULT_ADMIN_ROLE' can call this function.
-     * - '_newAmount' must be greater than 0, but less than 110% of the current weeklyAmount.
-     * - 'lastUpdate' timestamp should be at least 4 weeks prior to the current block.timestamp.
+     * - The caller must have the DEFAULT_ADMIN_ROLE.
+     * - The proposed weekly drip amount must be greater than 0, but less than MAX_WEEKLY_AMOUNT and 110% of the current weeklyAmount.
+     * - The last update timestamp must be more than 4 weeks prior to the current block timestamp.
+     *
      * Effects:
-     * - Updates the value of the 'weeklyAmount' variable to the new input '_newAmount'.
-     * - Updates the value of 'lastUpdate' to the current block.timestamp.
+     * - Sets the weeklyAmount property to the newly specified drip amount.
+     * - Sets the lastUpdate timestamp to the current block timestamp.
+     *
+     * @param _weeklyAmount The new value for the weekly drip amount.
+     *
+     * @notice This function throws an exception if the caller does not have the DEFAULT_ADMIN_ROLE, if the proposed weekly drip amount falls outside the allowed range, or if the lastUpdate timestamp is less than 4 weeks prior to the current block timestamp. Additionally, this function updates the weeklyAmount and lastUpdate properties as necessary.
      */
-
-    function changeWeeklyAmount(uint256 _newAmount) external;
+    function changeWeeklyAmount(uint256 _weeklyAmount) external;
 
     /**
-     * @dev Changes the address of the designated 'redeemer' by revoking the previous 'REDEEMER_ROLE' and granting it to the new 'IAjnaRedeemer' instance.
-     * @param _redeemer The new 'IAjnaRedeemer' instance to be designated as the 'redeemer'.
+     * @dev Changes the designated Ajna redeemer and weekly drip amount, subject to admin access control.
      *
      * Requirements:
-     * - Only the user with 'DEFAULT_ADMIN_ROLE' can call this function.
+     * - The caller must have the DEFAULT_ADMIN_ROLE.
+     * - The proposed weekly drip amount must be within the allowable bounds.
      *
      * Effects:
-     * - Revokes the previous designated 'redeemer' role from its address.
-     * - Grants the 'REDEEMER_ROLE' to the new 'IAjnaRedeemer' instance address.
-     * - Sets the 'redeemer' variable to the new 'IAjnaRedeemer' instance.
+     * - Revokes the Redemeer role from the current redeemer address.
+     * - Grants the Redeemer role to the newly specified _redeemer contract address.
+     * - Sets the weeklyAmount property to the newly specified drip amount.
+     * - Sets the lastUpdate timestamp to the current block timestamp.
+     * - Assigns the provided _redeemer address to the redeemer property.
+     *
+     * @param _redeemer The address of the contract that will be assigned the new REDEEMER_ROLE.
+     * @param _weeklyAmount The new value for the weekly drip amount.
+     *
+     * @notice This function throws an exception if the caller does not have the DEFAULT_ADMIN_ROLE, or if the proposed weekly drip amount falls outside the allowed range. Additionally, this function revokes and grants the Redeemer role as necessary, and updates the weeklyAmount and lastUpdate properties.
      */
-    function changeRedeemer(IAjnaRedeemer _redeemer) external;
+    function changeRedeemer(IAjnaRedeemer _redeemer, uint256 _weeklyAmount) external;
 
     /**
      * @dev Allows the contract with 'REDEEMER_ROLE' to transfer a weekly amount of tokens to the designated 'redeemer' address.
