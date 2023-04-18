@@ -21,7 +21,7 @@ const proof = tree.getHexProof(leaf);
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
 
-async function deployTokenFixture() {
+async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
   const firstUserAddress = await firstUser.getAddress();
@@ -53,14 +53,14 @@ async function deployTokenFixture() {
 describe("AjnaRedeemer", () => {
   describe("token", () => {
     it("should mint", async () => {
-      const { ajnaToken, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, operator } = await loadFixture(deployBaseFixture);
       const balanceBefore = await ajnaToken.balanceOf(operator.address);
       await ajnaToken.mint(operator.address, 100);
       const balanceAfter = await ajnaToken.balanceOf(operator.address);
       expect(balanceAfter.sub(balanceBefore)).to.equal(100);
     });
     it("should burn", async () => {
-      const { ajnaToken, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, operator } = await loadFixture(deployBaseFixture);
       await ajnaToken.mint(operator.address, 1000);
       const balanceBefore = await ajnaToken.balanceOf(operator.address);
       await ajnaToken.burn(operator.address, 100);
@@ -68,18 +68,18 @@ describe("AjnaRedeemer", () => {
       expect(balanceBefore.sub(balanceAfter)).to.equal(100);
     });
     it("should not mint", async () => {
-      const { ajnaToken, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, operator } = await loadFixture(deployBaseFixture);
       await expect(ajnaToken.connect(operator).mint(operator.address, 100)).to.be.reverted;
     });
     it("should not burn", async () => {
-      const { ajnaToken, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, operator } = await loadFixture(deployBaseFixture);
       await ajnaToken.mint(operator.address, 1000);
       await expect(ajnaToken.connect(operator).burn(operator.address, 100)).to.be.reverted;
     });
   });
   describe("addRoot", () => {
     it("should add root (by operator), revert on second try (same week number)", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.not.reverted;
@@ -89,7 +89,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });
     it("should add root (by operator), with number lower than deployment week", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek - 1, root)).to.be.revertedWith(
@@ -97,14 +97,14 @@ describe("AjnaRedeemer", () => {
       );
     });
     it("should not add root (by admin), revert on second try (same week number)", async () => {
-      const { ajnaRedeemer, firstUser } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUser } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(firstUser).addRoot(currentWeek, root)).to.be.reverted;
       await expect(ajnaRedeemer.connect(firstUser).addRoot(currentWeek, root)).to.be.reverted;
     });
     it("should add root (by operator), revert on second try (diff week number)", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.not.reverted;
@@ -114,7 +114,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });
     it("should revert add root (by non operator)", async () => {
-      const { ajnaRedeemer, firstUser } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUser } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(firstUser).addRoot(currentWeek, root)).to.be.reverted;
@@ -123,7 +123,7 @@ describe("AjnaRedeemer", () => {
 
   describe("getRoot", () => {
     it("should return the same weekly root as added by operator", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -131,7 +131,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });
     it("should revert if there is no root for given week", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -141,7 +141,7 @@ describe("AjnaRedeemer", () => {
   });
   describe("canClaim", () => {
     it("should return true for verified leaf and unclaimed reward and correct week number", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -150,7 +150,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaRedeemer.connect(testUser).canClaim(proof, currentWeek, dataForFirstUser[1])).to.equal(true);
     });
     it("should return false for verified leaf and unclaimed reward and wrong week number", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -161,7 +161,7 @@ describe("AjnaRedeemer", () => {
       );
     });
     it("should return false for diff users leaf and unclaimed reward", async () => {
-      const { ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -175,7 +175,7 @@ describe("AjnaRedeemer", () => {
 
   describe("claimMultiple", () => {
     it("should claim the reward and flip the hasClaimed flag - revert on second try - verify the users balance after claim", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUser, firstUserAddress, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, firstUser, firstUserAddress, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -188,7 +188,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
     });
     it("shouldn't claim if insufficient funds", async () => {
-      const { ajnaRedeemer, ajnaToken, firstUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, ajnaToken, firstUser, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -201,7 +201,7 @@ describe("AjnaRedeemer", () => {
       ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
     });
     it("shouldn't claim if there are no week numbers provided", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -211,7 +211,7 @@ describe("AjnaRedeemer", () => {
       ).to.be.revertedWith("redeemer/cannot-claim-zero");
     });
     it("shouldn't claim with mismatched data lengths", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -221,7 +221,7 @@ describe("AjnaRedeemer", () => {
       ).to.be.revertedWith("redeemer/invalid-params");
     });
     it("shouldn't allow a random user to use someone's elses claim, using same input", async () => {
-      const { ajnaToken, ajnaRedeemer, randomUser, firstUserAddress, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, randomUser, firstUserAddress, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -233,7 +233,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaToken.connect(randomUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
     });
     it("not allow to claim twice the same week - in one call", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -251,7 +251,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
     });
     it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balnce to be 0", async () => {
-      const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -294,7 +294,7 @@ describe("AjnaRedeemer", () => {
       expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.eql(BigNumber.from(0));
     });
     it("should claim WEEKS_COUNT past weeks (gas check)", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
       const WEEKS_COUNT = 50;
 
       let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
@@ -320,7 +320,7 @@ describe("AjnaRedeemer", () => {
   });
   describe("AccessControl", () => {
     it("should return no admin for DEFAULT_ADMIN_ROLE", async () => {
-      const { ajnaRedeemer } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
 
       expect(await ajnaRedeemer.getRoleAdmin(keccak256("DEFAULT_ADMIN_ROLE"))).to.be.equal(
         "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -329,7 +329,7 @@ describe("AjnaRedeemer", () => {
   });
   describe("emergencyWithdraw", () => {
     it("should allow the operator to withdraw to dripper contract - confirm company wallet balance after", async () => {
-      const { ajnaToken, ajnaRedeemer, owner, ajnaDripper, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaToken, ajnaRedeemer, owner, ajnaDripper, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -342,7 +342,7 @@ describe("AjnaRedeemer", () => {
       expect(beneficiaryBalanceAfter.sub(beneficiaryBalanceBefore)).to.eql(redeemerBalanceBefore);
     });
     it("shouldn't allow a random user to withdraw", async () => {
-      const { ajnaRedeemer, randomUser, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, randomUser, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
@@ -352,14 +352,14 @@ describe("AjnaRedeemer", () => {
   });
   describe("changeOperator", () => {
     it("should not allow the operator (deployer) to grant operator role", async () => {
-      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
       await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("OPERATOR_ROLE"), firstUserAddress)).to.be.reverted;
     });
     it("should not allow the operator (deployer) to grant admin role", async () => {
-      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployTokenFixture);
+      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);

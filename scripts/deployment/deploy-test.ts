@@ -1,17 +1,17 @@
 import { ethers } from "hardhat";
+import { deployContract } from "../common/helpers";
 
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY_DEPLOY!);
 
 async function main() {
-  const MerkleRedeemer = await ethers.getContractFactory("MerkleRedeemer");
-  const OopsieDAI = await ethers.getContractFactory("OopsieDAI");
-  const oopsieDAI = await OopsieDAI.deploy();
-  // deployer is the operator, admin, urgent and beneficiary
-  const merkleRedeemer = await MerkleRedeemer.deploy(oopsieDAI.address, wallet.address, wallet.address);
-  await merkleRedeemer.deployed();
-  await oopsieDAI.deployed();
-  console.log(oopsieDAI.address);
-  console.log(merkleRedeemer.address);
+  const ajnaToken = await deployContract("AjnaToken", []);
+  const ajnaDripper = await deployContract("AjnaDripper", [ajnaToken.address, wallet.address]);
+  const ajnaRedeemer = await deployContract("AjnaRedeemer", [ajnaToken.address, wallet.address, ajnaDripper.address]);
+  console.table({
+    ajnaToken: ajnaToken.address,
+    ajnaDripper: ajnaDripper.address,
+    ajnaRedeemer: ajnaRedeemer.address,
+  });
 }
 
 main().catch((error) => {

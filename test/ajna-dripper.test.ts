@@ -1,13 +1,12 @@
 import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
 import { createMerkleTree, deployContract, impersonate } from "../scripts/common/helpers";
 import { dummyProcessedSnaphot } from "../scripts/common/test-data";
-import { impersonateAccount, loadFixture, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { HUNDRED_THOUSAND, TWO_THOUSAND, WEEK } from "../scripts/common/constants";
 import { AjnaToken, AjnaDripper, AjnaRedeemer } from "../typechain-types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
 const leaf = leaves[1];
@@ -17,10 +16,12 @@ const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.a
 const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
 async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
+
   const ownerAddress = await owner.getAddress();
   const firstUserAddress = await firstUser.getAddress();
   const adminAddress = await admin.getAddress();
   const operatorAddress = await operator.getAddress();
+
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);
   const ajnaDripper = await deployContract<AjnaDripper>("AjnaDripper", [ajnaToken.address, adminAddress]);
   const ajnaRedeemer = await deployContract<AjnaRedeemer>("AjnaRedeemer", [
@@ -55,10 +56,12 @@ async function deployBaseFixture() {
 }
 async function deployBaseNoMintFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
+
   const ownerAddress = await owner.getAddress();
   const firstUserAddress = await firstUser.getAddress();
   const adminAddress = await admin.getAddress();
   const operatorAddress = await operator.getAddress();
+
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);
   const ajnaDripper = await deployContract<AjnaDripper>("AjnaDripper", [ajnaToken.address, adminAddress]);
   const ajnaRedeemer = await deployContract<AjnaRedeemer>("AjnaRedeemer", [

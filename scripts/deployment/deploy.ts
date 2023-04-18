@@ -1,16 +1,19 @@
 import { ethers, network } from "hardhat";
 
 import { addresses } from "../common/config";
+import { deployContract } from "../common/helpers";
 
 async function main() {
-  const MerkleRedeemer = await ethers.getContractFactory("MerkleRedeemer");
-  const merkleRedeemer = await MerkleRedeemer.deploy(
+  const ajnaDripper = await deployContract("AjnaDripper", [
     network.name === "mainnet" ? addresses.ajnaToken.mainnet : addresses.ajnaToken.goerli,
     addresses.admin,
-    addresses.operator
-  );
-  await merkleRedeemer.deployed();
-  console.log(`Redeemer deployed to : ${merkleRedeemer.address} on ${network.name}`);
+  ]);
+  const ajnaRedeemer = await deployContract("AjnaRedeemer", [
+    network.name === "mainnet" ? addresses.ajnaToken.mainnet : addresses.ajnaToken.goerli,
+    addresses.operator,
+    ajnaDripper.address,
+  ]);
+  console.log(`Redeemer deployed to : ${ajnaRedeemer.address} on ${network.name}`);
 }
 
 main().catch((error) => {
