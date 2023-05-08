@@ -5,7 +5,6 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
-//import { console } from "hardhat/console.sol";
 
 contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
@@ -44,12 +43,11 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         emit Dripped(week, weeklyAmount);
     }
 
-    function validateWeeklyAmount(uint256 _weeklyAmount) private {
-        //console.log("weeklyAmount", weeklyAmount);
-        //console.log("_weeklyAmount", _weeklyAmount);
+    function validateWeeklyAmount(uint256 _weeklyAmount) private view {
         require(_weeklyAmount <= MAX_WEEKLY_AMOUNT, "drip/amount-exceeds-max");
         require(
-            (_weeklyAmount > (90 * weeklyAmount) / 100 && _weeklyAmount < (110 * weeklyAmount) / 100) || weeklyAmount == 0,
+            (_weeklyAmount > (90 * weeklyAmount) / 100 &&
+                _weeklyAmount < (110 * weeklyAmount) / 100) || weeklyAmount == 0,
             "drip/invalid-amount"
         );
     }
