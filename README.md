@@ -1,4 +1,8 @@
 # Oasis Ajna Redeemer
+## TO BE DONE:
+[] database schema
+[] snapshot script
+
 ## Drip
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
 - authorized user can change the redeemer contract address
