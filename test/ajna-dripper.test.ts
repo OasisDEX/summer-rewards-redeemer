@@ -88,7 +88,7 @@ async function deployBaseNoMintFixture() {
 }
 describe("AjnaDripper", () => {
   describe("changeWeeklyAmount", () => {
-    it("should allow change of weekly amount by 5%", async () => {
+    it("should allow change of weekly amount by 5% up", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
       await increase(WEEK * 4);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
@@ -96,11 +96,26 @@ describe("AjnaDripper", () => {
       const weeklyAmountAfter = await ajnaDripper.weeklyAmount();
       expect(weeklyAmountBefore.mul(105).div(100)).to.equal(weeklyAmountAfter);
     });
-    it("should not allow change of weekly amount by 15%", async () => {
+    it("should allow change of weekly amount by 5% down", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
+      const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
+      await ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(95).div(100));
+      const weeklyAmountAfter = await ajnaDripper.weeklyAmount();
+      expect(weeklyAmountBefore.mul(95).div(100)).to.equal(weeklyAmountAfter);
+    });
+    it("should not allow change of weekly amount by 15% up", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
       await increase(WEEK * 4);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
       const tx = ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(115).div(100));
+      await expect(tx).to.be.revertedWith("drip/invalid-amount");
+    });
+    it("should not allow change of weekly amount by 15% down", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
+      const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
+      const tx = ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(85).div(100));
       await expect(tx).to.be.revertedWith("drip/invalid-amount");
     });
     it("should not allow change of weekly amount above max", async () => {
