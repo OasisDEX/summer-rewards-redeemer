@@ -2,9 +2,9 @@
 ## Drip
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
 - authorized user can change the redeemer contract address
-- authorized user can change the weekly emission ( but not more than 10% and not more often thatn once per 4 weeks )
+- authorized user can change the weekly emission ( but not more than 10% and not more often than once per 4 weeks )
 - authorized user can transfer all Ajna tokens to multisig address
-- when new redeemer is added it can set the weekly amount between 0 and MAX_WEEKLY_AMOUNT
+- when new redeemer is added it can set the weekly amount between 90% and 110% of the current weekly amount
 - drip contract remains unchanged, while redeemer contract can be redeployed and address changed in drip contract
 - drip contract holds all of the Ajna tokens
 - `drip()` can only be called by redeemer contract to pull tokens for weekly distribution
