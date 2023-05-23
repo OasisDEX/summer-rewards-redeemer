@@ -1,5 +1,31 @@
 # Oasis Ajna Redeemer
+## TO BE DONE:
+[] database schema
+[] snapshot script
 
+## Drip
+- weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
+- authorized user can change the redeemer contract address
+- authorized user can change the weekly emission ( but not more than 10% and not more often than once per 4 weeks )
+- authorized user can transfer all Ajna tokens to multisig address
+- when new redeemer is added it can set the weekly amount between 90% and 110% of the current weekly amount
+- drip contract remains unchanged, while redeemer contract can be redeployed and address changed in drip contract
+- drip contract holds all of the Ajna tokens
+- `drip()` can only be called by redeemer contract to pull tokens for weekly distribution
+- each `drip()` call is stored in `weeklyDrip` mapping so the Ajna tokens can't be pulled multiple times
+- drip can only be called for week numbers past `dripperDeploymentWeek` 
+
+## Redeemer
+- operator can add weekly root ( that will pull Ajna tokens from Drip contract )
+- one root per week can be added
+- roots from the past can be added (in case they were missed)
+- only week numbers past the deployment week can be used (and below or equal current week) - no future week numbers
+- user can claim multiple claims at once
+- week number is week number since the UNIX epoch (week starting from Thursday at 00:00:00 UTC)
+- authorized user can withdraw all the Ajna tokens from redeemer contract to the drip contract
+
+
+# TO BE UPDATED
 # Snapshot
 To generate the snapshot use:
 ```
