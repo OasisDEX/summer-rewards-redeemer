@@ -5,6 +5,8 @@
 
 ## Drip
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
+- MAX_WEEKLY_AMOUNT set to 2_000_000
+- ADMIN_ROLE can withdraw an arbitrary amount of AJNA tokens to the multisig wallet
 - authorized user can change the redeemer contract address
 - authorized user can change the weekly emission ( but not more than 10% and not more often than once per 4 weeks )
 - authorized user can transfer all Ajna tokens to multisig address

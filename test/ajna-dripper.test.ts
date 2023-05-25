@@ -5,7 +5,15 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { HUNDRED_THOUSAND, TWO_THOUSAND, WEEK } from "../scripts/common/constants";
+import {
+  HUNDRED,
+  HUNDRED_THOUSAND,
+  MILLION,
+  TEN_THOUSAND,
+  THOUSAND,
+  TWO_THOUSAND,
+  WEEK,
+} from "../scripts/common/constants";
 import { AjnaToken, AjnaDripper, AjnaRedeemer } from "../typechain-types";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
@@ -29,7 +37,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, MILLION);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
   console.table({
     ajnaToken: ajnaToken.address,
@@ -69,7 +77,7 @@ async function deployBaseNoMintFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, MILLION.add(HUNDRED_THOUSAND));
 
   return {
     ajnaToken,
@@ -146,6 +154,47 @@ describe("AjnaDripper", () => {
       await increase(WEEK * 4);
       const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
       await expect(ajnaDripper.changeWeeklyAmount(weeklyAmountBefore.mul(105).div(100))).to.be.reverted;
+    });
+    it("should allow change of weekly amount according to the rewards distribution scheme", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+
+      const rewardsDistribution = {
+        1: MILLION,
+        2: HUNDRED_THOUSAND.mul(9),
+        3: HUNDRED_THOUSAND.mul(8).add(TEN_THOUSAND),
+        4: HUNDRED_THOUSAND.mul(7).add(TEN_THOUSAND.mul(2)).add(THOUSAND.mul(9)),
+        5: HUNDRED_THOUSAND.mul(6).add(TEN_THOUSAND.mul(5)).add(THOUSAND.mul(6)).add(HUNDRED),
+        6: HUNDRED_THOUSAND.mul(6),
+        7: HUNDRED_THOUSAND.mul(5).add(TEN_THOUSAND.mul(5)),
+        8: HUNDRED_THOUSAND.mul(5),
+      };
+
+      for (const [_, value] of Object.entries(rewardsDistribution)) {
+        await increase(WEEK * 4);
+        await ajnaDripper.connect(admin).changeWeeklyAmount(value);
+      }
+    });
+    it("should NOT allow tochange of weekly amount according to the tempered rewards distribution scheme", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+
+      const rewardsDistribution = {
+        1: MILLION,
+        2: HUNDRED_THOUSAND.mul(9),
+        3: HUNDRED_THOUSAND.mul(8).add(TEN_THOUSAND),
+        4: HUNDRED_THOUSAND.mul(7).add(TEN_THOUSAND.mul(2)).add(THOUSAND.mul(9)),
+        5: HUNDRED_THOUSAND.mul(6).add(TEN_THOUSAND.mul(5)).add(THOUSAND.mul(6)).add(HUNDRED),
+        6: HUNDRED_THOUSAND.mul(6),
+        7: HUNDRED_THOUSAND.mul(5).add(TEN_THOUSAND.mul(5)),
+      };
+      const temperedFinalAmount = HUNDRED_THOUSAND.mul(4);
+      for (const [_, value] of Object.entries(rewardsDistribution)) {
+        await increase(WEEK * 4);
+        await ajnaDripper.connect(admin).changeWeeklyAmount(value);
+      }
+      await increase(WEEK * 4);
+      await expect(ajnaDripper.connect(admin).changeWeeklyAmount(temperedFinalAmount)).to.be.revertedWith(
+        "drip/invalid-amount"
+      );
     });
   });
   describe("drip", () => {
@@ -321,6 +370,29 @@ describe("AjnaDripper", () => {
       await ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address, TWO_THOUSAND);
       await increase(WEEK);
       await expect(newAjnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.not.reverted;
+    });
+  });
+  describe("emergencyWithdraw", () => {
+    it("should allow admin role to withdraw", async () => {
+      const { ajnaToken, adminAddress, ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
+
+      const adminBalanceBefore = await ajnaToken.balanceOf(adminAddress);
+      const dripperBalanceBefore = await ajnaToken.balanceOf(ajnaDripper.address);
+      await expect(ajnaDripper.connect(admin).emergencyWithdraw(TWO_THOUSAND)).to.be.not.reverted;
+      expect(await ajnaToken.balanceOf(ajnaDripper.address)).to.eql(dripperBalanceBefore.sub(TWO_THOUSAND));
+      expect(await ajnaToken.balanceOf(adminAddress)).to.eql(adminBalanceBefore.add(TWO_THOUSAND));
+    });
+    it("should NOT allow REDEEMER_ROLE to withdraw", async () => {
+      const { ajnaDripper, ajnaRedeemer } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
+      const signer = await impersonate(ajnaRedeemer.address);
+      await expect(ajnaDripper.connect(signer).emergencyWithdraw(TWO_THOUSAND)).to.be.reverted;
+    });
+    it("should NOT allow random user to withdraw", async () => {
+      const { ajnaDripper, operator } = await loadFixture(deployBaseFixture);
+      await increase(WEEK * 4);
+      await expect(ajnaDripper.connect(operator).emergencyWithdraw(TWO_THOUSAND)).to.be.reverted;
     });
   });
 });
