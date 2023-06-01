@@ -1,6 +1,6 @@
 import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
 import { createMerkleTree, deployContract } from "../scripts/common/helpers";
-import { dummyProcessedSnaphot } from "../scripts/common/test-data";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
@@ -20,7 +20,7 @@ const proof = tree.getHexProof(leaf);
 
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
-
+console.log(totalWeekAmount.toString());
 async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
@@ -34,7 +34,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, TWO_THOUSAND);
+  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
   return {

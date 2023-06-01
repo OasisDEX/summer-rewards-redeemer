@@ -72,4 +72,19 @@ interface IAjnaDripper {
      */
 
     function drip(uint256 week) external returns (bool status);
+
+    /**
+     * @dev Allows the default admin role to withdraw emergency funds.
+     * @param amount The amount of tokens to withdraw from the contract.
+     *
+     * Requirements:
+     * - Only the user with the default admin role can call this function.
+     * - The contract should have a balance equal to or greater than the requested withdrawal amount.
+     *
+     * Effects:
+     * - Transfers the requested amount of AJNA tokens to the designated beneficiary address.
+     * - Emits a 'Transfer' event with the information about the amount and the sender address.
+     * - Throws an error if any of the requirements are not met.
+     */
+    function emergencyWithdraw(uint256 amount) external;
 }

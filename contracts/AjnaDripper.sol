@@ -8,7 +8,7 @@ import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
 
 contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
-    uint256 constant MAX_WEEKLY_AMOUNT = 10_000 * 10 ** 18;
+    uint256 constant MAX_WEEKLY_AMOUNT = 2_000_000 * 10 ** 18;
     address public immutable beneficiary;
     uint256 public immutable dripperDeploymentWeek;
     IERC20 public immutable ajnaToken;
@@ -46,8 +46,8 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     function validateWeeklyAmount(uint256 _weeklyAmount) private view {
         require(_weeklyAmount <= MAX_WEEKLY_AMOUNT, "drip/amount-exceeds-max");
         require(
-            (_weeklyAmount > (90 * weeklyAmount) / 100 &&
-                _weeklyAmount < (110 * weeklyAmount) / 100) || weeklyAmount == 0,
+            (_weeklyAmount >= (90 * weeklyAmount) / 100 &&
+                _weeklyAmount <= (110 * weeklyAmount) / 100) || weeklyAmount == 0,
             "drip/invalid-amount"
         );
     }
@@ -72,5 +72,11 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         require(lastUpdate + 4 weeks < block.timestamp, "drip/invalid-timestamp");
         weeklyAmount = _weeklyAmount;
         lastUpdate = block.timestamp;
+    }
+
+    /* @inheritdoc IAjnaDripper */
+    function emergencyWithdraw(uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(ajnaToken.balanceOf(address(this)) >= amount, "drip/insufficient-balance");
+        require(ajnaToken.transfer(beneficiary, amount), "drip/transfer-failed");
     }
 }
