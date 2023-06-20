@@ -43,13 +43,13 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.ALCHEMY_GOERLI_RPC_URL,
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
-      gas: 4300000,
+      gas: "auto",
     },
     hardhat: {
       chainId: 2137,
       forking: {
-        url: process.env.ALCHEMY_MAINNET_RPC_URL !== undefined ? process.env.ALCHEMY_MAINNET_RPC_URL : "",
-        blockNumber: 17000000,
+        url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
+        blockNumber: 9209459,
       },
       mining: {
         auto: true,

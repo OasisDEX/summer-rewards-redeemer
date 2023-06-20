@@ -1,19 +1,36 @@
-import { ethers, network } from "hardhat";
+import hre, { network } from "hardhat";
 
 import { addresses } from "../common/config";
 import { deployContract } from "../common/helpers";
 
 async function main() {
+  const networkName = network.name === "hardhat" ? "goerli" : network.name;
   const ajnaDripper = await deployContract("AjnaDripper", [
-    network.name === "mainnet" ? addresses.ajnaToken.mainnet : addresses.ajnaToken.goerli,
-    addresses.admin,
+    addresses["ajnaToken"][networkName],
+    addresses["admin"][networkName],
   ]);
   const ajnaRedeemer = await deployContract("AjnaRedeemer", [
-    network.name === "mainnet" ? addresses.ajnaToken.mainnet : addresses.ajnaToken.goerli,
-    addresses.operator,
+    addresses["ajnaToken"][networkName],
+    addresses["operator"][networkName],
     ajnaDripper.address,
   ]);
-  console.log(`Redeemer deployed to : ${ajnaRedeemer.address} on ${network.name}`);
+
+  if (network.name === "mainnet" || network.name === "goerli") {
+    await hre.run("verify:verify", {
+      address: ajnaRedeemer.address,
+      constructorArguments: [
+        addresses["ajnaToken"][networkName],
+        addresses["operator"][networkName],
+        ajnaDripper.address,
+      ],
+    });
+    await hre.run("verify:verify", {
+      address: ajnaDripper.address,
+      constructorArguments: [addresses["ajnaToken"][networkName], addresses["admin"][networkName]],
+    });
+  }
+  console.log(`Redeemer deployed to : ${ajnaRedeemer.address} on ${networkName}`);
+  console.log(`Dripper deployed to : ${ajnaDripper.address} on ${networkName}`);
 }
 
 main().catch((error) => {
