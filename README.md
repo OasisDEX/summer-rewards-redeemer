@@ -27,6 +27,10 @@
 - authorized user can withdraw all the Ajna tokens from redeemer contract to the drip contract
 
 
+## Config
+- each entry in `rewardDistributions` contains the % of the weekly amount that will be distributed to the given address
+- to calculate the required amount of Ajna tokens for the given pool, the weekly amount (`getWeeklyReward()`) is multiplied by the ratio for each pool `rewardDistributions` and ratio of earn/borrow rewards 
+
 # TO BE UPDATED
 # Snapshot
 To generate the snapshot use:
