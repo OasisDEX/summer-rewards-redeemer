@@ -225,6 +225,33 @@ model UsersWhoFollowVaults {
   @@map("users_who_follow_vaults")
 }
 
+model ProductHubItems {
+  id                   String                      @id @default(uuid())
+  label                String
+  network              NetworkNames
+  primaryToken         String
+  primaryTokenGroup    String?
+  product              Product[]
+  protocol             Protocol
+  secondaryToken       String
+  secondaryTokenGroup  String?
+  weeklyNetApy         String?
+  depositToken         String?
+  earnStrategy         String?
+  fee                  String?
+  liquidity            String?
+  managementType       ProductHubManagementSimple?
+  maxLtv               String?
+  maxMultiply          String?
+  multiplyStrategy     String?
+  multiplyStrategyType ProductHubStrategy?
+  reverseTokens        Boolean?
+  updatedAt            DateTime                    @updatedAt
+
+  @@unique([label, network, product, protocol, primaryToken, secondaryToken], name: "product_hub_item_id")
+  @@map("product_hub_items")
+}
+
 enum Protocol {
   maker
   aavev2
@@ -232,4 +259,76 @@ enum Protocol {
   ajna
 
   @@map("protocol")
+}
+
+enum NetworkNames {
+  ethereum
+  arbitrum
+  polygon
+  optimism
+
+  @@map("network")
+}
+
+enum Product {
+  borrow
+  multiply
+  earn
+
+  @@map("product")
+}
+
+enum ProductHubManagement {
+  active
+  active_with_liq_risk
+  passive
+
+  @@map("managementType")
+}
+
+enum ProductHubManagementSimple {
+  active
+  passive
+
+  @@map("managementTypeSimple")
+}
+
+enum ProductHubStrategy {
+  long
+  short
+
+  @@map("multiplyStrategyType")
+}
+
+model AjnaRewardsUser {
+  id            String                   @unique
+  timestamp     DateTime                 @default(now())
+  weekly_claims AjnaRewardsWeeklyClaim[]
+  accepted      Boolean
+
+  @@map("ajna_rewards_user")
+}
+
+model AjnaRewardsWeeklyClaim {
+  id           Int             @id @default(autoincrement())
+  timestamp    DateTime?       @default(now())
+  week_number  Int
+  user_address String
+  proof        String[]
+  amount       String
+  claimant     AjnaRewardsUser @relation(fields: [user_address], references: [id])
+
+  @@unique([week_number, user_address], name: "week_number_userAddress_unique_id")
+  @@map("ajna_rewards_weekly_claim")
+}
+
+model AjnaRewardsMerkleTree {
+  week_number Int       @unique
+  timestamp   DateTime? @default(now())
+  start_block Int?
+  end_block   Int?
+  tree_root   String
+  snapshot    String?
+
+  @@map("ajna_rewards_merkle_tree")
 }

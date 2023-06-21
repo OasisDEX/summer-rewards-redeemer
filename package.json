@@ -11,7 +11,7 @@
     "deploy:test": "npx hardhat run --network localhost scripts/snapshot/seed-contract-and-db-hardhat.ts",
     "test": "npx hardhat test",
     "test:ts": "mocha -r ts-node/register 'scripts/**/*test.ts'",
-    "build": "npx hardhat compile",
+    "build": "npx hardhat compile && npx graphclient build",
     "clean": "rm -rf artifacts cache typechain",
     "lint:fix": "./node_modules/.bin/solhint --fix -f table contracts/*.sol contracts/**/*.sol && ./node_modules/.bin/eslint --fix test/**/*.ts scripts/**/*.ts",
     "lint:contracts": "./node_modules/.bin/solhint -f table contracts/*.sol contracts/**/*.sol",
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@ethersproject/abstract-signer": "^5.5.0",
     "@ethersproject/contracts": "^5.5.0",
+    "@graphprotocol/client-cli": "^3.0.0",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@nomiclabs/hardhat-solhint": "^3.0.1",

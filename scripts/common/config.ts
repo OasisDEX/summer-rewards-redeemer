@@ -40,12 +40,13 @@ export const rewardDistributions = {
     { name: "RETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.12 },
   ],
   goerli: [
-    { name: "WBTC-USDC", address: "0x325E0C594C011Af40a260c6aEb20E0557DEd7E6f", share: 0.6 },
-    { name: "WETH-USDC", address: "0x8806584b9ba1383Cd77589DD937d4AE267E8c61d", share: 0.4 },
+    { name: "WBTC-USDC", address: "0xc2b64ca87090fe79786a8773009d7fb1288d3db1", share: 0.6 },
+    { name: "WETH-USDC", address: "0x3ae0ea990cb38487d7a698c68b7b520a3d57c018", share: 0.4 },
   ],
 };
 
 export const getWeeklyReward = (weekNumber: number) => {
+  weekNumber = weekNumber - 2785
   if (weekNumber <= 4) {
     return 1100000;
   } else if (weekNumber <= 8) {
