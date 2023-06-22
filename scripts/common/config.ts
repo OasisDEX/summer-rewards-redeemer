@@ -1,3 +1,8 @@
+import { ethers } from "ethers";
+export enum Network {
+  Mainnet = "mainnet",
+  Goerli = "goerli",
+}
 export const addresses: { [key: string]: { [key: string]: string } } = {
   ajnaToken: {
     mainnet: "0x9a96ec9b57fb64fbc60b423d1f4da7691bd35079",
@@ -23,6 +28,10 @@ export const addresses: { [key: string]: { [key: string]: string } } = {
 export const config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
+  rewardStartWeek: 2782,
+  multiplier: 10000,
+  network: Network.Goerli,
+  dryRun : true,
 };
 
 export const rewardDistributions = {
@@ -46,26 +55,28 @@ export const rewardDistributions = {
 };
 
 export const getWeeklyReward = (weekNumber: number) => {
-  weekNumber = weekNumber - 2785
-  if (weekNumber <= 4) {
-    return 1100000;
-  } else if (weekNumber <= 8) {
-    return 1000000;
-  } else if (weekNumber <= 12) {
-    return 900000;
-  } else if (weekNumber <= 16) {
-    return 810000;
-  } else if (weekNumber <= 20) {
-    return 729000;
-  } else if (weekNumber <= 26) {
-    return 656100;
-  } else if (weekNumber <= 36) {
-    return 600000;
-  } else if (weekNumber <= 40) {
-    return 550000;
+  weekNumber = weekNumber - config.rewardStartWeek;
+  let reward = 0;
+  if (weekNumber < 4) {
+    reward = 1100000;
+  } else if (weekNumber < 8) {
+    reward = 1000000;
+  } else if (weekNumber < 12) {
+    reward = 900000;
+  } else if (weekNumber < 16) {
+    reward = 810000;
+  } else if (weekNumber < 20) {
+    reward = 729000;
+  } else if (weekNumber < 26) {
+    reward = 656100;
+  } else if (weekNumber < 36) {
+    reward = 600000;
+  } else if (weekNumber < 40) {
+    reward = 550000;
   } else {
-    return 500000;
+    reward = 500000;
   }
+  return ethers.utils.parseEther(reward.toString());
 };
 
 export const tokens = {

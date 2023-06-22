@@ -1,6 +1,7 @@
-import { ethers } from "hardhat";
+import { ethers } from "ethers";
 export const WEEK = 7 * 24 * 60 * 60;
 
+export const ZERO = ethers.utils.parseEther("0");
 export const ONE = ethers.utils.parseEther("1");
 export const TWO = ethers.utils.parseEther("2");
 export const THREE = ethers.utils.parseEther("3");

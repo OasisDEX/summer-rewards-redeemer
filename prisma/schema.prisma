@@ -300,35 +300,22 @@ enum ProductHubStrategy {
   @@map("multiplyStrategyType")
 }
 
-model AjnaRewardsUser {
-  id            String                   @unique
-  timestamp     DateTime                 @default(now())
-  weekly_claims AjnaRewardsWeeklyClaim[]
-  accepted      Boolean
-
-  @@map("ajna_rewards_user")
-}
-
 model AjnaRewardsWeeklyClaim {
-  id           Int             @id @default(autoincrement())
-  timestamp    DateTime?       @default(now())
+  id           Int      @id @default(autoincrement())
+  timestamp    DateTime @default(now())
   week_number  Int
   user_address String
   proof        String[]
   amount       String
-  claimant     AjnaRewardsUser @relation(fields: [user_address], references: [id])
 
   @@unique([week_number, user_address], name: "week_number_userAddress_unique_id")
   @@map("ajna_rewards_weekly_claim")
 }
 
 model AjnaRewardsMerkleTree {
-  week_number Int       @unique
-  timestamp   DateTime? @default(now())
-  start_block Int?
-  end_block   Int?
+  week_number Int      @unique
+  timestamp   DateTime @default(now())
   tree_root   String
-  snapshot    String?
 
   @@map("ajna_rewards_merkle_tree")
 }
