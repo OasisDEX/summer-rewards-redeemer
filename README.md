@@ -1,4 +1,15 @@
 # Oasis Ajna Redeemer
+
+## Setup
+- install dependencies
+```
+yarn install
+```
+- create `.env` file and fill in the required values (see `.env.example` for reference)
+- run `npx graphclient build` to build the GraphQL client by The Graph
+- run `yarn start:local` to start the local Hardhat node and the local DB
+- run `yarn db:seed` to seed the DB with the initial data ( it will deploy the contracts, generate snapshots and add the merkle roots to both the DB and redeemer contract )
+- 
 ## TO BE DONE:
 [] database schema
 [] snapshot script

@@ -6,7 +6,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 import keccak256 from "keccak256";
-import { TWO_THOUSAND, WEEK } from "../scripts/common/constants";
+import { WEEK } from "../scripts/common/constants";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
@@ -20,7 +20,7 @@ const proof = tree.getHexProof(leaf);
 
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
-console.log(totalWeekAmount.toString());
+
 async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();

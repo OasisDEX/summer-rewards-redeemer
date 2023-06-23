@@ -1,31 +1,21 @@
 import hre, { network } from "hardhat";
 
 import { addresses, config } from "../common/config";
-import { deployContract, getContract } from "../common/helpers";
+import { deployContract, getContract, getOrDeployContract } from "../common/helpers";
 import { Contract, ethers } from "ethers";
+import chalk from "chalk";
+import { AjnaDripper, AjnaRedeemer } from "../../typechain-types";
 
 async function main() {
-  let ajnaRedeemer: Contract;
-  let ajnaDripper: Contract ;
-  if (addresses[config.network].ajnaDripper === ethers.constants.AddressZero) {
-    ajnaDripper = await deployContract("AjnaDripper", [
-      addresses[config.network]["ajnaToken"],
-      addresses[config.network]["admin"],
-    ]);
-  } else {
-    console.info("AjnaDripper already deployed");
-    ajnaDripper = await getContract("AjnaDripper", addresses[config.network]["ajnaDripper"]);
-  }
-  if (addresses[config.network].ajnaRedeemer === ethers.constants.AddressZero) {
-    ajnaRedeemer = await deployContract("AjnaRedeemer", [
-      addresses[config.network]["ajnaToken"],
-      addresses[config.network]["operator"],
-      ajnaDripper.address,
-    ]);
-  } else {
-    console.info("AjnaRedeemer already deployed");
-    ajnaRedeemer = await getContract("AjnaRedeemer", addresses[config.network]["ajnaRedeemer"]);
-  }
+  let ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
+    addresses[config.network]["ajnaToken"],
+    addresses[config.network]["admin"],
+  ]);
+  let ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
+    addresses[config.network]["ajnaToken"],
+    addresses[config.network]["operator"],
+    ajnaDripper.address,
+  ]);
 
   if (network.name === "mainnet" || network.name === "goerli") {
     await hre.run("verify:verify", {
@@ -41,8 +31,8 @@ async function main() {
       constructorArguments: [addresses[config.network]["ajnaToken"], addresses[config.network]["admin"]],
     });
   }
-  console.log(`Redeemer deployed to : ${ajnaRedeemer.address} on ${config.network}`);
-  console.log(`Dripper deployed to : ${ajnaDripper.address} on ${config.network}`);
+  console.log(`Redeemer deployed to : ${chalk.green(ajnaRedeemer.address)} on ${chalk.green(config.network)}`);
+  console.log(`Dripper deployed to : ${chalk.green(ajnaDripper.address)} on ${chalk.green(config.network)}`);
 }
 
 main().catch((error) => {

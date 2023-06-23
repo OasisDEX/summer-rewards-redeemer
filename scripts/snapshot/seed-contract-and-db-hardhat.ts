@@ -1,77 +1,81 @@
-import { PrismaClient, User } from "@prisma/client";
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
-import { MerkleTree } from "merkletreejs";
-
-import { deployContract } from "../common/helpers";
-import { dummyProcessedSnaphot } from "../common/test-data";
+import { PrismaClient } from "@prisma/client";
+import { BigNumber, ethers } from "ethers";
+import { config } from "../common/config";
+import { createMerkleTree, getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
+import { addresses } from "../common/config";
+import { calculateWeeklySnapshot } from "./get-weekly-snapshot";
+import { EthersError, Snapshot } from "../common/types";
+import chalk from "chalk";
+const fs = require("fs");
 
 const prisma = new PrismaClient();
-
-const inputDb = dummyProcessedSnaphot.map((user) =>
-  ethers.utils.solidityKeccak256(["address", "uint256"], [user.address, user.amount])
-);
-
-const tree = new MerkleTree(inputDb, ethers.utils.keccak256, {
-  sortLeaves: true,
-  sortPairs: true,
-});
-const root = tree.getHexRoot();
+const dataDir = "./scripts/snapshot/test-data";
 
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
 async function main() {
-  const [owner] = await ethers.getSigners();
-  const ajnaToken = await deployContract("AjnaToken", []);
-  const ajnaRedeemer = await deployContract("AjnaRedeemer", [
-    ajnaToken.address,
-    owner.getAddress(),
-    owner.getAddress(),
+  const files = fs.readdirSync(dataDir).filter((file: any) => /^weekly-data-\d+.json$/.test(file));
+  const weekIds = files.map((file: any) => parseInt(file.match(/\d+/)[0]));
+  const data = files.map((file: any) => JSON.parse(fs.readFileSync(`${dataDir}/${file}`, "utf8")));
+  const ajnaToken = await getOrDeployContract<AjnaToken>("AjnaToken", []);
+  const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
+    addresses[config.network]["ajnaToken"],
+    addresses[config.network]["admin"],
+  ]);
+  const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
+    addresses[config.network]["ajnaToken"],
+    addresses[config.network]["operator"],
+    ajnaDripper.address,
   ]);
 
-  console.log(`AJNA TOKEN ADDRESS   : ${ajnaToken.address}`);
-  console.log(`AJNA REDEEMER ADDRESS: ${ajnaRedeemer.address}`);
+  const operator = await impersonate(addresses[config.network].operator);
+  const admin = await impersonate(addresses[config.network].admin);
 
-  // how many weeks will be seeded - same weekly  data
-  const WEEKS_COUNT = 4;
-
-  await ajnaToken.mint(owner.getAddress(), totalWeekAmount.mul(10));
-  await ajnaToken.approve(ajnaRedeemer.address, totalWeekAmount.mul(1000));
-  const currentWeek = (await ajnaRedeemer.getCurrentWeek()) as number;
-  console.log(`CURRENT WEEK: ${currentWeek}`);
-
-  // add the users from the snapshot to the db
-  // use addMany with dup check instead of the error handling ?
-  const seedUserList = dummyProcessedSnaphot.map((user) => ({
-    address: user.address,
-    total_amount: ethers.BigNumber.from("0").toString(),
-    accepted: true,
-  }));
-
-  for (const entry of seedUserList) {
-    try {
-      await prisma.user.create({ data: entry });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT.mul(5));
+  await (await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
+  await (await ajnaToken.connect(operator).approve(ajnaRedeemer.address, totalWeekAmount)).wait();
 
   // add the weekly roots and weekly claims for all the users from the list
-  for (let i = 0; i < WEEKS_COUNT; i++) {
-    await (await ajnaRedeemer.addRoot(Number(currentWeek) + i, root, totalWeekAmount)).wait();
+  for (let i = 0; i < files.length; i++) {
+    console.log(chalk.dim(`Processing week ${weekIds[i]}`));
+    const result = calculateWeeklySnapshot(data[i], weekIds[i]);
+    const s: Snapshot = result.map((user) => ({
+      address: user.address,
+      amount: BigNumber.from(user.amount),
+    }));
+    if (s.length === 0) {
+      console.log(chalk.dim(`No claims for week ${weekIds[i]}`));
+      continue;
+    }
+    const { root, tree } = createMerkleTree(s);
     try {
-      await prisma.merkleTree.create({ data: { tree_root: root, week_number: Number(currentWeek) + i } });
+      await (await ajnaRedeemer.connect(operator).addRoot(Number(weekIds[i]), root)).wait();
+    } catch (error: unknown) {
+      const ethersError = error as EthersError;
+      if (
+        ethersError.reason ==
+        "VM Exception while processing transaction: reverted with reason string 'redeemer/invalid-week'"
+      ) {
+        throw new Error(`Week ${weekIds[i]} earlier than deployment week`);
+      }
+    }
+
+    try {
+      await prisma.ajnaRewardsMerkleTree.create({ data: { tree_root: root, week_number: Number(weekIds[i]) } });
     } catch (error) {
       console.log(error);
     }
 
-    dummyProcessedSnaphot.forEach(async (element) => {
+    s.forEach(async (element) => {
+      console.log(chalk.dim(`Adding weekly claim for ${element.address} for week ${weekIds[i]}`));
       const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [element.address, element.amount]);
       const proof = tree.getHexProof(leaf);
       try {
-        await prisma.weeklyClaim.create({
+        await prisma.ajnaRewardsWeeklyClaim.create({
           data: {
-            week_number: Number(currentWeek) + i,
+            week_number: weekIds[i],
             user_address: element.address,
             proof: proof,
             amount: element.amount.toString(),

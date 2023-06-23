@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers";
 import { BorrowDailyReward, Pool, Maybe, EarnDailyReward, User } from "../../.graphclient";
+import { Options } from "merkletreejs/dist/MerkleTree";
 
 export interface ParsedSnapshotEntry {
   address: string;
@@ -40,4 +41,32 @@ export type Addresses = {
   [network in Network]: {
     [key: string]: string;
   };
+};
+
+export interface Config {
+  earnRewardsRatio: number;
+  borrowRewardsRatio: number;
+  rewardStartWeek: number;
+  multiplier: number;
+  dryRun: boolean;
+  network: Network;
+  merkleTreeOptions: Options;
+}
+
+export type EthersError = {
+  reason: string;
+  code: string;
+  transactionHash: string;
+  method: string;
+  transaction?: {
+    hash: string;
+    from: string;
+    to: string;
+    data: string;
+    nonce: number;
+    gasLimit: BigNumber;
+    gasPrice: BigNumber;
+    value: BigNumber;
+    chainId: number;
+  };  
 };

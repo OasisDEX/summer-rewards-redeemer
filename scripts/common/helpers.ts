@@ -3,6 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, Contract, constants } from "ethers";
 import { ethers, network } from "hardhat";
 import MerkleTree from "merkletreejs";
+import { addresses, config } from "./config";
 
 export const deployContract = async <T extends Contract>(contractName: string, args: any[]): Promise<T> => {
   const factory = await ethers.getContractFactory(contractName);
@@ -12,6 +13,16 @@ export const deployContract = async <T extends Contract>(contractName: string, a
 };
 export const getContract = async <T extends Contract>(contractName: string, contractAddress: string): Promise<T> => {
   const contract = (await ethers.getContractAt(contractName, contractAddress)) as T;
+  return contract;
+};
+export const getOrDeployContract = async <T extends Contract>(contractName: string, args: any[]): Promise<T> => {
+  let contract: T;
+  if (addresses[config.network][getCorrectName(contractName)] === ethers.constants.AddressZero) {
+    contract = await deployContract(contractName, args);
+  } else {
+    console.info(`${contractName} already deployed`);
+    contract = await getContract(contractName, addresses[config.network][getCorrectName(contractName)]);
+  }
   return contract;
 };
 export const createMerkleTree = (
@@ -81,4 +92,16 @@ export const setTokenBalance = async (account: string, tokenAddress: string, bal
   const token = await ethers.getContractAt("ERC20", tokenAddress);
   const balanceAfter = await token.balanceOf(account);
   return balance == balanceAfter;
+};
+
+/**
+ * @title Get Correct Name
+ * @dev Returns a new string with the first character of the input `name` in lowercase,
+ * preserving the case of the remaining characters.
+ * @param name The input string to modify.
+ * @return A new string with the first character of `name` in lowercase, and the rest of
+ * the original case.
+ */
+const getCorrectName = (name: string) => {
+  return name.charAt(0).toLowerCase().concat(name.slice(1));
 };

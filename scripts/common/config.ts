@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
-import { Addresses, Network, RewardDistributions } from "./types";
+import { Addresses, Config, Network, RewardDistributions } from "./types";
+import chalk from "chalk";
 
 export const addresses: Addresses = {
   goerli: {
@@ -17,13 +18,18 @@ export const addresses: Addresses = {
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
 };
-export const config = {
+
+export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
   rewardStartWeek: 2782,
   multiplier: 10000,
   dryRun: true,
   network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
+  merkleTreeOptions: {
+    sortLeaves: false,
+    sortPairs: true,
+  },
 };
 
 export const rewardDistributions: RewardDistributions = {
@@ -94,3 +100,20 @@ export const tokens = {
     CBETH: "0x0000000000000000000000000000000000000000",
   },
 };
+
+function validateRewardDistributions(distributions: RewardDistributions): void {
+  for (const network in distributions) {
+    const rewards = distributions[network as Network];
+    let totalShares = 0;
+    for (const reward of rewards) {
+      totalShares += reward.share;
+    }
+    if (totalShares !== 1) {
+      throw new Error(chalk.red(`Invalid reward distribution for ${network}: shares do not add up to 1`));
+    } else {
+      console.log(chalk.blue(`Validated reward distribution for ${network}`));
+    }
+  }
+}
+
+validateRewardDistributions(rewardDistributions);
