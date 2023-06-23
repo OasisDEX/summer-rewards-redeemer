@@ -5,20 +5,19 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
-import { addresses } from "../scripts/common/config";
+import { addresses, config } from "../scripts/common/config";
 import { PrismaClient } from "@prisma/client";
 export const prisma = new PrismaClient();
 // all rewards for a given week
 
 async function deployBaseFixture() {
-  const networkName = network.name === "hardhat" ? "goerli" : network.name;
   const [owner, firstUser, randomUser] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
   const firstUserAddress = await firstUser.getAddress();
-  const ajnaToken = await getContract<AjnaToken>("AjnaToken", addresses.ajnaToken[networkName]);
-  const ajnaDripper = await getContract<AjnaDripper>("AjnaDripper", addresses.ajnaDripper[networkName]);
-  const ajnaRedeemer = await getContract<AjnaRedeemer>("AjnaRedeemer", addresses.ajnaRedeemer[networkName]);
-  const operator = await impersonate(addresses.operator[networkName]);
+  const ajnaToken = await getContract<AjnaToken>("AjnaToken", addresses[config.network].ajnaToken);
+  const ajnaDripper = await getContract<AjnaDripper>("AjnaDripper", addresses[config.network].ajnaDripper);
+  const ajnaRedeemer = await getContract<AjnaRedeemer>("AjnaRedeemer", addresses[config.network].ajnaRedeemer);
+  const operator = await impersonate(addresses[config.network].operator);
 
   return {
     ajnaToken,

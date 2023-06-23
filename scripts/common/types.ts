@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { BigNumber } from "ethers";
 import { BorrowDailyReward, Pool, Maybe, EarnDailyReward, User } from "../../.graphclient";
 
 export interface ParsedSnapshotEntry {
@@ -21,3 +21,23 @@ export type EarnDailyRewards = (Pick<EarnDailyReward, "id" | "reward"> & {
   pool: Pick<Pool, "id">;
   user?: Maybe<Pick<User, "id">> | undefined;
 })[];
+
+export interface Distribution {
+  name: string;
+  address: string;
+  share: number;
+}
+export enum Network {
+  Mainnet = "mainnet",
+  Goerli = "goerli",
+}
+
+export type RewardDistributions = {
+  [network in Network]: Distribution[];
+};
+
+export type Addresses = {
+  [network in Network]: {
+    [key: string]: string;
+  };
+};
