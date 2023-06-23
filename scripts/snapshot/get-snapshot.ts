@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import {
   DailyRewardsDocument,
   DailyRewardsQuery,
-  Day,
   execute,
   WeeklyRewardsDocument,
   WeeklyRewardsQuery,
@@ -63,7 +62,7 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
     throw new Error(`No weekly rewards found for week ${weekId}`);
   }
 
-  const days = data.week!.days;
+  const days = data.week.days;
 
   const totalWeeklyDistribution = getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};

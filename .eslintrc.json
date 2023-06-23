@@ -17,6 +17,16 @@
   "parserOptions": {
     "ecmaVersion": 12
   },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+      }
+    }
+  },
   "rules": {
     "prettier/prettier": [
       "error",
@@ -26,8 +36,10 @@
     ],
     "@typescript-eslint/no-unused-vars": "warn",
     "node/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
-    // increase the severity of rules so they are auto-fixable
     "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error"
+    "simple-import-sort/exports": "error",
+    "node/no-missing-import": "off",
+    "import/no-unresolved": "error",
+    "node/no-unpublished-import": "off"
   }
 }

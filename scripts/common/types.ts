@@ -19,8 +19,12 @@ export interface Distribution {
   address: string;
   share: number;
 }
-export interface DistributionAmount { [poolAddress: string]: BigNumber }
-export interface UserRewardsAmount { [userAddress: string]: BigNumber }
+export interface DistributionAmount {
+  [poolAddress: string]: BigNumber;
+}
+export interface UserRewardsAmount {
+  [userAddress: string]: BigNumber;
+}
 export enum Network {
   Mainnet = "mainnet",
   Goerli = "goerli",

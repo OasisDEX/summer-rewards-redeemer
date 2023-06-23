@@ -1,5 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
+import { increase } from "@nomicfoundation/hardhat-network-helpers/src/helpers/time";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
