@@ -6,3 +6,4 @@ sources:
 
 documents:
   - ./queries/weekly.graphql
+  - ./queries/daily.graphql

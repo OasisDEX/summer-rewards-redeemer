@@ -5,7 +5,7 @@ import { createMerkleTree, getContract, getOrDeployContract, impersonate, setTok
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
 import { addresses } from "../common/config";
-import { calculateWeeklySnapshot } from "./get-weekly-snapshot";
+import { calculateWeeklySnapshot } from "./get-snapshot";
 import { EthersError, Snapshot } from "../common/types";
 import chalk from "chalk";
 const fs = require("fs");

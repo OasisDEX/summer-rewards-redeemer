@@ -7,7 +7,7 @@ import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
 import { addresses, config } from "../scripts/common/config";
 import chalk from "chalk";
-import { prisma } from "../scripts/snapshot/process-weekly-snapshot-in-db";
+import { prisma } from "../scripts/snapshot/process-snapshot-in-db";
 // all rewards for a given week
 const CURRENT_WEEK = 2789;
 async function deployFixture() {

@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { BorrowDailyReward, Pool, Maybe, EarnDailyReward, User } from "../../.graphclient";
+import { BorrowDailyReward, Pool, Maybe, EarnDailyReward, User, Day, Week } from "../../.graphclient";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
 export interface ParsedSnapshotEntry {
@@ -68,5 +68,28 @@ export type EthersError = {
     gasPrice: BigNumber;
     value: BigNumber;
     chainId: number;
-  };  
+  };
 };
+
+export type WeekDay = Pick<Day, "id"> & {
+  borrowDailyRewards?:
+    | Maybe<
+        (Pick<BorrowDailyReward, "id" | "reward"> & {
+          pool: Pick<Pool, "id">;
+          user?: Maybe<Pick<User, "id">> | undefined;
+        })[]
+      >
+    | undefined;
+  earnDailyRewards?: EarnDailyRewards | null;
+  week: Pick<Week, "id">;
+};
+
+export interface DailyRewards {
+  id: string;
+  dailyRewards: {
+    [userAddress: string]: BigNumber;
+  };
+  totalDailyRewards: BigNumber;
+}
+
+export type WeeklyRewards = DailyRewards[]

@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { calculateWeeklySnapshot } from "./get-weekly-snapshot";
+import { calculateWeeklySnapshot } from "./get-snapshot";
 import { jest, expect, beforeAll } from "@jest/globals";
 const fs = require("fs");
 
