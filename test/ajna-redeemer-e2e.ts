@@ -3,7 +3,7 @@ import { expect } from "chai";
 import chalk from "chalk";
 import { ethers } from "hardhat";
 
-import { addresses, config } from "../scripts/common/config";
+import { config } from "../scripts/common/config";
 import { getContract, impersonate } from "../scripts/common/helpers";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
 import { prisma } from "../scripts/snapshot/process-snapshot-in-db";
@@ -14,10 +14,10 @@ async function deployFixture() {
   const [owner, firstUser, randomUser] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
   const firstUserAddress = await firstUser.getAddress();
-  const ajnaToken = await getContract<AjnaToken>("AjnaToken", addresses[config.network].ajnaToken);
-  const ajnaDripper = await getContract<AjnaDripper>("AjnaDripper", addresses[config.network].ajnaDripper);
-  const ajnaRedeemer = await getContract<AjnaRedeemer>("AjnaRedeemer", addresses[config.network].ajnaRedeemer);
-  const operator = await impersonate(addresses[config.network].operator);
+  const ajnaToken = await getContract<AjnaToken>("AjnaToken", config.addresses.ajnaToken);
+  const ajnaDripper = await getContract<AjnaDripper>("AjnaDripper", config.addresses.ajnaDripper);
+  const ajnaRedeemer = await getContract<AjnaRedeemer>("AjnaRedeemer", config.addresses.ajnaRedeemer);
+  const operator = await impersonate(config.addresses.operator);
 
   return {
     ajnaToken,

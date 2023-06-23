@@ -2,7 +2,6 @@ import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
-import keccak256 from "keccak256";
 
 import { WEEK } from "../scripts/common/constants";
 import { createMerkleTree, deployContract } from "../scripts/common/helpers";
@@ -322,9 +321,9 @@ describe("AjnaRedeemer", () => {
     it("should return no admin for DEFAULT_ADMIN_ROLE", async () => {
       const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
 
-      expect(await ajnaRedeemer.getRoleAdmin(keccak256("DEFAULT_ADMIN_ROLE"))).to.be.equal(
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-      );
+      expect(
+        await ajnaRedeemer.getRoleAdmin(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]))
+      ).to.be.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
     });
   });
   describe("emergencyWithdraw", () => {
@@ -356,15 +355,22 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("OPERATOR_ROLE"), firstUserAddress)).to.be.reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(owner)
+          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
+      ).to.be.reverted;
     });
     it("should not allow the operator (deployer) to grant admin role", async () => {
       const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("DEFAULT_ADMIN_ROLE"), firstUserAddress)).to.be
-        .reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(owner)
+          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
+      ).to.be.reverted;
     });
   });
 });

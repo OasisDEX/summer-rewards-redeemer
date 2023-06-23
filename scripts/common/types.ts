@@ -36,7 +36,7 @@ export type RewardDistributions = {
 
 export type Addresses = {
   [network in Network]: {
-    [key: string]: string;
+    [contractName: string]: string;
   };
 };
 
@@ -48,6 +48,8 @@ export interface Config {
   dryRun: boolean;
   network: Network;
   merkleTreeOptions: Options;
+  addresses: { [key: string]: string };
+  rewardDistributions: Distribution[];
 }
 
 export type EthersError = {

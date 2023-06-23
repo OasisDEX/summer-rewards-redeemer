@@ -2,19 +2,19 @@ import chalk from "chalk";
 import { network } from "hardhat";
 
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
-import { addresses, config } from "../common/config";
+import { config } from "../common/config";
 import { getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
 import { BASE_WEEKLY_AMOUNT } from "../common/test-data";
 
 export async function processTransaction(weekId: number, root: string) {
-  const ajnaToken = await getContract<AjnaToken>("AjnaToken", addresses[config.network].ajnaToken);
+  const ajnaToken = await getContract<AjnaToken>("AjnaToken", config.addresses.ajnaToken);
   const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    addresses[config.network].ajnaToken,
-    addresses[config.network].admin,
+    config.addresses.ajnaToken,
+    config.addresses.admin,
   ]);
   const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    addresses[config.network].ajnaToken,
-    addresses[config.network].operator,
+    config.addresses.ajnaToken,
+    config.addresses.operator,
     ajnaDripper.address,
   ]);
   console.log(
@@ -31,8 +31,8 @@ export async function processTransaction(weekId: number, root: string) {
 
   if (network.name === "hardhat") {
     try {
-      const operator = await impersonate(addresses[config.network].operator);
-      const admin = await impersonate(addresses[config.network].admin);
+      const operator = await impersonate(config.addresses.operator);
+      const admin = await impersonate(config.addresses.admin);
       await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT);
       await (await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
       await (await ajnaRedeemer.connect(operator).addRoot(Number(weekId), root)).wait();

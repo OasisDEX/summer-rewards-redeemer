@@ -46,11 +46,11 @@ export const getContract = async <T extends Contract>(contractName: string, cont
  */
 export const getOrDeployContract = async <T extends Contract>(contractName: string, args: any[]): Promise<T> => {
   let contract: T;
-  if (addresses[config.network][getCorrectName(contractName)] === ethers.constants.AddressZero) {
+  if (config.addresses[getCorrectName(contractName)] === ethers.constants.AddressZero) {
     contract = await deployContract(contractName, args);
   } else {
     console.info(`${contractName} already deployed`);
-    contract = await getContract(contractName, addresses[config.network][getCorrectName(contractName)]);
+    contract = await getContract(contractName, config.addresses[getCorrectName(contractName)]);
   }
   return contract;
 };
@@ -115,7 +115,7 @@ export const findBalancesSlot = async (tokenAddress: string): Promise<number> =>
     await network.provider.send("hardhat_setStorageAt", [tokenAddress, probedSlot, prev]);
     if (balance.eq(ethers.BigNumber.from(probe))) return i;
   }
-  throw "Balances slot not found!";
+  throw new Error("Balances slot not found!");
 };
 /**
  * Set token balance to the provided value.
@@ -136,7 +136,7 @@ export const setTokenBalance = async (account: string, tokenAddress: string, bal
   ]);
   const token = await ethers.getContractAt("ERC20", tokenAddress);
   const balanceAfter = await token.balanceOf(account);
-  return balance == balanceAfter;
+  return balance === balanceAfter;
 };
 
 /**

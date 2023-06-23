@@ -31,6 +31,12 @@ export const config: Config = {
     sortLeaves: false,
     sortPairs: true,
   },
+  get addresses() {
+    return addresses[this.network];
+  },
+  get rewardDistributions() {
+    return rewardDistributions[this.network];
+  },
 };
 
 export const rewardDistributions: RewardDistributions = {
@@ -102,6 +108,11 @@ export const tokens = {
   },
 };
 
+/**
+ * Validates the reward distributions for each network.
+ * @param distributions The reward distributions to validate.
+ * @throws An error if the total shares for a network do not add up to 1.
+ */
 function validateRewardDistributions(distributions: RewardDistributions): void {
   for (const network in distributions) {
     const rewards = distributions[network as Network];

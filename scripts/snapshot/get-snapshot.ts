@@ -67,7 +67,7 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
   const totalWeeklyDistribution = getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
 
-  for (const pool of rewardDistributions[config.network]) {
+  for (const pool of config.rewardDistributions) {
     totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
       .mul(totalWeeklyDistribution)
       .div(100);
@@ -117,7 +117,7 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
   const totalWeeklyDistribution = getWeeklyReward(+data.day.week.id);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
 
-  for (const pool of rewardDistributions[config.network]) {
+  for (const pool of config.rewardDistributions) {
     totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
       .mul(totalWeeklyDistribution)
       .div(100);

@@ -3,7 +3,7 @@ import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
-import { addresses, config } from "../common/config";
+import { config } from "../common/config";
 import { createMerkleTree, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
 import { EthersError, Snapshot } from "../common/types";
@@ -21,17 +21,17 @@ async function main() {
   const data = files.map((file: any) => JSON.parse(fs.readFileSync(`${dataDir}/${file}`, "utf8")));
   const ajnaToken = await getOrDeployContract<AjnaToken>("AjnaToken", []);
   const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    addresses[config.network].ajnaToken,
-    addresses[config.network].admin,
+    config.addresses.ajnaToken,
+    config.addresses.admin,
   ]);
   const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    addresses[config.network].ajnaToken,
-    addresses[config.network].operator,
+    config.addresses.ajnaToken,
+    config.addresses.operator,
     ajnaDripper.address,
   ]);
 
-  const operator = await impersonate(addresses[config.network].operator);
-  const admin = await impersonate(addresses[config.network].admin);
+  const operator = await impersonate(config.addresses.operator);
+  const admin = await impersonate(config.addresses.admin);
 
   await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT.mul(5));
   await (await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
