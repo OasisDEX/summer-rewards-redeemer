@@ -55,7 +55,7 @@ async function main() {
     } catch (error: unknown) {
       const ethersError = error as EthersError;
       if (
-        ethersError.reason ==
+        ethersError.reason ===
         "VM Exception while processing transaction: reverted with reason string 'redeemer/invalid-week'"
       ) {
         throw new Error(`Week ${weekIds[i]} earlier than deployment week`);

@@ -14,21 +14,13 @@ export interface SnapshotEntry {
 }
 export type Snapshot = SnapshotEntry[];
 
-export type BorrowDailyRewards = (Pick<BorrowDailyReward, "id" | "reward"> & {
-  pool: Pick<Pool, "id">;
-  user?: Maybe<Pick<User, "id">> | undefined;
-})[];
-
-export type EarnDailyRewards = (Pick<EarnDailyReward, "id" | "reward"> & {
-  pool: Pick<Pool, "id">;
-  user?: Maybe<Pick<User, "id">> | undefined;
-})[];
-
 export interface Distribution {
   name: string;
   address: string;
   share: number;
 }
+export interface DistributionAmount { [poolAddress: string]: BigNumber }
+export interface UserRewardsAmount { [userAddress: string]: BigNumber }
 export enum Network {
   Mainnet = "mainnet",
   Goerli = "goerli",
@@ -71,6 +63,16 @@ export type EthersError = {
     chainId: number;
   };
 };
+
+export type BorrowDailyRewards = (Pick<BorrowDailyReward, "id" | "reward"> & {
+  pool: Pick<Pool, "id">;
+  user?: Maybe<Pick<User, "id">> | undefined;
+})[];
+
+export type EarnDailyRewards = (Pick<EarnDailyReward, "id" | "reward"> & {
+  pool: Pick<Pool, "id">;
+  user?: Maybe<Pick<User, "id">> | undefined;
+})[];
 
 export type WeekDay = Pick<Day, "id"> & {
   borrowDailyRewards?:

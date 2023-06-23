@@ -18,7 +18,7 @@
     "test:ts": "jest scripts/",
     "build": "npx hardhat compile && npx graphclient build",
     "clean": "rm -rf artifacts cache typechain",
-    "lint:fix": "./node_modules/.bin/solhint --fix -f table contracts/*.sol contracts/**/*.sol && ./node_modules/.bin/eslint --fix test/**/*.ts scripts/**/*.ts",
+    "lint:fix": "solhint --fix -f table contracts/*.sol contracts/**/*.sol && eslint --fix test/**/*.ts scripts/**/*.ts",
     "lint:contracts": "./node_modules/.bin/solhint -f table contracts/*.sol contracts/**/*.sol",
     "lint:typescript": "./node_modules/.bin/eslint test/**/*.ts scripts/**/*.ts",
     "lint": "yarn lint:contracts && yarn lint:typescript",

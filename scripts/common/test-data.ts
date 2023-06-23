@@ -1,5 +1,4 @@
 import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
 
 import { HUNDRED_THOUSAND, MILLION } from "./constants";
 
