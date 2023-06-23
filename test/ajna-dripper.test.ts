@@ -1,10 +1,9 @@
-import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
-import { createMerkleTree, deployContract, impersonate } from "../scripts/common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+
 import {
   HUNDRED,
   HUNDRED_THOUSAND,
@@ -14,7 +13,9 @@ import {
   TWO_THOUSAND,
   WEEK,
 } from "../scripts/common/constants";
-import { AjnaToken, AjnaDripper, AjnaRedeemer } from "../typechain-types";
+import { createMerkleTree, deployContract, impersonate } from "../scripts/common/helpers";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
 const leaf = leaves[1];

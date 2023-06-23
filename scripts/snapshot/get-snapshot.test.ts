@@ -1,6 +1,7 @@
+import { beforeAll, expect, jest } from "@jest/globals";
 import { createHash } from "crypto";
+
 import { calculateWeeklySnapshot } from "./get-snapshot";
-import { jest, expect, beforeAll } from "@jest/globals";
 const fs = require("fs");
 
 describe("First", () => {

@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+
 import { deployContract } from "../common/helpers";
 
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY_DEPLOY!);

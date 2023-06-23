@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+
 import { HUNDRED_THOUSAND, MILLION } from "./constants";
 
 export const BASE_WEEKLY_AMOUNT = MILLION.add(HUNDRED_THOUSAND);

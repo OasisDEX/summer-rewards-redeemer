@@ -1,13 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import { BigNumber, ethers } from "ethers";
-import { config } from "../common/config";
-import { createMerkleTree, getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
-import { addresses } from "../common/config";
-import { calculateWeeklySnapshot } from "./get-snapshot";
-import { EthersError, Snapshot } from "../common/types";
 import chalk from "chalk";
+import { BigNumber, ethers } from "ethers";
+
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
+import { addresses, config } from "../common/config";
+import { createMerkleTree, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
+import { EthersError, Snapshot } from "../common/types";
+import { calculateWeeklySnapshot } from "./get-snapshot";
 const fs = require("fs");
 
 const prisma = new PrismaClient();
@@ -21,12 +21,12 @@ async function main() {
   const data = files.map((file: any) => JSON.parse(fs.readFileSync(`${dataDir}/${file}`, "utf8")));
   const ajnaToken = await getOrDeployContract<AjnaToken>("AjnaToken", []);
   const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["admin"],
+    addresses[config.network].ajnaToken,
+    addresses[config.network].admin,
   ]);
   const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["operator"],
+    addresses[config.network].ajnaToken,
+    addresses[config.network].operator,
     ajnaDripper.address,
   ]);
 
@@ -77,7 +77,7 @@ async function main() {
           data: {
             week_number: weekIds[i],
             user_address: element.address,
-            proof: proof,
+            proof,
             amount: element.amount.toString(),
           },
         });

@@ -1,8 +1,9 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { ethers } from "hardhat";
-import { Snapshot } from "../common/types";
-import MerkleTree from "merkletreejs";
 import chalk from "chalk";
+import { ethers } from "hardhat";
+import MerkleTree from "merkletreejs";
+
+import { Snapshot } from "../common/types";
 export const prisma = new PrismaClient();
 
 export async function processWeeklyDb(snapshot: Snapshot, currentWeek: number, root: string, tree: MerkleTree) {
@@ -29,7 +30,7 @@ export async function processWeeklyDb(snapshot: Snapshot, currentWeek: number, r
         data: {
           week_number: Number(currentWeek),
           user_address: element.address,
-          proof: proof,
+          proof,
           amount: element.amount.toString(),
         },
       });

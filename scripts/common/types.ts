@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
-import { BorrowDailyReward, Pool, Maybe, EarnDailyReward, User, Day, Week } from "../../.graphclient";
 import { Options } from "merkletreejs/dist/MerkleTree";
+
+import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "../../.graphclient";
 
 export interface ParsedSnapshotEntry {
   address: string;
@@ -92,4 +93,4 @@ export interface DailyRewards {
   totalDailyRewards: BigNumber;
 }
 
-export type WeeklyRewards = DailyRewards[]
+export type WeeklyRewards = DailyRewards[];

@@ -1,19 +1,20 @@
 import chalk from "chalk";
 import { network } from "hardhat";
-import { AjnaToken, AjnaDripper, AjnaRedeemer } from "../../typechain-types";
+
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
 import { addresses, config } from "../common/config";
 import { getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
 import { BASE_WEEKLY_AMOUNT } from "../common/test-data";
 
 export async function processTransaction(weekId: number, root: string) {
   const ajnaToken = await getContract<AjnaToken>("AjnaToken", addresses[config.network].ajnaToken);
-  let ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["admin"],
+  const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
+    addresses[config.network].ajnaToken,
+    addresses[config.network].admin,
   ]);
-  let ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["operator"],
+  const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
+    addresses[config.network].ajnaToken,
+    addresses[config.network].operator,
     ajnaDripper.address,
   ]);
   console.log(

@@ -1,12 +1,15 @@
+import { BigNumber } from "ethers";
+
 import {
-  WeeklyRewardsQuery,
-  WeeklyRewardsDocument,
   DailyRewardsDocument,
-  execute,
   DailyRewardsQuery,
   Day,
+  execute,
+  WeeklyRewardsDocument,
+  WeeklyRewardsQuery,
 } from "../../.graphclient";
 import { config, getWeeklyReward, rewardDistributions } from "../common/config";
+import { ZERO } from "../common/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
@@ -15,8 +18,6 @@ import {
   WeekDay,
   WeeklyRewards,
 } from "../common/types";
-import { BigNumber } from "ethers";
-import { ZERO } from "../common/constants";
 
 export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot> => {
   const res = await execute(WeeklyRewardsDocument, { week: weekId });

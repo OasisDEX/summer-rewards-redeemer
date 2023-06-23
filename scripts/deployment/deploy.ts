@@ -1,19 +1,19 @@
+import chalk from "chalk";
+import { Contract, ethers } from "ethers";
 import hre, { network } from "hardhat";
 
+import { AjnaDripper, AjnaRedeemer } from "../../typechain-types";
 import { addresses, config } from "../common/config";
 import { deployContract, getContract, getOrDeployContract } from "../common/helpers";
-import { Contract, ethers } from "ethers";
-import chalk from "chalk";
-import { AjnaDripper, AjnaRedeemer } from "../../typechain-types";
 
 async function main() {
-  let ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["admin"],
+  const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
+    addresses[config.network].ajnaToken,
+    addresses[config.network].admin,
   ]);
-  let ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    addresses[config.network]["ajnaToken"],
-    addresses[config.network]["operator"],
+  const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
+    addresses[config.network].ajnaToken,
+    addresses[config.network].operator,
     ajnaDripper.address,
   ]);
 
@@ -21,14 +21,14 @@ async function main() {
     await hre.run("verify:verify", {
       address: ajnaRedeemer.address,
       constructorArguments: [
-        addresses[config.network]["ajnaToken"],
-        addresses[config.network]["operator"],
+        addresses[config.network].ajnaToken,
+        addresses[config.network].operator,
         ajnaDripper.address,
       ],
     });
     await hre.run("verify:verify", {
       address: ajnaDripper.address,
-      constructorArguments: [addresses[config.network]["ajnaToken"], addresses[config.network]["admin"]],
+      constructorArguments: [addresses[config.network].ajnaToken, addresses[config.network].admin],
     });
   }
   console.log(`Redeemer deployed to : ${chalk.green(ajnaRedeemer.address)} on ${chalk.green(config.network)}`);

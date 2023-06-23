@@ -1,6 +1,7 @@
-import { ethers } from "ethers";
-import { Addresses, Config, Network, RewardDistributions } from "./types";
 import chalk from "chalk";
+import { ethers } from "ethers";
+
+import { Addresses, Config, Network, RewardDistributions } from "./types";
 
 export const addresses: Addresses = {
   goerli: {

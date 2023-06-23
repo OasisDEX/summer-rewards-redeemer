@@ -1,8 +1,9 @@
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, Contract, constants } from "ethers";
+import { BigNumber, constants, Contract } from "ethers";
 import { ethers, network } from "hardhat";
 import MerkleTree from "merkletreejs";
+
 import { addresses, config } from "./config";
 
 export const deployContract = async <T extends Contract>(contractName: string, args: any[]): Promise<T> => {

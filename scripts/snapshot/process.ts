@@ -1,11 +1,11 @@
 import { BigNumber } from "ethers";
+
+import { AjnaRedeemer } from "../../typechain-types";
+import { addresses, config } from "../common/config";
 import { createMerkleTree, getContract } from "../common/helpers";
 import { Snapshot } from "../common/types";
 import { getDailySnapshot, getWeeklySnapshot } from "./get-snapshot";
 import { processDailyDb, processWeeklyDb } from "./process-snapshot-in-db";
-import { config } from "../common/config";
-import { AjnaRedeemer } from "../../typechain-types";
-import { addresses } from "../common/config";
 import { processTransaction } from "./process-tx";
 
 export async function processWeeklyClaims(weekId = 0) {

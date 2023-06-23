@@ -1,13 +1,12 @@
-import { getContract, impersonate } from "../scripts/common/helpers";
-import { BASE_WEEKLY_AMOUNT } from "../scripts/common/test-data";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers, network } from "hardhat";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
-import { processWeeklyClaims } from "../scripts/snapshot/process";
+import { ethers } from "hardhat";
+
 import { addresses, config } from "../scripts/common/config";
-import chalk from "chalk";
+import { getContract, impersonate } from "../scripts/common/helpers";
+import { processWeeklyClaims } from "../scripts/snapshot/process";
 import { prisma } from "../scripts/snapshot/process-snapshot-in-db";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week
 const CURRENT_WEEK = 2789;
 async function deployFixture() {
