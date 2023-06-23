@@ -43,5 +43,3 @@ function getEpochDayId(): number {
   const epoch = new Date(1970, 0, 1);
   return Math.floor((today.getTime() - epoch.getTime()) / oneDayMilliseconds);
 }
-
-processDailyClaims();
