@@ -1,5 +1,4 @@
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { increase } from "@nomicfoundation/hardhat-network-helpers/src/helpers/time";
+import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
@@ -305,7 +304,7 @@ describe("AjnaRedeemer", () => {
 
       for (let i = 0; i < WEEKS_COUNT; i++) {
         await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await increase(WEEK);
+        await time.increase(WEEK);
         weeks.push(currentWeek);
         currentWeek = Number(currentWeek) + 1;
         amounts.push(dataForFirstUser[1]);

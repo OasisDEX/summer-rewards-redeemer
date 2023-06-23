@@ -57,7 +57,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "ethers": "^5.6.1",
     "fs": "0.0.1-security",
-    "hardhat": "^2.13.1",
+    "hardhat": "2.15.0",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-tenderly": "^1.0.1",
     "jest": "^29.5.0",

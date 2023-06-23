@@ -1,5 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import chalk from "chalk";
 import { ethers } from "hardhat";
 
 import { addresses, config } from "../scripts/common/config";
@@ -43,28 +44,34 @@ describe("AjnaRedeemer e2e", () => {
     it("should return true for verified leaf and unclaimed reward and correct week number", async () => {
       const { ajnaRedeemer } = await loadFixture(deployFixture);
       const currentWeek = CURRENT_WEEK;
-      const randomClaim = await prisma.ajnaRewardsWeeklyClaim.findFirst({
+      const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
         where: {
           week_number: currentWeek,
         },
       });
-      const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
-      expect(
-        await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount)
-      ).to.equal(true);
+      for (const randomClaim of randomClaims) {
+        console.log(chalk.dim(`Checking claim for ${randomClaim.user_address}`));
+        const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
+        expect(
+          await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount)
+        ).to.equal(true);
+      }
     });
     it("should claim the reward for a random claim", async () => {
       const { ajnaRedeemer } = await loadFixture(deployFixture);
       const currentWeek = CURRENT_WEEK;
-      const randomClaim = await prisma.ajnaRewardsWeeklyClaim.findFirst({
+      const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
         where: {
           week_number: currentWeek,
         },
       });
-      const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
-      await expect(
-        ajnaRedeemer.connect(testUser).claimMultiple([currentWeek], [randomClaim!.amount], [randomClaim!.proof])
-      ).to.not.be.reverted;
+      for (const randomClaim of randomClaims) {
+        console.log(chalk.dim(`Claiming for ${randomClaim.user_address}`));
+        const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
+        await expect(
+          ajnaRedeemer.connect(testUser).claimMultiple([currentWeek], [randomClaim!.amount], [randomClaim!.proof])
+        ).to.not.be.reverted;
+      }
     });
   });
 });
