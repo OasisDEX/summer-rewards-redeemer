@@ -14,7 +14,6 @@ const prisma = new PrismaClient();
 const dataDir = "./scripts/snapshot/test-data";
 
 // all rewards for a given week
-const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
 async function main() {
   try {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
@@ -42,7 +41,6 @@ async function main() {
 
   await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT.mul(5));
   await (await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
-  await (await ajnaToken.connect(operator).approve(ajnaRedeemer.address, totalWeekAmount)).wait();
 
   // add the weekly roots and weekly claims for all the users from the list
   for (let i = 0; i < files.length; i++) {
