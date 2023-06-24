@@ -1,6 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
+import * as fs from "fs";
 
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
 import { config } from "../common/config";
@@ -8,7 +9,6 @@ import { createMerkleTree, getOrDeployContract, impersonate, setTokenBalance } f
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
 import { EthersError, Snapshot } from "../common/types";
 import { calculateWeeklySnapshot } from "./get-snapshot";
-const fs = require("fs");
 
 const prisma = new PrismaClient();
 const dataDir = "./scripts/snapshot/test-data";
@@ -16,6 +16,13 @@ const dataDir = "./scripts/snapshot/test-data";
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
 async function main() {
+  try {
+    await prisma.ajnaRewardsMerkleTree.deleteMany({});
+    await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
+  } catch (error) {
+    console.info("No previous data to delete");
+  }
+
   const files = fs.readdirSync(dataDir).filter((file: any) => /^weekly-data-\d+.json$/.test(file));
   const weekIds = files.map((file: any) => parseInt(file.match(/\d+/)[0]));
   const data = files.map((file: any) => JSON.parse(fs.readFileSync(`${dataDir}/${file}`, "utf8")));
@@ -41,15 +48,15 @@ async function main() {
   for (let i = 0; i < files.length; i++) {
     console.log(chalk.dim(`Processing week ${weekIds[i]}`));
     const result = calculateWeeklySnapshot(data[i], weekIds[i]);
-    const s: Snapshot = result.map((user) => ({
+    const snapshot: Snapshot = result.map((user) => ({
       address: user.address,
       amount: BigNumber.from(user.amount),
     }));
-    if (s.length === 0) {
+    if (snapshot.length === 0) {
       console.log(chalk.dim(`No claims for week ${weekIds[i]}`));
       continue;
     }
-    const { root, tree } = createMerkleTree(s);
+    const { root, tree } = createMerkleTree(snapshot);
     try {
       await (await ajnaRedeemer.connect(operator).addRoot(Number(weekIds[i]), root)).wait();
     } catch (error: unknown) {
@@ -63,27 +70,35 @@ async function main() {
     }
 
     try {
-      await prisma.ajnaRewardsMerkleTree.create({ data: { tree_root: root, week_number: Number(weekIds[i]) } });
-    } catch (error) {
-      console.log(error);
+      console.log(chalk.gray(`Adding week #${weekIds[i]} to the db`));
+      await prisma.ajnaRewardsMerkleTree.create({
+        data: { tree_root: root, week_number: Number(weekIds[i]) },
+      });
+    } catch (error: unknown) {
+      const prismaError = error as Prisma.PrismaClientKnownRequestError;
+      if (prismaError?.code === "P2002") {
+        console.error(`Root already added for week ${weekIds[i]}`);
+      } else {
+        throw error;
+      }
     }
 
-    s.forEach(async (element) => {
-      console.log(chalk.dim(`Adding weekly claim for ${element.address} for week ${weekIds[i]}`));
-      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [element.address, element.amount]);
+    const snapshotEntries: Prisma.AjnaRewardsWeeklyClaimCreateManyInput[] = snapshot.map((entry) => {
+      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [entry.address, entry.amount]);
       const proof = tree.getHexProof(leaf);
-      try {
-        await prisma.ajnaRewardsWeeklyClaim.create({
-          data: {
-            week_number: weekIds[i],
-            user_address: element.address,
-            proof,
-            amount: element.amount.toString(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+
+      return {
+        user_address: entry.address,
+        amount: entry.amount.toString(),
+        week_number: weekIds[i],
+        proof,
+      };
+    });
+
+    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`));
+    await prisma.ajnaRewardsWeeklyClaim.createMany({
+      data: snapshotEntries,
+      skipDuplicates: true,
     });
   }
 }
