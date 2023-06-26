@@ -327,6 +327,7 @@ model AjnaRewardsMerkleTree {
   week_number Int      @unique
   timestamp   DateTime @default(now())
   tree_root   String
+  tx_processed Boolean  @default(false)
 
   @@map("ajna_rewards_merkle_tree")
 }

@@ -1,16 +1,16 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
 
+import { prisma } from "../../prisma/client";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
 import { config } from "../common/config";
 import { createMerkleTree, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../common/test-data";
+import { BASE_WEEKLY_AMOUNT } from "../common/test-data";
 import { EthersError, Snapshot } from "../common/types";
 import { calculateWeeklySnapshot } from "./get-snapshot";
 
-const prisma = new PrismaClient();
 const dataDir = "./scripts/snapshot/test-data";
 
 // all rewards for a given week

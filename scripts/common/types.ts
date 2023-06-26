@@ -102,3 +102,8 @@ export interface DailyRewards {
 }
 
 export type WeeklyRewards = DailyRewards[];
+
+export enum TX_STATUS {
+  "REVERTED" = 0,
+  "SUCCESSFUL" = 1,
+}

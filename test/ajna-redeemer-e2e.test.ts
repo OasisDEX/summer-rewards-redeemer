@@ -3,10 +3,10 @@ import { expect } from "chai";
 import chalk from "chalk";
 import { ethers } from "hardhat";
 
+import { prisma } from "../prisma/client";
 import { config } from "../scripts/common/config";
 import { getContract, impersonate } from "../scripts/common/helpers";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
-import { prisma } from "../scripts/snapshot/process-snapshot-in-db";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week
 const CURRENT_WEEK = 2789;
@@ -34,7 +34,7 @@ async function deployFixture() {
 
 describe("AjnaRedeemer e2e", () => {
   before(async () => {
-    await processWeeklyClaims(CURRENT_WEEK);
+    await processWeeklyClaims([CURRENT_WEEK, CURRENT_WEEK + 1]);
   });
   after(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});

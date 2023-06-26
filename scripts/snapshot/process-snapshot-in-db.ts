@@ -1,10 +1,10 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import chalk from "chalk";
 import { ethers } from "hardhat";
 import MerkleTree from "merkletreejs";
 
+import { prisma } from "../../prisma/client";
 import { Snapshot } from "../common/types";
-export const prisma = new PrismaClient();
 
 export async function processWeeklySnapshotInDb(
   snapshot: Snapshot,

@@ -264,7 +264,8 @@ CREATE TABLE "ajna_rewards_daily_claim" (
 CREATE TABLE "ajna_rewards_merkle_tree" (
     "week_number" INTEGER NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "tree_root" TEXT NOT NULL
+    "tree_root" TEXT NOT NULL,
+    "tx_processed" BOOLEAN NOT NULL DEFAULT false
 );
 
 -- CreateIndex
