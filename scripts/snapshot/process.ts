@@ -11,10 +11,10 @@ import { processTransaction } from "./process-tx";
  * Processes weekly claims for a given array of week IDs.
  * If a week has already been processed, it skips the week and logs a message.
  * If not it will generate the snapshot again and proceed to process the claims.
- * @param weekIds An array of week IDs to process claims for. Defaults to the current epoch week ID.
+ * @param weekIds An array of week IDs to process claims for. Defaults to the previous epoch week ID.
  * @returns A Promise that resolves when the claims have been processed.
  */
-export async function processWeeklyClaims(weekIds = [getEpochWeekId()]): Promise<void> {
+export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
   for (const weekId of weekIds) {
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
       where: { week_number: weekId, tx_processed: true },
@@ -40,10 +40,10 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId()]): Promise
 }
 /**
  * Processes daily claims for a given array of day IDs.
- * @param dayIds An array of day IDs to process claims for. Defaults to the current epoch day ID.
+ * @param dayIds An array of day IDs to process claims for. Defaults to the previous epoch day ID.
  * @returns A Promise that resolves when the claims have been processed.
  */
-export async function processDailyClaims(dayIds = [getEpochDayId()]): Promise<void> {
+export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promise<void> {
   for (const dayId of dayIds) {
     console.log(`Processing daily claims for day ${dayId}`);
 

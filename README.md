@@ -1,19 +1,70 @@
-# Oasis Ajna Redeemer
+# Oasis Ajna Redeemer & Drip
 
-## Setup
+# Setup
+
+## Environment Variables
+
+The following environment variables are used in this project:
+
+- `ALCHEMY_MAINNET_RPC_URL`: The RPC URL for the Alchemy mainnet.
+- `ALCHEMY_GOERLI_RPC_URL`: The RPC URL for the Alchemy Goerli test network.
+- `PRIVATE_KEY_DEPLOY`: The private key to use for deploying contracts.
+- `AJNA_GRAPHQL_ENDPOINT`: The GraphQL endpoint for the Ajna API.
+- `DATABASE_URL`: The URL for the PostgreSQL database.
+- `FORKED_NETWORK`: The network name used to get contract addresses and reward distributions (since when we use fork - the name of the network is `hardhat`)
+
+To use these environment variables, create a `.env` file in the root directory of the project and set the values for each variable. You can use the `.env.example` file as a template.
+
+## Using the project 
+
 - install dependencies
 ```
 yarn install
 ```
-- create `.env` file and fill in the required values (see `.env.example` for reference)
 - run `npx graphclient build` to build the GraphQL client by The Graph
 - run `yarn start:local` to start the local Hardhat node and the local DB
-- run `yarn db:seed` to seed the DB with the initial data ( it will deploy the contracts, generate snapshots and add the merkle roots to both the DB and redeemer contract )
-- 
-## TO BE DONE:
-[] database schema
-[] snapshot script
+- run `yarn db:seed` to seed the DB with the initial data ( it will deploy the contracts, generate snapshots and add the merkle roots to both the DB and redeemer contract ) and start local hardhat node
 
+## Scripts
+
+The following scripts are available in this project:
+
+- `start:local`: Starts a local development environment with a forked Ethereum node and a local database.
+- `db:start`: Starts a local PostgreSQL database using Docker.
+- `db:stop`: Stops the local PostgreSQL database using Docker.
+- `db:run`: Starts a local PostgreSQL database using Docker and runs database migrations.
+- `db:reset`: Resets the local PostgreSQL database using Docker.
+- `db:migrate`: Runs database migrations.
+- `db:seed`: Seeds the database and redeemer contract with data - concurrently starts local hardhat node.
+- `test`: Runs the tests.
+- `test:ts`: Runs the scripts tests.
+- `build`: Compiles the SC code and generates the contract typechain.
+- `clean`: Deletes the generated artifacts, cache, and typechain.
+- `lint:fix`: Lints the code and fixes any issues.
+- `lint:contracts`: Lints the Solidity contracts.
+- `lint:typescript`: Lints the TypeScript code.
+- `lint`: Lints the code.
+- `format:fix`: Formats the code and fixes any issues.
+- `format`: Formats the code.
+
+# Configuration
+The `config.ts` file contains the configuration for the project. It exports a `config` object that contains the following properties:
+
+- `earnRewardsRatio`: The ratio of rewards allocated to earning.
+- `borrowRewardsRatio`: The ratio of rewards allocated to borrowing.
+- `rewardStartWeek`: The week number when rewards start.
+- `multiplier`: The multiplier used to calculate rewards.
+- `dryRun`: Whether to run the script in dry run mode.
+- `network`: The network name used to get addresses and distributions.
+- `merkleTreeOptions`: The options for the Merkle tree.
+- `addresses`: The addresses for the contracts on the current network.
+- `rewardDistributions`: The reward distribution ratios per pool for the current network.
+
+The `addresses` and `rewardDistributions` properties are getters that return the addresses and reward distributions for the current network based on the `network` property.
+
+
+
+# Contracts
 ## Drip
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
 - MAX_WEEKLY_AMOUNT set to 2_000_000
@@ -37,10 +88,6 @@ yarn install
 - week number is week number since the UNIX epoch (week starting from Thursday at 00:00:00 UTC)
 - authorized user can withdraw all the Ajna tokens from redeemer contract to the drip contract
 
-
-## Config
-- each entry in `rewardDistributions` contains the % of the weekly amount that will be distributed to the given address
-- to calculate the required amount of Ajna tokens for the given pool, the weekly amount (`getWeeklyReward()`) is multiplied by the ratio for each pool `rewardDistributions` and ratio of earn/borrow rewards 
 
 # TO BE UPDATED
 # Snapshot
