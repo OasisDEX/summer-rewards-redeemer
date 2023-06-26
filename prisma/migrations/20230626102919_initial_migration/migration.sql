@@ -238,16 +238,9 @@ CREATE TABLE "product_hub_items" (
 );
 
 -- CreateTable
-CREATE TABLE "ajna_rewards_user" (
-    "id" TEXT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "accepted" BOOLEAN NOT NULL
-);
-
--- CreateTable
 CREATE TABLE "ajna_rewards_weekly_claim" (
     "id" SERIAL NOT NULL,
-    "timestamp" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "week_number" INTEGER NOT NULL,
     "user_address" TEXT NOT NULL,
     "proof" TEXT[],
@@ -257,13 +250,21 @@ CREATE TABLE "ajna_rewards_weekly_claim" (
 );
 
 -- CreateTable
+CREATE TABLE "ajna_rewards_daily_claim" (
+    "id" SERIAL NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "day_number" INTEGER NOT NULL,
+    "user_address" TEXT NOT NULL,
+    "amount" TEXT NOT NULL,
+
+    CONSTRAINT "ajna_rewards_daily_claim_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ajna_rewards_merkle_tree" (
     "week_number" INTEGER NOT NULL,
-    "timestamp" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
-    "start_block" INTEGER,
-    "end_block" INTEGER,
-    "tree_root" TEXT NOT NULL,
-    "snapshot" TEXT
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "tree_root" TEXT NOT NULL
 );
 
 -- CreateIndex
@@ -315,10 +316,10 @@ CREATE UNIQUE INDEX "largest_debt_protocol_id_position_id_key" ON "largest_debt"
 CREATE UNIQUE INDEX "product_hub_items_label_network_product_protocol_primaryTok_key" ON "product_hub_items"("label", "network", "product", "protocol", "primaryToken", "secondaryToken");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ajna_rewards_user_id_key" ON "ajna_rewards_user"("id");
+CREATE UNIQUE INDEX "ajna_rewards_weekly_claim_week_number_user_address_key" ON "ajna_rewards_weekly_claim"("week_number", "user_address");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ajna_rewards_weekly_claim_week_number_user_address_key" ON "ajna_rewards_weekly_claim"("week_number", "user_address");
+CREATE UNIQUE INDEX "ajna_rewards_daily_claim_day_number_user_address_key" ON "ajna_rewards_daily_claim"("day_number", "user_address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ajna_rewards_merkle_tree_week_number_key" ON "ajna_rewards_merkle_tree"("week_number");
@@ -328,6 +329,3 @@ ALTER TABLE "user" ADD CONSTRAINT "user_user_that_referred_address_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "weekly_claim" ADD CONSTRAINT "weekly_claim_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "user"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ajna_rewards_weekly_claim" ADD CONSTRAINT "ajna_rewards_weekly_claim_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "ajna_rewards_user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

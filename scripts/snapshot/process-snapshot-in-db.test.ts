@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-extraneous-import
 import { afterAll, beforeAll, describe, expect } from "@jest/globals";
 import { BigNumber } from "ethers";
 import fs from "fs";
