@@ -64,11 +64,12 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         require(address(redeemer) == address(0), "drip/redeemer-already-set");
         require(weeklyAmount == 0, "drip/weekly-amount-already-set");
         validateWeeklyAmount(_weeklyAmount);
-        weeklyAmount = _weeklyAmount;
         revokeRole(REDEEMER_ROLE, address(redeemer));
         grantRole(REDEEMER_ROLE, address(_redeemer));
-        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
+        weeklyAmount = _weeklyAmount;
+        lastUpdate = block.timestamp;
         redeemer = _redeemer;
+        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
     }
 
     /* @inheritdoc IAjnaDripper */
@@ -77,8 +78,8 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         require(address(redeemer) != address(0), "drip/redeemer-not-set");
         revokeRole(REDEEMER_ROLE, address(redeemer));
         grantRole(REDEEMER_ROLE, address(_redeemer));
-        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
         redeemer = _redeemer;
+        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
     }
 
     /* @inheritdoc IAjnaDripper */

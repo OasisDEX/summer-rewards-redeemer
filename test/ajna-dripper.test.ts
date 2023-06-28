@@ -96,6 +96,13 @@ async function deployBaseNoMintFixture() {
 }
 describe("AjnaDripper", () => {
   describe("changeWeeklyAmount", () => {
+    it("should not allow change of weekly amount before 4 weeks after initialization passed", async () => {
+      const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
+      const weeklyAmountBefore = await ajnaDripper.weeklyAmount();
+      await expect(
+        ajnaDripper.connect(admin).changeWeeklyAmount(weeklyAmountBefore.mul(105).div(100))
+      ).to.be.revertedWith("drip/invalid-timestamp");
+    });
     it("should allow change of weekly amount by 5% up", async () => {
       const { ajnaDripper, admin } = await loadFixture(deployBaseFixture);
       await time.increase(WEEK * 4);

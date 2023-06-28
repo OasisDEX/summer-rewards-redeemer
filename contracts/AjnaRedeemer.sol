@@ -5,10 +5,13 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
+    using BitMaps for BitMaps.BitMap;
+
     mapping(uint256 => bytes32) public weeklyRoots;
-    mapping(address => uint256) private hasClaimed;
+    mapping(address => BitMaps.BitMap) private hasClaimed;
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
@@ -47,31 +50,26 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
 
     /* @inheritdoc IAjnaRedeemer */
     function claimMultiple(
-        uint256[] calldata _weeks,
+        uint256[] calldata weekIds,
         uint256[] calldata amounts,
         bytes32[][] calldata proofs
     ) external {
-        require(_weeks.length > 0, "redeemer/cannot-claim-zero");
+        require(weekIds.length > 0, "redeemer/cannot-claim-zero");
         require(
-            _weeks.length == amounts.length && amounts.length == proofs.length,
+            weekIds.length == amounts.length && amounts.length == proofs.length,
             "redeemer/invalid-params"
         );
 
         uint256 total;
-        uint256 alreadyClaimed = hasClaimed[_msgSender()];
-        uint256 accumulatedClaimed = 0;
-        for (uint256 i = 0; i < _weeks.length; i += 1) {
-            require(canClaim(proofs[i], _weeks[i], amounts[i]), "redeemer/cannot-claim");
-
-            uint256 thisWeekClaimed = 1 << (_weeks[i] - deploymentWeek);
-            require((accumulatedClaimed & thisWeekClaimed) == 0);
-
-            accumulatedClaimed = accumulatedClaimed | thisWeekClaimed;
+        BitMaps.BitMap storage alreadyClaimed = hasClaimed[_msgSender()];
+        for (uint256 i = 0; i < weekIds.length; i += 1) {
+            uint256 adjustedWeekId = weekIds[i] - deploymentWeek;
+            require(canClaim(proofs[i], weekIds[i], amounts[i]), "redeemer/cannot-claim");
+            require(!alreadyClaimed.get(adjustedWeekId), "redeemer/already-claimed");
+            alreadyClaimed.set(adjustedWeekId);
             total += amounts[i];
-            emit Claimed(_msgSender(), _weeks[i], amounts[i]);
+            emit Claimed(_msgSender(), weekIds[i], amounts[i]);
         }
-        require((accumulatedClaimed & alreadyClaimed) == 0, "redeemer/already-claimed");
-        hasClaimed[_msgSender()] = alreadyClaimed | accumulatedClaimed;
         require(ajnaToken.transfer(_msgSender(), total), "redeemer/transfer-failed");
     }
 
