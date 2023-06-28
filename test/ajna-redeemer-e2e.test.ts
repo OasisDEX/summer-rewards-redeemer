@@ -52,7 +52,6 @@ describe("AjnaRedeemer e2e", () => {
       for (const randomClaim of randomClaims) {
         console.log(chalk.dim(`Checking claim for ${randomClaim.user_address}`));
         const testUser = await impersonate(randomClaim.user_address);
-        // const testUser = ethers.provider.getSigner(randomClaim?.user_address.toLocaleLowerCase() as string);
         expect(
           await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount)
         ).to.equal(true);
