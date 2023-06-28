@@ -1,0 +1,9 @@
+sources:
+  - name: ajna
+    handler:
+      graphql:
+        endpoint: ${AJNA_GRAPHQL_ENDPOINT}
+
+documents:
+  - ./queries/weekly.graphql
+  - ./queries/daily.graphql

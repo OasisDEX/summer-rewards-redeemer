@@ -1,6 +1,3 @@
-import * as dotenv from "dotenv";
-
-import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
@@ -8,6 +5,9 @@ import "@nomiclabs/hardhat-solhint";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
+
+import * as dotenv from "dotenv";
+import { HardhatUserConfig, task } from "hardhat/config";
 
 dotenv.config();
 
@@ -43,13 +43,13 @@ const config: HardhatUserConfig = {
     goerli: {
       url: process.env.ALCHEMY_GOERLI_RPC_URL,
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
-      gas: 4300000,
+      gas: "auto",
     },
     hardhat: {
       chainId: 2137,
       forking: {
-        url: process.env.ALCHEMY_MAINNET_RPC_URL !== undefined ? process.env.ALCHEMY_MAINNET_RPC_URL : "",
-        blockNumber: 17000000,
+        url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
+        blockNumber: 9225499,
       },
       mining: {
         auto: true,

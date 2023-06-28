@@ -5,8 +5,14 @@
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@scripts/*": ["scripts/*"],
+      "@utils/*": ["utils/*"]
+    }
   },
-  "include": ["./scripts", "./test", "./typechain", "prisma/seed.ts"],
+  "include": ["./scripts/**.ts", "./test", "./typechain", "prisma/seed.ts"],
   "files": ["./hardhat.config.ts"]
 }

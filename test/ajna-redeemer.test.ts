@@ -1,12 +1,11 @@
-import { increase } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time";
-import { createMerkleTree, deployContract } from "../scripts/common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
-import keccak256 from "keccak256";
-import { TWO_THOUSAND, WEEK } from "../scripts/common/constants";
+
+import { WEEK } from "../scripts/common/constants";
+import { createMerkleTree, deployContract } from "../scripts/common/helpers";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
@@ -20,7 +19,7 @@ const proof = tree.getHexProof(leaf);
 
 // all rewards for a given week
 const totalWeekAmount = dummyProcessedSnaphot.reduce((acc, cur) => acc.add(cur.amount), BigNumber.from(0));
-console.log(totalWeekAmount.toString());
+
 async function deployBaseFixture() {
   const [owner, firstUser, randomUser, admin, operator] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
@@ -304,7 +303,7 @@ describe("AjnaRedeemer", () => {
 
       for (let i = 0; i < WEEKS_COUNT; i++) {
         await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await increase(WEEK);
+        await time.increase(WEEK);
         weeks.push(currentWeek);
         currentWeek = Number(currentWeek) + 1;
         amounts.push(dataForFirstUser[1]);
@@ -322,9 +321,9 @@ describe("AjnaRedeemer", () => {
     it("should return no admin for DEFAULT_ADMIN_ROLE", async () => {
       const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
 
-      expect(await ajnaRedeemer.getRoleAdmin(keccak256("DEFAULT_ADMIN_ROLE"))).to.be.equal(
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-      );
+      expect(
+        await ajnaRedeemer.getRoleAdmin(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]))
+      ).to.be.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
     });
   });
   describe("emergencyWithdraw", () => {
@@ -356,15 +355,22 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("OPERATOR_ROLE"), firstUserAddress)).to.be.reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(owner)
+          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
+      ).to.be.reverted;
     });
     it("should not allow the operator (deployer) to grant admin role", async () => {
       const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(ajnaRedeemer.connect(owner).grantRole(keccak256("DEFAULT_ADMIN_ROLE"), firstUserAddress)).to.be
-        .reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(owner)
+          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
+      ).to.be.reverted;
     });
   });
 });
