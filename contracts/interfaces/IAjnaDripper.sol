@@ -2,6 +2,17 @@
 pragma solidity 0.8.19;
 import { IAjnaRedeemer } from "./IAjnaRedeemer.sol";
 
+/**
+ * @title AjnaDripper
+ * @notice A contract that drips a fixed amount of Ajna tokens to a designated AjnaRedeemer contract every week.
+ * @dev Contract drips a specified amount of Ajna tokens defined by an offchain distribition schedule ( and it's limited by +-10% changes)
+ * AjnaDripper is designed to be the only instance that will hold bulk of Ajna tokens. In case of emergency, the AjnaRedeemer contract can be
+ * changed by the multisig to a new contract that will enable continuity of the rewards distribution.
+ * ROLES:
+ * - `DEFAULT_ADMIN_ROLE`: Can change the weekly drip amount, the designated AjnaRedeemer contract, \
+ * and call the emergencyWithdraw function to transfer the Ajna tokens to the beneficiary address (trusted summer.fi address).
+ * - `REDEEMER_ROLE`: Can call the drip function to transfer the weekly drip amount to the designated AjnaRedeemer contract (redeemer).
+ */
 interface IAjnaDripper {
     /**
      * @dev Gets the current week number since the UNIX epoch.

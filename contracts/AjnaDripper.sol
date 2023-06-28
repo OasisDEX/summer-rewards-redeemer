@@ -20,8 +20,11 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
 
     event Dripped(uint256 indexed week, uint256 amount);
     event RedeemerChanged(uint256 indexed week, address oldRedeemer, address indexed newRedeemer);
+    event WeeklyAmountChanged(uint256 indexed week, uint256 oldAmount, uint256 indexed newAmount);
 
     constructor(IERC20 _ajnaToken, address _multisig) {
+        require(address(_ajnaToken) != address(0), "drip/invalid-ajna-token");
+        require(_multisig != address(0), "drip/invalid-multisig");
         ajnaToken = _ajnaToken;
         beneficiary = _multisig;
         dripperDeploymentWeek = getCurrentWeek();
@@ -57,6 +60,7 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
         IAjnaRedeemer _redeemer,
         uint256 _weeklyAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(address(_redeemer) != address(0), "drip/invalid-redeemer");
         validateWeeklyAmount(_weeklyAmount);
         revokeRole(REDEEMER_ROLE, address(redeemer));
         grantRole(REDEEMER_ROLE, address(_redeemer));
@@ -67,9 +71,10 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     }
 
     /* @inheritdoc IAjnaDripper */
-    function changeWeeklyAmount(uint256 _weeklyAmount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeWeeklyAmount(uint256 _weeklyAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         validateWeeklyAmount(_weeklyAmount);
         require(lastUpdate + 4 weeks < block.timestamp, "drip/invalid-timestamp");
+        emit WeeklyAmountChanged(getCurrentWeek(), weeklyAmount, _weeklyAmount);
         weeklyAmount = _weeklyAmount;
         lastUpdate = block.timestamp;
     }
