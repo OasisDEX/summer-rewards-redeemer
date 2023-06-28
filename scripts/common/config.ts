@@ -6,8 +6,8 @@ import { Addresses, Config, Network, RewardDistributions } from "./types";
 export const addresses: Addresses = {
   goerli: {
     ajnaToken: "0xaadebCF61AA7Da0573b524DE57c67aDa797D46c5",
-    ajnaRedeemer: "0x107F1AA82558ac18671733dc32d15D999fc6b70c",
-    ajnaDripper: "0x6e4c6e76b3C1D834c0e3c4c2bAec8d58B8421A99",
+    ajnaRedeemer: "0x19d44E4Cef8B5bCA136665DbB7D69454af3D0C43",
+    ajnaDripper: "0x029c506264495886FB21c7D254F8a0c588D9e454",
     admin: "0x0B5a3C04D1199283938fbe887A2C82C808aa89Fb",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },

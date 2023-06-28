@@ -25,7 +25,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
       continue;
     }
 
-    console.log(`Processing weekly claims for day ${weekId}`);
+    console.log(`Processing weekly claims for week ${weekId}`);
 
     const parsedSnapshot: ParsedSnapshot = await getWeeklySnapshot(weekId);
     const snapshot: Snapshot = parsedSnapshot.map((entry) => ({

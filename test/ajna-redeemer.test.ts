@@ -33,7 +33,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
+  await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
   return {
@@ -92,7 +92,7 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek - 1, root)).to.be.revertedWith(
-        "redeemer/invalid-week"
+        "drip/invalid-week"
       );
     });
     it("should not add root (by admin), revert on second try (same week number)", async () => {
@@ -108,7 +108,7 @@ describe("AjnaRedeemer", () => {
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.not.reverted;
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.revertedWith(
-        "redeemer/invalid-week"
+        "drip/invalid-week"
       );
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });
@@ -134,8 +134,8 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(ajnaRedeemer.getRoot(currentWeek + 1)).to.be.revertedWith("redeemer/no-root");
+      const res = await ajnaRedeemer.getRoot(currentWeek + 1);
+      expect(res).to.be.equal(ethers.utils.formatBytes32String(""));
     });
   });
   describe("canClaim", () => {

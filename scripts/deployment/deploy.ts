@@ -17,6 +17,10 @@ async function main() {
   ]);
 
   if (network.name === "mainnet" || network.name === "goerli") {
+    // Add a 10 second wait
+    console.log(`Waiting for 10 seconds...`);
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     await hre.run("verify:verify", {
       address: ajnaRedeemer.address,
       constructorArguments: [config.addresses.ajnaToken, config.addresses.operator, ajnaDripper.address],

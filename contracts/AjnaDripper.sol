@@ -56,16 +56,27 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     }
 
     /* @inheritdoc IAjnaDripper */
-    function changeRedeemer(
+    function initializeRedeemer(
         IAjnaRedeemer _redeemer,
         uint256 _weeklyAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(address(_redeemer) != address(0), "drip/invalid-redeemer");
+        require(address(redeemer) == address(0), "drip/redeemer-already-set");
+        require(weeklyAmount == 0, "drip/weekly-amount-already-set");
         validateWeeklyAmount(_weeklyAmount);
+        weeklyAmount = _weeklyAmount;
         revokeRole(REDEEMER_ROLE, address(redeemer));
         grantRole(REDEEMER_ROLE, address(_redeemer));
-        weeklyAmount = _weeklyAmount;
-        lastUpdate = block.timestamp;
+        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
+        redeemer = _redeemer;
+    }
+
+    /* @inheritdoc IAjnaDripper */
+    function changeRedeemer(IAjnaRedeemer _redeemer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(address(_redeemer) != address(0), "drip/invalid-redeemer");
+        require(address(redeemer) != address(0), "drip/redeemer-not-set");
+        revokeRole(REDEEMER_ROLE, address(redeemer));
+        grantRole(REDEEMER_ROLE, address(_redeemer));
         emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
         redeemer = _redeemer;
     }

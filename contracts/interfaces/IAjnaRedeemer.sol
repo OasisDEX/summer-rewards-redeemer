@@ -47,7 +47,7 @@ interface IAjnaRedeemer {
      * @param week The week number for which to retrieve the Merkle root.
      * @return The Merkle root associated with the specified week.
      *
-     * @notice This function throws an exception if the requested week does not have a Merkle root set.
+     * @notice returns bytes32(0) if the provided week does not have a root set.
      */
     function getRoot(uint256 week) external view returns (bytes32);
 

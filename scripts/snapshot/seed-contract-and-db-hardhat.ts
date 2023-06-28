@@ -40,7 +40,7 @@ async function main() {
   const admin = await impersonate(config.addresses.admin);
 
   await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT.mul(5));
-  await (await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
+  await (await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
 
   // add the weekly roots and weekly claims for all the users from the list
   for (let i = 0; i < files.length; i++) {
@@ -61,7 +61,7 @@ async function main() {
       const ethersError = error as EthersError;
       if (
         ethersError.reason ===
-        "VM Exception while processing transaction: reverted with reason string 'redeemer/invalid-week'"
+        "VM Exception while processing transaction: reverted with reason string 'drip/invalid-week'"
       ) {
         throw new Error(`Week ${weekIds[i]} earlier than deployment week`);
       }

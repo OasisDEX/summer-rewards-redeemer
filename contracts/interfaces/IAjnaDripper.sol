@@ -60,11 +60,28 @@ interface IAjnaDripper {
      * - Assigns the provided _redeemer address to the redeemer property.
      *
      * @param _redeemer The address of the contract that will be assigned the new REDEEMER_ROLE.
-     * @param _weeklyAmount The new value for the weekly drip amount.
      *
      * @notice This function throws an exception if the caller does not have the DEFAULT_ADMIN_ROLE, or if the proposed weekly drip amount falls outside the allowed range. Additionally, this function revokes and grants the Redeemer role as necessary, and updates the weeklyAmount and lastUpdate properties.
      */
-    function changeRedeemer(IAjnaRedeemer _redeemer, uint256 _weeklyAmount) external;
+    function changeRedeemer(IAjnaRedeemer _redeemer) external;
+
+    /**
+     * @dev Initializes the designated AjnaRedeemer contract address and weekly drip amount.
+     *
+     * Requirements:
+     * - Only the DEFAULT_ADMIN_ROLE can call this function.
+     * - The new AjnaRedeemer contract address must not be zero.
+     * - The current AjnaRedeemer contract address must not be set.
+     * - The weeklyAmount property must not be set.
+     * @dev Validates that the proposed weekly drip amount is within the allowable bounds.
+     * Effects:
+     * - Grants the REDEEMER_ROLE to the specified _redeemer contract address.
+     * - Emits a RedeemerChanged event with the current week number, the zero address, and the new AjnaRedeemer contract address.
+     *
+     * @param _redeemer The address of the contract that will be assigned the REDEEMER_ROLE.
+     * @param _weeklyAmount The value for the weekly drip amount.
+     */
+    function initializeRedeemer(IAjnaRedeemer _redeemer, uint256 _weeklyAmount) external;
 
     /**
      * @dev Allows the contract with 'REDEEMER_ROLE' to transfer a weekly amount of tokens to the designated 'redeemer' address.
