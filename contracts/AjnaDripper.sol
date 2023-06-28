@@ -6,6 +6,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
 
+/* @inheritdoc IAjnaDripper */
 contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
     uint256 constant MAX_WEEKLY_AMOUNT = 2_000_000 * 10 ** 18;

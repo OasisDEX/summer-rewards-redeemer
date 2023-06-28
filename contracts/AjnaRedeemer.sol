@@ -7,6 +7,7 @@ import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
+/* @inheritdoc IAjnaRedeemer */
 contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
     using BitMaps for BitMaps.BitMap;
 
