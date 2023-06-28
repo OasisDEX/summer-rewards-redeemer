@@ -32,5 +32,5 @@ describe("First", () => {
     }
   });
 
-  jest.setTimeout(100000); // 10 seconds
+  jest.setTimeout(100000); // 100 seconds
 });
