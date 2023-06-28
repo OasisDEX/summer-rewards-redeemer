@@ -5,7 +5,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
-import {console} from "hardhat/console.sol";
+
 contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
     mapping(uint256 => bytes32) public weeklyRoots;
     mapping(address => uint256) private hasClaimed;
@@ -81,9 +81,7 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
         uint256 week,
         uint256 amount
     ) public view returns (bool) {
-        console.log(_msgSender());
-        console.log(msg.sender);
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, amount));
+        bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), amount));
         return MerkleProof.verify(proof, weeklyRoots[week], leaf);
     }
 
