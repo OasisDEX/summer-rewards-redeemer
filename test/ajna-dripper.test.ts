@@ -1,5 +1,6 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { zeroAddress } from "ethereumjs-util";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
@@ -37,7 +38,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
+  await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
   console.table({
     ajnaToken: ajnaToken.address,
@@ -77,7 +78,7 @@ async function deployBaseNoMintFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
+  await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
 
   return {
     ajnaToken,
@@ -268,7 +269,7 @@ describe("AjnaDripper", () => {
       await expect(ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address)).to.be.not.reverted;
       expect(await ajnaDripper.redeemer()).to.be.equal(newAjnaRedeemer.address);
     });
-    it.skip("should not allow admin role to change redeemer if _weeklyAmount is above max", async () => {
+    it("should not allow admin role to change redeemer to zero address", async () => {
       const { ajnaToken, ajnaRedeemer, firstUser, operator, firstUserAddress, operatorAddress, ajnaDripper, admin } =
         await loadFixture(deployBaseFixture);
       await time.increase(WEEK * 4);
@@ -280,13 +281,8 @@ describe("AjnaDripper", () => {
         .be.reverted;
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
 
-      const newAjnaRedeemer = await deployContract("AjnaRedeemer", [
-        ajnaToken.address,
-        operatorAddress,
-        ajnaDripper.address,
-      ]);
-      await expect(ajnaDripper.connect(admin).changeRedeemer(newAjnaRedeemer.address)).to.be.revertedWith(
-        "drip/amount-exceeds-max"
+      await expect(ajnaDripper.connect(admin).changeRedeemer(zeroAddress())).to.be.revertedWith(
+        "drip/invalid-redeemer"
       );
     });
     it("should not allow operator role to change redeemer", async () => {

@@ -23,6 +23,9 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
     event Claimed(address indexed user, uint256 indexed week, uint256 amount);
 
     constructor(IERC20 _ajnaToken, address _operator, address _dripper) {
+        require(address(_ajnaToken) != address(0), "drip/invalid-ajna-token");
+        require(_operator != address(0), "drip/invalid-operator");
+        require(_dripper != address(0), "drip/invalid-dripper");
         deploymentWeek = block.timestamp / 1 weeks;
         ajnaToken = _ajnaToken;
         dripper = _dripper;

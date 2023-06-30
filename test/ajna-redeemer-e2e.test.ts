@@ -9,7 +9,7 @@ import { getContract, impersonate } from "../scripts/common/helpers";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week
-const CURRENT_WEEK = 2790;
+const CURRENT_WEEK = 2791;
 async function deployFixture() {
   const [owner, firstUser, randomUser] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();

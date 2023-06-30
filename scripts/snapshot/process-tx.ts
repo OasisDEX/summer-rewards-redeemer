@@ -38,7 +38,7 @@ async function prepareHardhatEnv(ajnaDripper: AjnaDripper, ajnaToken: AjnaToken,
   const operator = await impersonate(config.addresses.operator);
   const admin = await impersonate(config.addresses.admin);
   await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT);
-  await (await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
+  await (await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
   return operator;
 }
 

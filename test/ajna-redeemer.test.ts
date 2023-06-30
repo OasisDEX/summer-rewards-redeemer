@@ -34,7 +34,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).initializeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
+  await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
   return {
@@ -250,7 +250,7 @@ describe("AjnaRedeemer", () => {
       ).to.be.reverted;
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
     });
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balnce to be 0", async () => {
+    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balance to be 0", async () => {
       const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 

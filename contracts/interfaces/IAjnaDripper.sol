@@ -81,7 +81,7 @@ interface IAjnaDripper {
      * @param _redeemer The address of the contract that will be assigned the REDEEMER_ROLE.
      * @param _weeklyAmount The value for the weekly drip amount.
      */
-    function initializeRedeemer(IAjnaRedeemer _redeemer, uint256 _weeklyAmount) external;
+    function setup(IAjnaRedeemer _redeemer, uint256 _weeklyAmount) external;
 
     /**
      * @dev Allows the contract with 'REDEEMER_ROLE' to transfer a weekly amount of tokens to the designated 'redeemer' address.
