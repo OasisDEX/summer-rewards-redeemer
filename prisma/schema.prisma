@@ -318,15 +318,16 @@ model AjnaRewardsDailyClaim {
   day_number   Int
   user_address String
   amount       String
+  week_number  Int
 
   @@unique([day_number, user_address], name: "day_number_userAddress_unique_id")
   @@map("ajna_rewards_daily_claim")
 }
 
 model AjnaRewardsMerkleTree {
-  week_number Int      @unique
-  timestamp   DateTime @default(now())
-  tree_root   String
+  week_number  Int      @unique
+  timestamp    DateTime @default(now())
+  tree_root    String
   tx_processed Boolean  @default(false)
 
   @@map("ajna_rewards_merkle_tree")

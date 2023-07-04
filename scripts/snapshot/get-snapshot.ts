@@ -7,7 +7,7 @@ import {
   WeeklyRewardsDocument,
   WeeklyRewardsQuery,
 } from "../../.graphclient";
-import { config, getWeeklyReward, rewardDistributions } from "../common/config";
+import { config, getWeeklyReward } from "../common/config";
 import { ZERO } from "../common/constants";
 import {
   BorrowDailyRewards,

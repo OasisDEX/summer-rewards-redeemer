@@ -1,10 +1,11 @@
 import { BigNumber } from "ethers";
 
 import { prisma } from "../../prisma/client";
-import { createMerkleTree, getEpochDayId, getEpochWeekId } from "../common/helpers";
+import { createMerkleTree } from "../common/helpers";
+import { getEpochWeekId } from "../common/time-helpers";
 import { ParsedSnapshot, Snapshot } from "../common/types";
-import { getDailySnapshot, getWeeklySnapshot } from "./get-snapshot";
-import { processDailySnapshotInDb, processWeeklySnapshotInDb } from "./process-snapshot-in-db";
+import { getWeeklySnapshot } from "./get-snapshot";
+import { processWeeklySnapshotInDb } from "./process-snapshot-in-db";
 import { processTransaction } from "./process-tx";
 
 /**
@@ -15,7 +16,13 @@ import { processTransaction } from "./process-tx";
  * @returns A Promise that resolves when the claims have been processed.
  */
 export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
+  const currentWeek = getEpochWeekId();
+
   for (const weekId of weekIds) {
+    if (!(weekId < currentWeek)) {
+      console.error(`Week ID ${weekId} - cant process current or future week`);
+      continue;
+    }
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
       where: { week_number: weekId, tx_processed: true },
     });
@@ -36,23 +43,5 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
 
     await processWeeklySnapshotInDb(snapshot, weekId, root, tree);
     await processTransaction(weekId, root);
-  }
-}
-/**
- * Processes daily claims for a given array of day IDs.
- * @param dayIds An array of day IDs to process claims for. Defaults to the previous epoch day ID.
- * @returns A Promise that resolves when the claims have been processed.
- */
-export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promise<void> {
-  for (const dayId of dayIds) {
-    console.log(`Processing daily claims for day ${dayId}`);
-
-    const parsedSnapshot: ParsedSnapshot = await getDailySnapshot(dayId);
-    const snapshot: Snapshot = parsedSnapshot.map((entry) => ({
-      address: entry.address,
-      amount: BigNumber.from(entry.amount),
-    }));
-
-    await processDailySnapshotInDb(snapshot, dayId);
   }
 }

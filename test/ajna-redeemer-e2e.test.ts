@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { prisma } from "../prisma/client";
 import { config } from "../scripts/common/config";
 import { getContract, impersonate } from "../scripts/common/helpers";
-import { processWeeklyClaims } from "../scripts/snapshot/process";
+import { processWeeklyClaims } from "../scripts/snapshot/process-weekly";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week
 const CURRENT_WEEK = 2791;
