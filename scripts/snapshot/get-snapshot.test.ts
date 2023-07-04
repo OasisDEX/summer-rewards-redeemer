@@ -1,11 +1,10 @@
-import { beforeAll, expect, jest } from "@jest/globals";
 import { createHash } from "crypto";
+import fs from "fs";
 
 import { calculateWeeklySnapshot } from "./get-snapshot";
-const fs = require("fs");
 
 describe("First", () => {
-  const dataDir = "./scripts/snapshot/test-data";
+  const dataDir = "./scripts/snapshot/test-data/weekly";
   let files: any[] = [];
   let data: any[] = [];
   let snapshots: any[] = [];

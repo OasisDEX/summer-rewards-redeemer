@@ -7,7 +7,7 @@ import {
   WeeklyRewardsDocument,
   WeeklyRewardsQuery,
 } from "../../.graphclient";
-import { config, getWeeklyReward, rewardDistributions } from "../common/config";
+import { config, getWeeklyReward } from "../common/config";
 import { ZERO } from "../common/constants";
 import {
   BorrowDailyRewards,
@@ -95,7 +95,7 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
 
   validateTotalAmount(weeklyRewardsSnapshot, totalWeeklyDistribution);
   return weeklyRewardsSnapshot.map((entry) => ({
-    address: entry.address,
+    address: entry.address.toLowerCase(),
     amount: entry.amount.toHexString(),
   }));
 }
@@ -132,7 +132,7 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
 
   validateTotalAmount(dailyRewardsSnapshot, totalDailyDistribution);
   return dailyRewardsSnapshot.map((entry) => ({
-    address: entry.address,
+    address: entry.address.toLowerCase(),
     amount: entry.amount.toHexString(),
   }));
 }
