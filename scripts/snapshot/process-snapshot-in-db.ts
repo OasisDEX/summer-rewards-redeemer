@@ -27,18 +27,18 @@ export async function processWeeklySnapshotInDb(
       }
     }
     const snapshotEntries: PrismaPromise<AjnaRewardsWeeklyClaim>[] = snapshot.map((entry) => {
-      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [entry.address, entry.amount]);
+      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [entry.address.toLowerCase(), entry.amount]);
       const proof = tree.getHexProof(leaf);
       // upser is used in case there were no daily entires for some reason and we do only need to create a final weekly entry
       return prisma.ajnaRewardsWeeklyClaim.upsert({
         where: {
           week_number_userAddress_unique_id: {
             week_number: currentWeek,
-            user_address: entry.address,
+            user_address: entry.address.toLowerCase(),
           },
         },
         create: {
-          user_address: entry.address,
+          user_address: entry.address.toLowerCase(),
           amount: entry.amount.toString(),
           week_number: currentWeek,
           proof,
@@ -72,7 +72,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
           where: {
             week_number_userAddress_unique_id: {
               week_number: currentWeek,
-              user_address: entry.address,
+              user_address: entry.address.toLowerCase(),
             },
           },
         });
@@ -81,7 +81,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
           where: {
             day_number_userAddress_unique_id: {
               day_number: currentDay,
-              user_address: entry.address,
+              user_address: entry.address.toLowerCase(),
             },
           },
         });
@@ -93,7 +93,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
               where: {
                 week_number_userAddress_unique_id: {
                   week_number: currentWeek,
-                  user_address: entry.address,
+                  user_address: entry.address.toLowerCase(),
                 },
               },
               data: {
@@ -106,7 +106,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
           tx.push(
             prisma.ajnaRewardsWeeklyClaim.create({
               data: {
-                user_address: entry.address,
+                user_address: entry.address.toLowerCase(),
                 amount: entry.amount.toString(),
                 week_number: currentWeek,
                 proof: [],
@@ -121,7 +121,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
 
     // Map the snapshot array to daily claim entries
     const dailyClaimEntries = snapshot.map((entry) => ({
-      user_address: entry.address,
+      user_address: entry.address.toLowerCase(),
       amount: entry.amount.toString(),
       day_number: currentDay,
       week_number: currentWeek,

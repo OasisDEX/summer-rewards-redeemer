@@ -19,7 +19,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
   const currentWeek = getEpochWeekId();
 
   for (const weekId of weekIds) {
-    if (!(weekId < currentWeek)) {
+    if (weekId >= currentWeek) {
       console.error(`Week ID ${weekId} - cant process current or future week`);
       continue;
     }
@@ -36,7 +36,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
 
     const parsedSnapshot: ParsedSnapshot = await getWeeklySnapshot(weekId);
     const snapshot: Snapshot = parsedSnapshot.map((entry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const { tree, root } = createMerkleTree(snapshot);
@@ -45,3 +45,4 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
     await processTransaction(weekId, root);
   }
 }
+processWeeklyClaims();

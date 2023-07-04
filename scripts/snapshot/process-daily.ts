@@ -25,7 +25,7 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
 
     const parsedSnapshot: ParsedSnapshot = await getDailySnapshot(dayId);
     const snapshot: Snapshot = parsedSnapshot.map((entry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
 

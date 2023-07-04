@@ -33,7 +33,7 @@ describe("processDailySnapshotInDb", () => {
     const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const currentDay = 1;
@@ -43,7 +43,7 @@ describe("processDailySnapshotInDb", () => {
     const entries = await prisma.ajnaRewardsDailyClaim.findMany();
     expect(entries).toHaveLength(snapshot.length);
     snapshot.forEach((entry, index) => {
-      expect(entries[index].user_address).toEqual(entry.address);
+      expect(entries[index].user_address).toEqual(entry.address.toLowerCase());
       expect(entries[index].amount).toEqual(entry.amount.toString());
     });
   });
@@ -57,7 +57,7 @@ describe("processDailySnapshotInDb", () => {
 
     for (const [index, snapshotData] of snapshots.entries()) {
       const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-        address: entry.address,
+        address: entry.address.toLowerCase(),
         amount: BigNumber.from(entry.amount),
       }));
       const currentWeek = weekIds[index];
@@ -76,7 +76,7 @@ describe("processDailySnapshotInDb", () => {
 
     for (const [index, snapshotData] of snapshots.entries()) {
       const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-        address: entry.address,
+        address: entry.address.toLowerCase(),
         amount: BigNumber.from(entry.amount),
       }));
       const currentDay = dayIds[index];
@@ -90,7 +90,7 @@ describe("processDailySnapshotInDb", () => {
       const snapshotPath = path.join(__dirname, "test-data", "daily", `daily-snapshot-${day}.json`);
       const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
       const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-        address: entry.address,
+        address: entry.address.toLowerCase(),
         amount: BigNumber.from(entry.amount),
       }));
       await processDailySnapshotInDb(snapshot, day);
@@ -107,7 +107,7 @@ describe("processDailySnapshotInDb", () => {
     const snapshotPath = path.join(__dirname, "test-data", "weekly", `weekly-snapshot-${week}.json`);
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const total2 = Object.values(snapshot).reduce((acc, cur) => {
@@ -126,7 +126,7 @@ describe("processDailySnapshotInDb", () => {
       const snapshotPath = path.join(__dirname, "test-data", "daily", `daily-snapshot-${day}.json`);
       const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
       const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-        address: entry.address,
+        address: entry.address.toLowerCase(),
         amount: BigNumber.from(entry.amount),
       }));
       await processDailySnapshotInDb(snapshot, day);
@@ -143,14 +143,12 @@ describe("processDailySnapshotInDb", () => {
     const snapshotPath = path.join(__dirname, "test-data", "weekly", `weekly-snapshot-${week}.json`);
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const total2 = Object.values(snapshot).reduce((acc, cur) => {
       return acc + parseInt(cur.amount.toString());
     }, 0);
-    console.log(total);
-    console.log(total2);
     const { root, tree } = createMerkleTree(snapshot);
     await processWeeklySnapshotInDb(snapshot, week, root, tree);
     expect(total).toEqual(total2);
@@ -180,7 +178,7 @@ describe("processWeeklySnapshotInDb", () => {
     const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const currentWeek = 1;
@@ -196,7 +194,7 @@ describe("processWeeklySnapshotInDb", () => {
     const entries = await prisma.ajnaRewardsWeeklyClaim.findMany();
     expect(entries).toHaveLength(snapshot.length);
     snapshot.forEach((entry, index) => {
-      expect(entries[index].user_address).toEqual(entry.address);
+      expect(entries[index].user_address).toEqual(entry.address.toLowerCase());
       expect(entries[index].amount).toEqual(entry.amount.toString());
       expect(entries[index].week_number).toEqual(1);
       expect(entries[index].proof).toBeDefined();
@@ -207,7 +205,7 @@ describe("processWeeklySnapshotInDb", () => {
     const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
-      address: entry.address,
+      address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const currentWeek = 1;
