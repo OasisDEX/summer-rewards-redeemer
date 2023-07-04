@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+/**
+ * @title AjnaRedeemer
+ * @notice A contract that allows users to redeem their Ajna tokens for rewards. Pulls Ajan tokens from the Ajna Dripper contract.
+ * 
+ * ROLES:
+ * - `OPERATOR_ROLE`: Can add weekly reward snapshot merkle tree roots.
+ * - `EMERGENCY_ROLE`: Can withdraw all the Ajna tokens to AjnaDripper contract in case of emergency.
+ */
 interface IAjnaRedeemer {
     function deploymentWeek() external returns (uint256);
 
@@ -47,7 +55,7 @@ interface IAjnaRedeemer {
      * @param week The week number for which to retrieve the Merkle root.
      * @return The Merkle root associated with the specified week.
      *
-     * @notice This function throws an exception if the requested week does not have a Merkle root set.
+     * @notice returns bytes32(0) if the provided week does not have a root set.
      */
     function getRoot(uint256 week) external view returns (bytes32);
 

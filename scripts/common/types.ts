@@ -47,6 +47,7 @@ export interface Config {
   multiplier: number;
   dryRun: boolean;
   network: Network;
+  weeksCount: number;
   merkleTreeOptions: Options;
   addresses: { [key: string]: string };
   rewardDistributions: Distribution[];

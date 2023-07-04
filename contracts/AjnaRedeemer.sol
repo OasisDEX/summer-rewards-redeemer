@@ -5,26 +5,33 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
+/* @inheritdoc IAjnaRedeemer */
 contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
+    using BitMaps for BitMaps.BitMap;
+
     mapping(uint256 => bytes32) public weeklyRoots;
-    mapping(address => uint256) private hasClaimed;
+    mapping(address => BitMaps.BitMap) private hasClaimed;
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
     bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
     uint256 public immutable deploymentWeek;
-    address public immutable drip;
+    address public immutable dripper;
     IERC20 public immutable ajnaToken;
 
     event Claimed(address indexed user, uint256 indexed week, uint256 amount);
 
-    constructor(IERC20 _ajnaToken, address _operator, address _drip) {
+    constructor(IERC20 _ajnaToken, address _operator, address _dripper) {
+        require(address(_ajnaToken) != address(0), "drip/invalid-ajna-token");
+        require(_operator != address(0), "drip/invalid-operator");
+        require(_dripper != address(0), "drip/invalid-dripper");
         deploymentWeek = block.timestamp / 1 weeks;
         ajnaToken = _ajnaToken;
-        drip = _drip;
+        dripper = _dripper;
         _setupRole(OPERATOR_ROLE, _operator);
         _setupRole(EMERGENCY_ROLE, _operator);
-        _setupRole(EMERGENCY_ROLE, msg.sender);
+        _setupRole(EMERGENCY_ROLE, _msgSender());
     }
 
     /* @inheritdoc IAjnaRedeemer */
@@ -34,47 +41,40 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
 
     /* @inheritdoc IAjnaRedeemer */
     function addRoot(uint256 week, bytes32 root) external onlyRole(OPERATOR_ROLE) {
-        require((week >= deploymentWeek && week <= getCurrentWeek()), "redeemer/invalid-week");
         require(weeklyRoots[week] == bytes32(0), "redeemer/root-already-added");
-        require(IAjnaDripper(drip).drip(week), "redeemer/transfer-from-failed");
+        require(IAjnaDripper(dripper).drip(week), "redeemer/transfer-from-failed");
         weeklyRoots[week] = root;
     }
 
     /* @inheritdoc IAjnaRedeemer */
-    function getRoot(uint256 week) public view returns (bytes32) {
+    function getRoot(uint256 week) external view returns (bytes32) {
         bytes32 root = weeklyRoots[week];
-        require(root != bytes32(0), "redeemer/no-root");
         return root;
     }
 
     /* @inheritdoc IAjnaRedeemer */
     function claimMultiple(
-        uint256[] calldata _weeks,
+        uint256[] calldata weekIds,
         uint256[] calldata amounts,
         bytes32[][] calldata proofs
     ) external {
-        require(_weeks.length > 0, "redeemer/cannot-claim-zero");
+        require(weekIds.length > 0, "redeemer/cannot-claim-zero");
         require(
-            _weeks.length == amounts.length && amounts.length == proofs.length,
+            weekIds.length == amounts.length && amounts.length == proofs.length,
             "redeemer/invalid-params"
         );
 
         uint256 total;
-        uint256 alreadyClaimed = hasClaimed[msg.sender];
-        uint256 accumulatedClaimed = 0;
-        for (uint256 i = 0; i < _weeks.length; i += 1) {
-            require(canClaim(proofs[i], _weeks[i], amounts[i]), "redeemer/cannot-claim");
-
-            uint256 thisWeekClaimed = 1 << (_weeks[i] - deploymentWeek);
-            require((accumulatedClaimed & thisWeekClaimed) == 0);
-
-            accumulatedClaimed = accumulatedClaimed | thisWeekClaimed;
+        BitMaps.BitMap storage alreadyClaimed = hasClaimed[_msgSender()];
+        for (uint256 i = 0; i < weekIds.length; i += 1) {
+            uint256 adjustedWeekId = weekIds[i] - deploymentWeek;
+            require(canClaim(proofs[i], weekIds[i], amounts[i]), "redeemer/cannot-claim");
+            require(!alreadyClaimed.get(adjustedWeekId), "redeemer/already-claimed");
+            alreadyClaimed.set(adjustedWeekId);
             total += amounts[i];
-            emit Claimed(msg.sender, _weeks[i], amounts[i]);
+            emit Claimed(_msgSender(), weekIds[i], amounts[i]);
         }
-        require((accumulatedClaimed & alreadyClaimed) == 0, "redeemer/already-claimed");
-        hasClaimed[msg.sender] = alreadyClaimed | accumulatedClaimed;
-        require(ajnaToken.transfer(msg.sender, total), "redeemer/transfer-failed");
+        require(ajnaToken.transfer(_msgSender(), total), "redeemer/transfer-failed");
     }
 
     /* @inheritdoc IAjnaRedeemer */
@@ -83,14 +83,14 @@ contract AjnaRedeemer is AccessControl, IAjnaRedeemer {
         uint256 week,
         uint256 amount
     ) public view returns (bool) {
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender, amount));
+        bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), amount));
         return MerkleProof.verify(proof, weeklyRoots[week], leaf);
     }
 
     /* @inheritdoc IAjnaRedeemer */
     function emergencyWithdraw() external onlyRole(EMERGENCY_ROLE) {
         require(
-            ajnaToken.transfer(drip, ajnaToken.balanceOf(address(this))),
+            ajnaToken.transfer(dripper, ajnaToken.balanceOf(address(this))),
             "redeemer/transfer-failed"
         );
     }

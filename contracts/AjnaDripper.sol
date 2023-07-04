@@ -6,6 +6,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import { IAjnaDripper } from "./interfaces/IAjnaDripper.sol";
 import { IAjnaRedeemer } from "./interfaces/IAjnaRedeemer.sol";
 
+/* @inheritdoc IAjnaDripper */
 contract AjnaDripper is IAjnaDripper, AccessControl {
     mapping(uint256 => bool) public weeklyDrip;
     uint256 constant MAX_WEEKLY_AMOUNT = 2_000_000 * 10 ** 18;
@@ -56,32 +57,47 @@ contract AjnaDripper is IAjnaDripper, AccessControl {
     }
 
     /* @inheritdoc IAjnaDripper */
-    function changeRedeemer(
+    function setup(
         IAjnaRedeemer _redeemer,
         uint256 _weeklyAmount
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(address(_redeemer) != address(0), "drip/invalid-redeemer");
-        validateWeeklyAmount(_weeklyAmount);
-        revokeRole(REDEEMER_ROLE, address(redeemer));
-        grantRole(REDEEMER_ROLE, address(_redeemer));
-        weeklyAmount = _weeklyAmount;
-        lastUpdate = block.timestamp;
-        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
-        redeemer = _redeemer;
+        require(address(redeemer) == address(0), "drip/redeemer-already-set");
+        changeRedeemerInternal(_redeemer);
+
+        require(weeklyAmount == 0, "drip/weekly-amount-already-set");
+        changeWeeklyAmountInternal(_weeklyAmount);
+    }
+
+    /* @inheritdoc IAjnaDripper */
+    function changeRedeemer(IAjnaRedeemer _redeemer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(address(redeemer) != address(0), "drip/redeemer-not-set");
+        changeRedeemerInternal(_redeemer);
     }
 
     /* @inheritdoc IAjnaDripper */
     function changeWeeklyAmount(uint256 _weeklyAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        validateWeeklyAmount(_weeklyAmount);
         require(lastUpdate + 4 weeks < block.timestamp, "drip/invalid-timestamp");
-        emit WeeklyAmountChanged(getCurrentWeek(), weeklyAmount, _weeklyAmount);
-        weeklyAmount = _weeklyAmount;
-        lastUpdate = block.timestamp;
+        changeWeeklyAmountInternal(_weeklyAmount);
     }
 
     /* @inheritdoc IAjnaDripper */
     function emergencyWithdraw(uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(ajnaToken.balanceOf(address(this)) >= amount, "drip/insufficient-balance");
         require(ajnaToken.transfer(beneficiary, amount), "drip/transfer-failed");
+    }
+
+    function changeRedeemerInternal(IAjnaRedeemer _redeemer) internal {
+        require(address(_redeemer) != address(0), "drip/invalid-redeemer");
+        revokeRole(REDEEMER_ROLE, address(redeemer));
+        grantRole(REDEEMER_ROLE, address(_redeemer));
+        redeemer = _redeemer;
+        emit RedeemerChanged(getCurrentWeek(), address(redeemer), address(_redeemer));
+    }
+
+    function changeWeeklyAmountInternal(uint256 _weeklyAmount) internal {
+        validateWeeklyAmount(_weeklyAmount);
+        weeklyAmount = _weeklyAmount;
+        lastUpdate = block.timestamp;
+        emit WeeklyAmountChanged(getCurrentWeek(), weeklyAmount, _weeklyAmount);
     }
 }

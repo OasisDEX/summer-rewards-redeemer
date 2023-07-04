@@ -9,7 +9,7 @@ import { getContract, impersonate } from "../scripts/common/helpers";
 import { processWeeklyClaims } from "../scripts/snapshot/process";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week
-const CURRENT_WEEK = 2789;
+const CURRENT_WEEK = 2791;
 async function deployFixture() {
   const [owner, firstUser, randomUser] = await ethers.getSigners();
   const ownerAddress = await owner.getAddress();
@@ -34,7 +34,7 @@ async function deployFixture() {
 
 describe("AjnaRedeemer e2e", () => {
   before(async () => {
-    await processWeeklyClaims([CURRENT_WEEK, CURRENT_WEEK + 1]);
+    await processWeeklyClaims([CURRENT_WEEK]);
   });
   after(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
@@ -51,7 +51,7 @@ describe("AjnaRedeemer e2e", () => {
       });
       for (const randomClaim of randomClaims) {
         console.log(chalk.dim(`Checking claim for ${randomClaim.user_address}`));
-        const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
+        const testUser = await impersonate(randomClaim.user_address);
         expect(
           await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount)
         ).to.equal(true);

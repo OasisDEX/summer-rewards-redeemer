@@ -6,8 +6,8 @@ import { Addresses, Config, Network, RewardDistributions } from "./types";
 export const addresses: Addresses = {
   goerli: {
     ajnaToken: "0xaadebCF61AA7Da0573b524DE57c67aDa797D46c5",
-    ajnaRedeemer: "0x107F1AA82558ac18671733dc32d15D999fc6b70c",
-    ajnaDripper: "0x6e4c6e76b3C1D834c0e3c4c2bAec8d58B8421A99",
+    ajnaRedeemer: "0x6f867970f24C95b0B47659aB617Fbc7cdf6fc935",
+    ajnaDripper: "0x5646Af7Dd65B5B582E8B652Be6c0E9E7283dab7b",
     admin: "0x0B5a3C04D1199283938fbe887A2C82C808aa89Fb",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
@@ -27,6 +27,7 @@ export const addresses: Addresses = {
  * @property {number} rewardStartWeek - The week number when rewards start.
  * @property {number} multiplier - The multiplier used to calculate rewards rounding.
  * @property {boolean} dryRun - Whether to run the script in dry run mode.
+ * @property {number} weeksCount - The number of weeks to do gas usage check for reddemer in `ajna-redeemer.test.ts`
  * @property {Network} network - The network to use.
  * @property {MerkleTreeOptions} merkleTreeOptions - The options for the Merkle tree.
  * @property {Object.<string, string>} addresses - The addresses for the contracts on the current network.
@@ -38,6 +39,7 @@ export const config: Config = {
   rewardStartWeek: 2782,
   multiplier: 10000,
   dryRun: true,
+  weeksCount: 50,
   network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
   merkleTreeOptions: {
     sortLeaves: false,

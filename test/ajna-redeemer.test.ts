@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 
+import { config } from "../scripts/common/config";
 import { WEEK } from "../scripts/common/constants";
 import { createMerkleTree, deployContract } from "../scripts/common/helpers";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
@@ -33,7 +34,7 @@ async function deployBaseFixture() {
     operatorAddress,
     ajnaDripper.address,
   ]);
-  await ajnaDripper.connect(admin).changeRedeemer(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
+  await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
   await ajnaToken.mint(ajnaDripper.address, totalWeekAmount.mul(100));
 
   return {
@@ -92,7 +93,7 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek - 1, root)).to.be.revertedWith(
-        "redeemer/invalid-week"
+        "drip/invalid-week"
       );
     });
     it("should not add root (by admin), revert on second try (same week number)", async () => {
@@ -108,7 +109,7 @@ describe("AjnaRedeemer", () => {
 
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek, root)).to.be.not.reverted;
       await expect(ajnaRedeemer.connect(operator).addRoot(currentWeek + 1, root)).to.be.revertedWith(
-        "redeemer/invalid-week"
+        "drip/invalid-week"
       );
       expect(await ajnaRedeemer.getRoot(currentWeek)).to.equal(root);
     });
@@ -134,8 +135,8 @@ describe("AjnaRedeemer", () => {
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
       await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(ajnaRedeemer.getRoot(currentWeek + 1)).to.be.revertedWith("redeemer/no-root");
+      const res = await ajnaRedeemer.getRoot(currentWeek + 1);
+      expect(res).to.be.equal(ethers.utils.formatBytes32String(""));
     });
   });
   describe("canClaim", () => {
@@ -249,7 +250,7 @@ describe("AjnaRedeemer", () => {
       ).to.be.reverted;
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
     });
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balnce to be 0", async () => {
+    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balance to be 0", async () => {
       const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
       const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
@@ -292,16 +293,42 @@ describe("AjnaRedeemer", () => {
       }
       expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.eql(BigNumber.from(0));
     });
-    it("should claim WEEKS_COUNT past weeks (gas check)", async () => {
+    it(`should NOT claim ${config.weeksCount} past weeks (gas check)`, async () => {
       const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const WEEKS_COUNT = 50;
 
       let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
       const weeks = [];
       const amounts = [];
       const proofs = [];
 
-      for (let i = 0; i < WEEKS_COUNT; i++) {
+      for (let i = 0; i < config.weeksCount; i++) {
+        await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+        await time.increase(WEEK);
+        weeks.push(currentWeek);
+        currentWeek = Number(currentWeek) + 1;
+        amounts.push(dataForFirstUser[1]);
+        proofs.push(proof);
+      }
+      await expect(ajnaRedeemer.connect(firstUser).claimMultiple([weeks[0]], [amounts[0]], [proofs[0]])).to.not.be
+        .reverted;
+      await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.be.revertedWith(
+        "redeemer/already-claimed"
+      );
+
+      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
+        BigNumber.from(dataForFirstUser[1])
+      );
+    });
+
+    it(`should claim ${config.weeksCount} past weeks (gas check)`, async () => {
+      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
+
+      let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const weeks = [];
+      const amounts = [];
+      const proofs = [];
+
+      for (let i = 0; i < config.weeksCount; i++) {
         await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
         await time.increase(WEEK);
         weeks.push(currentWeek);
@@ -313,7 +340,7 @@ describe("AjnaRedeemer", () => {
       await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.not.be.reverted;
 
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
-        BigNumber.from(dataForFirstUser[1]).mul(WEEKS_COUNT)
+        BigNumber.from(dataForFirstUser[1]).mul(config.weeksCount)
       );
     });
   });
