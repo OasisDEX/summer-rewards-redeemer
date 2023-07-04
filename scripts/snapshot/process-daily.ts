@@ -17,7 +17,7 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
   }
 
   for (const dayId of dayIds) {
-    if (!(dayId < currentDay)) {
+    if (dayId >= currentDay) {
       console.error(`Day ID ${dayId} - cant process current or future day`);
       continue;
     }
