@@ -52,6 +52,7 @@ export interface Config {
   addresses: { [key: string]: string };
   rewardDistributions: Distribution[];
   chainId: number;
+  subgraphUrl: string;
 }
 
 export type EthersError = {

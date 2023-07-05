@@ -2,7 +2,7 @@ sources:
   - name: ajna
     handler:
       graphql:
-        endpoint: ${AJNA_GRAPHQL_ENDPOINT}
+        endpoint: "{context.url:https://api.thegraph.com/subgraphs/name/halaprix/gajna2}"
 
 documents:
   - ./queries/weekly.graphql

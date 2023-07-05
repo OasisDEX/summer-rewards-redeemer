@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 /**
  * @title AjnaRedeemer
  * @notice A contract that allows users to redeem their Ajna tokens for rewards. Pulls Ajan tokens from the Ajna Dripper contract.
- * 
+ *
  * ROLES:
  * - `OPERATOR_ROLE`: Can add weekly reward snapshot merkle tree roots.
  * - `EMERGENCY_ROLE`: Can withdraw all the Ajna tokens to AjnaDripper contract in case of emergency.

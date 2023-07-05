@@ -1,12 +1,7 @@
+import chalk from "chalk";
 import { BigNumber } from "ethers";
 
-import {
-  DailyRewardsDocument,
-  DailyRewardsQuery,
-  execute,
-  WeeklyRewardsDocument,
-  WeeklyRewardsQuery,
-} from "../../.graphclient";
+import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
 import { config, getWeeklyReward } from "../common/config";
 import { ZERO } from "../common/constants";
 import {
@@ -30,8 +25,7 @@ import {
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the weekly rewards snapshot.
  */
 export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot> => {
-  const res = await execute(WeeklyRewardsDocument, { week: weekId });
-  const data = res.data as WeeklyRewardsQuery;
+  const data = await fetchWeeklyData(weekId);
 
   return calculateWeeklySnapshot(data, weekId);
 };
@@ -44,11 +38,11 @@ export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot>
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the daily rewards snapshot.
  */
 export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> => {
-  const res = await execute(DailyRewardsDocument, { day: dayId });
-  const data = res.data as DailyRewardsQuery;
+  const data = await fetchDailyData(dayId);
 
   return calculateDailySnapshot(data, dayId);
 };
+
 /**
  * Calculates weekly rewards snapshot for a given week and returns it in a ParsedSnapshot object.
  *
@@ -92,7 +86,6 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
     address: userAddress,
     amount: weeklyUserRewards[userAddress],
   }));
-
   validateTotalAmount(weeklyRewardsSnapshot, totalWeeklyDistribution);
   return weeklyRewardsSnapshot.map((entry) => ({
     address: entry.address.toLowerCase(),
@@ -190,7 +183,7 @@ function calculateUsersDailyRewards(
     const poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].mul(ratio * 100).div(100);
     const poolDailyRewards = poolWeeklyRewards.div(7);
     const userAddress = reward.user!.id;
-    const userShare = BigNumber.from((reward.reward * config.multiplier).toFixed(0));
+    const userShare = BigNumber.from(Math.floor(reward.reward * config.multiplier));
     const userPoolDailyRewards = poolDailyRewards.mul(userShare).div(config.multiplier);
     if (!dailyUserRewards[userAddress]) {
       dailyUserRewards[userAddress] = userPoolDailyRewards;
@@ -210,6 +203,34 @@ function calculateUsersDailyRewards(
 function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistribution: BigNumber) {
   const weeklyRewardsSnapshotTotal = weeklyRewardsSnapshot.reduce((a, b) => a.add(b.amount), ZERO);
   if (weeklyRewardsSnapshotTotal.gt(totalWeeklyDistribution)) {
+    console.log("weeklyRewardsSnapshotTotal", weeklyRewardsSnapshotTotal.toString());
+    console.log("totalWeeklyDistribution", totalWeeklyDistribution.toString());
     throw new Error("Weekly rewards snapshot total is greater than total weekly rewards");
   }
+}
+
+export async function fetchDailyData(dayId: number) {
+  const sdk = getBuiltGraphSDK({
+    url: config.subgraphUrl,
+  });
+  const res = await sdk.DailyRewards(
+    { day: dayId.toString() },
+    {
+      url: config.subgraphUrl,
+    }
+  );
+  return res;
+}
+
+export async function fetchWeeklyData(weekId: number) {
+  const sdk = getBuiltGraphSDK({
+    url: config.subgraphUrl,
+  });
+  const res = await sdk.WeeklyRewards(
+    { week: weekId.toString() },
+    {
+      url: config.subgraphUrl,
+    }
+  );
+  return res;
 }

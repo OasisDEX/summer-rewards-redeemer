@@ -37,7 +37,7 @@ export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
   rewardStartWeek: 2782,
-  multiplier: 10000,
+  multiplier: 1000,
   dryRun: true,
   weeksCount: 50,
   network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
@@ -53,6 +53,11 @@ export const config: Config = {
   },
   get chainId() {
     return this.network === Network.Mainnet ? 1 : 5;
+  },
+  get subgraphUrl() {
+    return this.network === Network.Mainnet
+      ? process.env.AJNA_GRAPHQL_ENDPOINT_MAINNET || ""
+      : process.env.AJNA_GRAPHQL_ENDPOINT_GOERLI || "";
   },
 };
 
