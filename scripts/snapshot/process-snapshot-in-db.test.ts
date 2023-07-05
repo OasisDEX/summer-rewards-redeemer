@@ -6,6 +6,7 @@ import MerkleTree from "merkletreejs";
 import path from "path";
 
 import { prisma } from "../../prisma/client";
+import { config } from "../common/config";
 import { createMerkleTree } from "../common/helpers";
 import { ParsedSnapshotEntry, Snapshot } from "../common/types";
 import { processDailySnapshotInDb, processWeeklySnapshotInDb } from "../snapshot/process-snapshot-in-db";
@@ -98,6 +99,7 @@ describe("processDailySnapshotInDb", () => {
     const weekly = await prisma.ajnaRewardsWeeklyClaim.findMany({
       where: {
         week_number: week,
+        chain_id: config.chainId,
       },
     });
     const total = weekly.reduce((acc, cur) => {
@@ -134,6 +136,7 @@ describe("processDailySnapshotInDb", () => {
     const weekly = await prisma.ajnaRewardsWeeklyClaim.findMany({
       where: {
         week_number: week,
+        chain_id: config.chainId,
       },
     });
     const total = weekly.reduce((acc, cur) => {
@@ -187,7 +190,9 @@ describe("processWeeklySnapshotInDb", () => {
 
     await processWeeklySnapshotInDb(snapshot, currentWeek, root, tree);
 
-    const merkleTree = await prisma.ajnaRewardsMerkleTree.findUnique({ where: { week_number: 1 } });
+    const merkleTree = await prisma.ajnaRewardsMerkleTree.findUnique({
+      where: { week_number_chain_id_unique_id: { week_number: 1, chain_id: config.chainId } },
+    });
     expect(merkleTree).toBeDefined();
     expect(merkleTree?.tree_root).toEqual("0x123");
 

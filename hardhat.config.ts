@@ -8,6 +8,8 @@ import "hardhat-tracer";
 
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
+import { config as appConfig } from "@scripts/common/config";
+import { Network } from "@scripts/common/types";
 
 dotenv.config();
 
@@ -48,7 +50,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 2137,
       forking: {
-        url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
+        url:
+          (appConfig.network === Network.Goerli
+            ? process.env.ALCHEMY_GOERLI_RPC_URL
+            : process.env.ALCHEMY_MAINNET_RPC_URL) || "",
         blockNumber: 9265714,
       },
       mining: {

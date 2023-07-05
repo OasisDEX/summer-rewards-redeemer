@@ -51,6 +51,9 @@ export const config: Config = {
   get rewardDistributions() {
     return rewardDistributions[this.network];
   },
+  get chainId() {
+    return this.network === Network.Mainnet ? 1 : 5;
+  },
 };
 
 export const rewardDistributions: RewardDistributions = {
