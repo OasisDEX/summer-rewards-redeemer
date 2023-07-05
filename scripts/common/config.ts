@@ -37,7 +37,7 @@ export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
   rewardStartWeek: 2782,
-  multiplier: 10000,
+  multiplier: 1000,
   dryRun: true,
   weeksCount: 50,
   network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
