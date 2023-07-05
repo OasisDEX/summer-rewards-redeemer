@@ -8,8 +8,9 @@ import "hardhat-tracer";
 
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
-import { config as appConfig } from "@scripts/common/config";
-import { Network } from "@scripts/common/types";
+
+import { config as appConfig } from "./scripts/common/config";
+import { Network } from "./scripts/common/types";
 
 dotenv.config();
 

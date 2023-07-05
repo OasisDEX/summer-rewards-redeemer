@@ -1,12 +1,6 @@
 import { BigNumber } from "ethers";
 
-import {
-  DailyRewardsDocument,
-  DailyRewardsQuery,
-  execute,
-  WeeklyRewardsDocument,
-  WeeklyRewardsQuery,
-} from "../../.graphclient";
+import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
 import { config, getWeeklyReward } from "../common/config";
 import { ZERO } from "../common/constants";
 import {
@@ -30,10 +24,17 @@ import {
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the weekly rewards snapshot.
  */
 export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot> => {
-  const res = await execute(WeeklyRewardsDocument, { week: weekId });
-  const data = res.data as WeeklyRewardsQuery;
+  const sdk = getBuiltGraphSDK({
+    url: config.subgraphUrl,
+  });
+  const res = await sdk.WeeklyRewards(
+    { week: weekId.toString() },
+    {
+      url: config.subgraphUrl,
+    }
+  );
 
-  return calculateWeeklySnapshot(data, weekId);
+  return calculateWeeklySnapshot(res, weekId);
 };
 /**
  * Retrieves and returns a parsed daily snapshot of user rewards for a specified day.
@@ -44,10 +45,17 @@ export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot>
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the daily rewards snapshot.
  */
 export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> => {
-  const res = await execute(DailyRewardsDocument, { day: dayId });
-  const data = res.data as DailyRewardsQuery;
+  const sdk = getBuiltGraphSDK({
+    url: config.subgraphUrl,
+  });
+  const res = await sdk.DailyRewards(
+    { day: dayId.toString() },
+    {
+      url: config.subgraphUrl,
+    }
+  );
 
-  return calculateDailySnapshot(data, dayId);
+  return calculateDailySnapshot(res, dayId);
 };
 /**
  * Calculates weekly rewards snapshot for a given week and returns it in a ParsedSnapshot object.

@@ -54,6 +54,11 @@ export const config: Config = {
   get chainId() {
     return this.network === Network.Mainnet ? 1 : 5;
   },
+  get subgraphUrl() {
+    return this.network === Network.Mainnet
+      ? process.env.AJNA_GRAPHQL_ENDPOINT_MAINNET || ""
+      : process.env.AJNA_GRAPHQL_ENDPOINT_GOERLI || "";
+  },
 };
 
 export const rewardDistributions: RewardDistributions = {
