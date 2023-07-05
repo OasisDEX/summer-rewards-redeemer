@@ -32,7 +32,7 @@ async function deployFixture() {
   };
 }
 
-describe.only("AjnaRedeemer e2e", () => {
+describe("AjnaRedeemer e2e", () => {
   before(async () => {
     await processWeeklyClaims([CURRENT_WEEK]);
   });
