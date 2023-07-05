@@ -21,7 +21,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
 
   for (const weekId of weekIds) {
     if (weekId >= currentWeek) {
-      console.error(`Week ID ${weekId} - cant process current or future week`);
+      console.error(`Week ID ${weekId} - cant process current or future week. Chain ID: ${config.chainId}`);
       continue;
     }
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
@@ -29,11 +29,11 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
     });
 
     if (existingWeek) {
-      console.log(`Week ${weekId} has already been processed.`);
+      console.log(`Week ${weekId} has already been processed. Chain ID: ${config.chainId}`);
       continue;
     }
 
-    console.log(`Processing weekly claims for week ${weekId}`);
+    console.log(`Processing weekly claims for week ${weekId}. Chain ID: ${config.chainId}`);
 
     const parsedSnapshot: ParsedSnapshot = await getWeeklySnapshot(weekId);
     const snapshot: Snapshot = parsedSnapshot.map((entry) => ({

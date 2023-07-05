@@ -15,14 +15,14 @@ export async function processWeeklySnapshotInDb(
 ) {
   await prisma.$transaction(async () => {
     try {
-      console.log(chalk.gray(`Adding week #${currentWeek} to the db`));
+      console.log(chalk.gray(`Adding week #${currentWeek} to the db. Chain ID: ${config.chainId}`));
       await prisma.ajnaRewardsMerkleTree.create({
         data: { tree_root: root, week_number: Number(currentWeek), chain_id: config.chainId },
       });
     } catch (error: unknown) {
       const prismaError = error as Prisma.PrismaClientKnownRequestError;
       if (prismaError?.code === "P2002") {
-        console.error(`Root already added for week ${currentWeek}`);
+        console.error(`Root already added for week ${currentWeek}. Chain ID: ${config.chainId}`);
       } else {
         throw error;
       }
@@ -53,7 +53,7 @@ export async function processWeeklySnapshotInDb(
       });
     });
 
-    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`));
+    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}`));
     try {
       await prisma.$transaction(snapshotEntries);
     } catch (error) {
@@ -134,13 +134,15 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
       week_number: currentWeek,
       chain_id: config.chainId,
     }));
-    console.log(chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database`));
+    console.log(
+      chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database. Chain ID: ${config.chainId}`)
+    );
 
     // Create daily claim entries in the database
     const res = await prisma.ajnaRewardsDailyClaim.createMany({
       data: dailyClaimEntries,
       skipDuplicates: true,
     });
-    console.log(chalk.gray(`Added ${res.count} daily claim entries to the database`));
+    console.log(chalk.gray(`Added ${res.count} daily claim entries to the database. Chain ID: ${config.chainId}`));
   });
 }

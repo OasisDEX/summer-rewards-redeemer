@@ -49,6 +49,6 @@ async function updateAjnaRewardsMerkleTree(receipt: ContractReceipt, weekId: num
       data: { tx_processed: true },
     });
   } else {
-    console.log(`Transaction failed for week ${weekId}.`);
+    console.log(`Transaction failed for week ${weekId}. Chain ID: ${config.chainId}`);
   }
 }

@@ -68,7 +68,7 @@ async function main() {
     }
 
     try {
-      console.log(chalk.gray(`Adding week #${weekIds[i]} to the db`));
+      console.log(chalk.gray(`Adding week #${weekIds[i]} to the db. Chain id: {${config.chainId}}}`));
       await prisma.ajnaRewardsMerkleTree.create({
         data: { tree_root: root, week_number: Number(weekIds[i]), chain_id: config.chainId },
       });
