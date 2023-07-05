@@ -45,7 +45,7 @@ async function prepareHardhatEnv(ajnaDripper: AjnaDripper, ajnaToken: AjnaToken,
 async function updateAjnaRewardsMerkleTree(receipt: ContractReceipt, weekId: number) {
   if (receipt.status === TX_STATUS.SUCCESSFUL) {
     await prisma.ajnaRewardsMerkleTree.update({
-      where: { week_number: Number(weekId) },
+      where: { week_number_chain_id_unique_id: { week_number: Number(weekId), chain_id: config.chainId } },
       data: { tx_processed: true },
     });
   } else {

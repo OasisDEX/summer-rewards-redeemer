@@ -70,7 +70,7 @@ async function main() {
     try {
       console.log(chalk.gray(`Adding week #${weekIds[i]} to the db`));
       await prisma.ajnaRewardsMerkleTree.create({
-        data: { tree_root: root, week_number: Number(weekIds[i]) },
+        data: { tree_root: root, week_number: Number(weekIds[i]), chain_id: config.chainId },
       });
     } catch (error: unknown) {
       const prismaError = error as Prisma.PrismaClientKnownRequestError;
@@ -89,6 +89,7 @@ async function main() {
         user_address: entry.address,
         amount: entry.amount.toString(),
         week_number: weekIds[i],
+        chain_id: config.chainId,
         proof,
       };
     });

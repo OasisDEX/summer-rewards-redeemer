@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
 
 import { prisma } from "../../prisma/client";
+import { config } from "../common/config";
 import { createMerkleTree } from "../common/helpers";
 import { getEpochWeekId } from "../common/time-helpers";
 import { ParsedSnapshot, Snapshot } from "../common/types";
@@ -24,7 +25,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
       continue;
     }
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
-      where: { week_number: weekId, tx_processed: true },
+      where: { week_number: weekId, tx_processed: true, chain_id: config.chainId },
     });
 
     if (existingWeek) {
@@ -45,4 +46,3 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
     await processTransaction(weekId, root);
   }
 }
-processWeeklyClaims();

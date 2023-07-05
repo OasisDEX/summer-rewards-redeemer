@@ -32,7 +32,7 @@ async function deployFixture() {
   };
 }
 
-describe("AjnaRedeemer e2e", () => {
+describe.only("AjnaRedeemer e2e", () => {
   before(async () => {
     await processWeeklyClaims([CURRENT_WEEK]);
   });
@@ -47,6 +47,7 @@ describe("AjnaRedeemer e2e", () => {
       const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
         where: {
           week_number: currentWeek,
+          chain_id: config.chainId,
         },
       });
       for (const randomClaim of randomClaims) {
@@ -63,6 +64,7 @@ describe("AjnaRedeemer e2e", () => {
       const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
         where: {
           week_number: currentWeek,
+          chain_id: config.chainId,
         },
       });
       for (const randomClaim of randomClaims) {

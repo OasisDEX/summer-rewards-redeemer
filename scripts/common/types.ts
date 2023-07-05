@@ -51,6 +51,7 @@ export interface Config {
   merkleTreeOptions: Options;
   addresses: { [key: string]: string };
   rewardDistributions: Distribution[];
+  chainId: number;
 }
 
 export type EthersError = {

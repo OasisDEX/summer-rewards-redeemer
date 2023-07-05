@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
 
 import { prisma } from "../../prisma/client";
+import { config } from "../common/config";
 import { Snapshot } from "../common/types";
 
 export async function processWeeklySnapshotInDb(
@@ -16,7 +17,7 @@ export async function processWeeklySnapshotInDb(
     try {
       console.log(chalk.gray(`Adding week #${currentWeek} to the db`));
       await prisma.ajnaRewardsMerkleTree.create({
-        data: { tree_root: root, week_number: Number(currentWeek) },
+        data: { tree_root: root, week_number: Number(currentWeek), chain_id: config.chainId },
       });
     } catch (error: unknown) {
       const prismaError = error as Prisma.PrismaClientKnownRequestError;
@@ -32,15 +33,17 @@ export async function processWeeklySnapshotInDb(
       // upser is used in case there were no daily entires for some reason and we do only need to create a final weekly entry
       return prisma.ajnaRewardsWeeklyClaim.upsert({
         where: {
-          week_number_userAddress_unique_id: {
+          week_number_userAddress_chain_id_unique_id: {
             week_number: currentWeek,
             user_address: entry.address.toLowerCase(),
+            chain_id: config.chainId,
           },
         },
         create: {
           user_address: entry.address.toLowerCase(),
           amount: entry.amount.toString(),
           week_number: currentWeek,
+          chain_id: config.chainId,
           proof,
         },
         update: {
@@ -70,18 +73,20 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
         // Check if a weekly claim already exists for the current week and user address
         const existingWeeklyClaim = await prisma.ajnaRewardsWeeklyClaim.findUnique({
           where: {
-            week_number_userAddress_unique_id: {
+            week_number_userAddress_chain_id_unique_id: {
               week_number: currentWeek,
               user_address: entry.address.toLowerCase(),
+              chain_id: config.chainId,
             },
           },
         });
         // Check if a daily claim already exists for the current day and user address and was processed
         const existingDailyClaim = await prisma.ajnaRewardsDailyClaim.findUnique({
           where: {
-            day_number_userAddress_unique_id: {
+            day_number_userAddress_chain_id_unique_id: {
               day_number: currentDay,
               user_address: entry.address.toLowerCase(),
+              chain_id: config.chainId,
             },
           },
         });
@@ -91,9 +96,10 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
           tx.push(
             prisma.ajnaRewardsWeeklyClaim.update({
               where: {
-                week_number_userAddress_unique_id: {
+                week_number_userAddress_chain_id_unique_id: {
                   week_number: currentWeek,
                   user_address: entry.address.toLowerCase(),
+                  chain_id: config.chainId,
                 },
               },
               data: {
@@ -110,6 +116,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
                 amount: entry.amount.toString(),
                 week_number: currentWeek,
                 proof: [],
+                chain_id: config.chainId,
               },
             })
           );
@@ -125,6 +132,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
       amount: entry.amount.toString(),
       day_number: currentDay,
       week_number: currentWeek,
+      chain_id: config.chainId,
     }));
     console.log(chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database`));
 
