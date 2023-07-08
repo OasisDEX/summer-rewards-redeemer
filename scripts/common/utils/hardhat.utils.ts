@@ -2,10 +2,8 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, constants, Contract } from "ethers";
 import { ethers, network } from "hardhat";
-import MerkleTree from "merkletreejs";
 
-import { config } from "./config";
-import { Snapshot } from "./types";
+import { config } from "../config/config";
 
 /**
  * Deploys a contract with the specified name and arguments.
@@ -53,23 +51,6 @@ export const getOrDeployContract = async <T extends Contract>(contractName: stri
     contract = await getContract(contractName, config.addresses[getCorrectName(contractName)]);
   }
   return contract;
-};
-
-/**
- * Creates a Merkle tree from a snapshot of Ethereum addresses and amounts.
- *
- * @param {Snapshot} snapshot - The snapshot of accounts to use in creating the tree.
- *
- * @returns {{ leaves: string[]; tree: MerkleTree; root: string }} - An object containing the leaves of the tree,
- * the tree itself, and its root hash.
- */
-export const createMerkleTree = (snapshot: Snapshot): { leaves: string[]; tree: MerkleTree; root: string } => {
-  const leaves = snapshot.map((user) =>
-    ethers.utils.solidityKeccak256(["address", "uint256"], [user.address, user.amount])
-  );
-  const tree = new MerkleTree(leaves, ethers.utils.keccak256, config.merkleTreeOptions);
-  const root = tree.getHexRoot();
-  return { leaves, tree, root };
 };
 
 /**

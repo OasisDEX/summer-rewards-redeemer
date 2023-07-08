@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import fs from "fs";
-
+import { beforeAll, describe, expect, jest, test } from "@jest/globals";
 import { calculateWeeklySnapshot } from "./get-snapshot";
 
-describe("First", () => {
+describe.only("First", () => {
   const dataDir = "./scripts/snapshot/test-data/weekly";
   let files: any[] = [];
   let data: any[] = [];

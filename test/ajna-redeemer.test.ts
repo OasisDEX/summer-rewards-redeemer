@@ -3,10 +3,11 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { config } from "../scripts/common/config";
-import { WEEK } from "../scripts/common/constants";
-import { createMerkleTree, deployContract } from "../scripts/common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
+import { config } from "../scripts/common/config/config";
+import { WEEK } from "../scripts/common/constants/constants";
+import { deployContract } from "../scripts/common";
+import { createMerkleTree } from "../scripts/common";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/snapshot/test-data/data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);

@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 
-import { Addresses, Config, Network, RewardDistributions } from "./types";
+import { Addresses, Config, Network, RewardDistributions } from "../types/types";
 
 export const addresses: Addresses = {
   goerli: {
@@ -58,6 +58,11 @@ export const config: Config = {
     return this.network === Network.Mainnet
       ? process.env.AJNA_GRAPHQL_ENDPOINT_MAINNET || ""
       : process.env.AJNA_GRAPHQL_ENDPOINT_GOERLI || "";
+  },
+  get rpcUrl() {
+    return this.network === Network.Mainnet
+      ? process.env.ALCHEMY_MAINNET_RPC_URL || ""
+      : process.env.ALCHEMY_GOERLI_RPC_URL || "";
   },
 };
 

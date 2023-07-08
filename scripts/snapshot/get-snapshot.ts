@@ -1,9 +1,8 @@
-import chalk from "chalk";
 import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
-import { config, getWeeklyReward } from "../common/config";
-import { ZERO } from "../common/constants";
+import { config, getWeeklyReward } from "../common/config/config";
+import { ZERO } from "../common/constants/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
@@ -14,7 +13,7 @@ import {
   UserRewardsAmount,
   WeekDay,
   WeeklyRewards,
-} from "../common/types";
+} from "../common/types/types";
 
 /**
  * Retrieves and returns a parsed weekly snapshot of user rewards for a specified week.

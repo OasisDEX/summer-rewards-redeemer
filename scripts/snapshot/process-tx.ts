@@ -3,10 +3,10 @@ import { network } from "hardhat";
 
 import { prisma } from "../../prisma/client";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
-import { config } from "../common/config";
-import { getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
-import { BASE_WEEKLY_AMOUNT } from "../common/test-data";
-import { TX_STATUS } from "../common/types";
+import { config } from "../common/config/config";
+import { getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/utils/hardhat.utils";
+import { BASE_WEEKLY_AMOUNT } from "./test-data/data";
+import { TX_STATUS } from "../common/types/types";
 
 export async function processTransaction(weekId: number, root: string) {
   const ajnaToken = await getContract<AjnaToken>("AjnaToken", config.addresses.ajnaToken);

@@ -1,14 +1,11 @@
 import { BigNumber } from "ethers";
 
 import { prisma } from "../../prisma/client";
-import { config } from "../common/config";
-import { createMerkleTree } from "../common/helpers";
-import { getEpochWeekId } from "../common/time-helpers";
-import { ParsedSnapshot, Snapshot } from "../common/types";
+import { getEpochWeekId, createMerkleTree, config } from "../common";
+import { ParsedSnapshot, Snapshot } from "../common";
 import { getWeeklySnapshot } from "./get-snapshot";
 import { processWeeklySnapshotInDb } from "./process-snapshot-in-db";
 import { processTransaction } from "./process-tx";
-
 /**
  * Processes weekly claims for a given array of week IDs.
  * If a week has already been processed, it skips the week and logs a message.

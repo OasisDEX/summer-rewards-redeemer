@@ -3,9 +3,9 @@ import { expect } from "chai";
 import chalk from "chalk";
 import { ethers } from "hardhat";
 
-import { prisma } from "../prisma/client";
-import { config } from "../scripts/common/config";
-import { getContract, impersonate } from "../scripts/common/helpers";
+import { prisma } from "./../prisma/client";
+import { config } from "../scripts/common/config/config";
+import { getContract, impersonate } from "../scripts/common/utils/hardhat.utils";
 import { processWeeklyClaims } from "../scripts/snapshot/process-weekly";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 // all rewards for a given week

@@ -3,9 +3,9 @@ import chalk from "chalk";
 import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
 
-import { prisma } from "../../prisma/client";
-import { config } from "../common/config";
-import { Snapshot } from "../common/types";
+import { config } from "../common/config/config";
+import { Snapshot } from "../common/types/types";
+import { prisma } from "./../../prisma/client";
 
 export async function processWeeklySnapshotInDb(
   snapshot: Snapshot,
@@ -68,6 +68,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
 
   await prisma.$transaction(async () => {
     const tx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];
+    console.log(chalk.gray(`Adding day #${currentDay} to the db`));
     await Promise.all(
       snapshot.map(async (entry) => {
         // Check if a weekly claim already exists for the current week and user address
@@ -90,7 +91,6 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
             },
           },
         });
-
         if (existingWeeklyClaim && !existingDailyClaim) {
           // If a weekly claim exists but a daily claim does not, update the weekly claim with the new amount = old amount + daily amount
           tx.push(

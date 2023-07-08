@@ -1,6 +1,5 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { zeroAddress } from "ethereumjs-util";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
@@ -12,9 +11,10 @@ import {
   THOUSAND,
   TWO_THOUSAND,
   WEEK,
-} from "../scripts/common/constants";
-import { createMerkleTree, deployContract, impersonate } from "../scripts/common/helpers";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/common/test-data";
+} from "../scripts/common/constants/constants";
+import { deployContract, impersonate } from "../scripts/common/utils/hardhat.utils";
+import { createMerkleTree } from "../scripts/common";
+import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "../scripts/snapshot/test-data/data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
@@ -281,7 +281,7 @@ describe("AjnaDripper", () => {
         .be.reverted;
       expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
 
-      await expect(ajnaDripper.connect(admin).changeRedeemer(zeroAddress())).to.be.revertedWith(
+      await expect(ajnaDripper.connect(admin).changeRedeemer(ethers.constants.AddressZero)).to.be.revertedWith(
         "drip/invalid-redeemer"
       );
     });

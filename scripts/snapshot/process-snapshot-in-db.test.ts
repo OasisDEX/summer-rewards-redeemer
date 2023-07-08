@@ -5,11 +5,10 @@ import fs from "fs";
 import MerkleTree from "merkletreejs";
 import path from "path";
 
-import { prisma } from "../../prisma/client";
-import { config } from "../common/config";
-import { createMerkleTree } from "../common/helpers";
-import { ParsedSnapshotEntry, Snapshot } from "../common/types";
+import { createMerkleTree, config } from "../common";
+import { ParsedSnapshotEntry, Snapshot } from "../common";
 import { processDailySnapshotInDb, processWeeklySnapshotInDb } from "../snapshot/process-snapshot-in-db";
+import { prisma } from "./../../prisma/client";
 
 describe("processDailySnapshotInDb", () => {
   beforeAll(async () => {

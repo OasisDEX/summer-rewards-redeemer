@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import { HUNDRED_THOUSAND, MILLION } from "./constants";
+import { HUNDRED_THOUSAND, MILLION } from "../../common/constants/constants";
 
 export const BASE_WEEKLY_AMOUNT = MILLION.add(HUNDRED_THOUSAND);
 

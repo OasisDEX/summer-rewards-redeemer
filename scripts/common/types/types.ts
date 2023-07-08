@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
-import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "../../.graphclient";
+import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "../../../.graphclient";
 
 export interface ParsedSnapshotEntry {
   address: string;
@@ -53,6 +53,7 @@ export interface Config {
   rewardDistributions: Distribution[];
   chainId: number;
   subgraphUrl: string;
+  rpcUrl: string;
 }
 
 export type EthersError = {

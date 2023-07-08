@@ -3,12 +3,13 @@ import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
 
-import { prisma } from "../../prisma/client";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
-import { config } from "../common/config";
-import { createMerkleTree, getOrDeployContract, impersonate, setTokenBalance } from "../common/helpers";
-import { BASE_WEEKLY_AMOUNT } from "../common/test-data";
-import { EthersError, Snapshot } from "../common/types";
+import { config } from "../common/config/config";
+import { getOrDeployContract, impersonate, setTokenBalance } from "../common/utils/hardhat.utils";
+import { createMerkleTree } from "../common";
+import { BASE_WEEKLY_AMOUNT } from "./test-data/data";
+import { EthersError, Snapshot } from "../common/types/types";
+import { prisma } from "./../../prisma/client";
 import { calculateWeeklySnapshot } from "./get-snapshot";
 
 const dataDir = "./scripts/snapshot/test-data";
