@@ -40,7 +40,7 @@ export const config: Config = {
   multiplier: 1000,
   dryRun: true,
   weeksCount: 50,
-  network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
+  network: (process.env.NETWORK_USED || Network.Goerli) as Network,
   merkleTreeOptions: {
     sortLeaves: false,
     sortPairs: true,
