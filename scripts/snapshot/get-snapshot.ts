@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
 import { config, getWeeklyReward } from "../common/config";
-import { ZERO } from "../common/constants";
+import { ZERO, ZERO_ADDRESS } from "../common/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
@@ -61,6 +61,9 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
 
   for (const pool of config.rewardDistributions) {
+    if (pool.address === ZERO_ADDRESS) {
+      throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
+    }
     totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
       .mul(totalWeeklyDistribution)
       .div(100);
@@ -110,6 +113,9 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
 
   for (const pool of config.rewardDistributions) {
+    if (pool.address === ZERO_ADDRESS) {
+      throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
+    }
     totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
       .mul(totalWeeklyDistribution)
       .div(100);
@@ -139,7 +145,7 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
 function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: DistributionAmount): DailyRewards {
   const dailyUsersRewards: UserRewardsAmount = {};
 
-  if (day.borrowDailyRewards) {
+  if (day.borrowDailyRewards && day.borrowDailyRewards.length > 0) {
     calculateUsersDailyRewards(
       day.borrowDailyRewards,
       totalWeeklyDistributionPerPool,
@@ -147,7 +153,7 @@ function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: Dis
       config.borrowRewardsRatio
     );
   }
-  if (day.earnDailyRewards) {
+  if (day.earnDailyRewards && day.earnDailyRewards.length > 0) {
     calculateUsersDailyRewards(
       day.earnDailyRewards,
       totalWeeklyDistributionPerPool,
