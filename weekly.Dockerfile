@@ -5,7 +5,7 @@ COPY . .
 RUN yarn cache clean
 RUN yarn install --verbose --inline-builds --loglevel TRACE
 RUN yarn build
-RUN yarn bundle:lambda:daily
+RUN yarn generate:lambda:weekly
 RUN bash postinstall.sh
     
 

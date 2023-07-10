@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
 
-import { getEpochDayId, ParsedSnapshot, Snapshot } from "../common";
+import { ParsedSnapshot, Snapshot } from "../common/types";
+import { getEpochDayId } from "../common/utils/time.utils";
 import { getDailySnapshot } from "./get-snapshot";
 import { processDailySnapshotInDb } from "./process-snapshot-in-db";
 

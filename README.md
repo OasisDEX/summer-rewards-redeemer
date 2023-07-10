@@ -63,13 +63,14 @@ The `config.ts` file contains the configuration for the project. It exports a `c
 The `addresses` and `rewardDistributions` properties are getters that return the addresses and reward distributions for the current network based on the `network` property.
 
 # Lambdas
+## Daily updates
 
 build the lambdas with `yarn generate:lambdas:daily`
 or
 ```bash
-docker build -t daily-lambda .
+docker build -t daily-lambda -f daily.Dockerfile .
 ```
-then
+then run the container with
 ```bash
 docker run -p 9000:8080 daily-lambda
 ```
@@ -84,6 +85,12 @@ AJNA_GRAPHQL_ENDPOINT_GOERLI=
 AJNA_GRAPHQL_ENDPOINT_MAINNET=
 NETWORK_USED=<network used to submit weekly root>
 ```
+
+usage
+```bash
+docker run -e DATABASE_URL="postgresql://user:pass@address:5432/db_name" AJNA_GRAPHQL_ENDPOINT_GOERLI xx ...
+```
+
 # Contracts
 ## Drip
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant

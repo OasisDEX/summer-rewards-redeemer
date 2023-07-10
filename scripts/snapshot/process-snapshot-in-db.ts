@@ -3,8 +3,8 @@ import chalk from "chalk";
 import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
 
-import { config } from "../common/config/config";
-import { Snapshot } from "../common/types/types";
+import { config } from "../common/config";
+import { Snapshot } from "../common/types";
 import { prisma } from "./../../prisma/client";
 
 export async function processWeeklySnapshotInDb(
@@ -65,66 +65,65 @@ export async function processWeeklySnapshotInDb(
 
 export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: number): Promise<void> {
   const currentWeek = Math.floor(currentDay / 7);
-
-  await prisma.$transaction(async () => {
-    const tx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];
-    console.log(chalk.gray(`Adding day #${currentDay} to the db`));
-    await Promise.all(
-      snapshot.map(async (entry) => {
-        // Check if a weekly claim already exists for the current week and user address
-        const existingWeeklyClaim = await prisma.ajnaRewardsWeeklyClaim.findUnique({
-          where: {
-            week_number_userAddress_chain_id_unique_id: {
-              week_number: currentWeek,
-              user_address: entry.address.toLowerCase(),
-              chain_id: config.chainId,
-            },
+  const weeklyClaimEntriesTx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];
+  console.log(chalk.gray(`Adding day #${currentDay} to the db`));
+  await Promise.all(
+    snapshot.map(async (entry) => {
+      // Check if a weekly claim already exists for the current week and user address
+      const existingWeeklyClaim = await prisma.ajnaRewardsWeeklyClaim.findUnique({
+        where: {
+          week_number_userAddress_chain_id_unique_id: {
+            week_number: currentWeek,
+            user_address: entry.address.toLowerCase(),
+            chain_id: config.chainId,
           },
-        });
-        // Check if a daily claim already exists for the current day and user address and was processed
-        const existingDailyClaim = await prisma.ajnaRewardsDailyClaim.findUnique({
-          where: {
-            day_number_userAddress_chain_id_unique_id: {
-              day_number: currentDay,
-              user_address: entry.address.toLowerCase(),
-              chain_id: config.chainId,
-            },
+        },
+      });
+      // Check if a daily claim already exists for the current day and user address and was processed
+      const existingDailyClaim = await prisma.ajnaRewardsDailyClaim.findUnique({
+        where: {
+          day_number_userAddress_chain_id_unique_id: {
+            day_number: currentDay,
+            user_address: entry.address.toLowerCase(),
+            chain_id: config.chainId,
           },
-        });
-        if (existingWeeklyClaim && !existingDailyClaim) {
-          // If a weekly claim exists but a daily claim does not, update the weekly claim with the new amount = old amount + daily amount
-          tx.push(
-            prisma.ajnaRewardsWeeklyClaim.update({
-              where: {
-                week_number_userAddress_chain_id_unique_id: {
-                  week_number: currentWeek,
-                  user_address: entry.address.toLowerCase(),
-                  chain_id: config.chainId,
-                },
-              },
-              data: {
-                amount: ethers.BigNumber.from(existingWeeklyClaim.amount).add(entry.amount).toString(),
-              },
-            })
-          );
-        } else if (!existingWeeklyClaim) {
-          // If a weekly claim does not exist, create a new weekly claim with the amount and empty proof
-          tx.push(
-            prisma.ajnaRewardsWeeklyClaim.create({
-              data: {
-                user_address: entry.address.toLowerCase(),
-                amount: entry.amount.toString(),
+        },
+      });
+      if (existingWeeklyClaim && !existingDailyClaim) {
+        // If a weekly claim exists but a daily claim does not, update the weekly claim with the new amount = old amount + daily amount
+        weeklyClaimEntriesTx.push(
+          prisma.ajnaRewardsWeeklyClaim.update({
+            where: {
+              week_number_userAddress_chain_id_unique_id: {
                 week_number: currentWeek,
-                proof: [],
+                user_address: entry.address.toLowerCase(),
                 chain_id: config.chainId,
               },
-            })
-          );
-        }
-      })
-    );
+            },
+            data: {
+              amount: ethers.BigNumber.from(existingWeeklyClaim.amount).add(entry.amount).toString(),
+            },
+          })
+        );
+      } else if (!existingWeeklyClaim) {
+        // If a weekly claim does not exist, create a new weekly claim with the amount and empty proof
+        weeklyClaimEntriesTx.push(
+          prisma.ajnaRewardsWeeklyClaim.create({
+            data: {
+              user_address: entry.address.toLowerCase(),
+              amount: entry.amount.toString(),
+              week_number: currentWeek,
+              proof: [],
+              chain_id: config.chainId,
+            },
+          })
+        );
+      }
+    })
+  );
+  await prisma.$transaction(async () => {
     // Execute the database transactions
-    await prisma.$transaction(tx);
+    await prisma.$transaction(weeklyClaimEntriesTx);
 
     // Map the snapshot array to daily claim entries
     const dailyClaimEntries = snapshot.map((entry) => ({
