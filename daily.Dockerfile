@@ -3,10 +3,8 @@ WORKDIR /usr/app
 COPY package.json ./
 COPY . .
 RUN yarn cache clean
-RUN yarn install --verbose --inline-builds --loglevel TRACE
-RUN yarn build
+RUN yarn install
 RUN yarn generate:lambda:daily
-RUN bash postinstall.sh
     
 
 FROM public.ecr.aws/lambda/nodejs:18
