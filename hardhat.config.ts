@@ -9,8 +9,7 @@ import "hardhat-tracer";
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
 
-import { config as appConfig } from "./scripts/common/config";
-import { Network } from "./scripts/common/types";
+import { config as appConfig } from "./scripts/common/config/config";
 
 dotenv.config();
 
@@ -39,22 +38,19 @@ const config: HardhatUserConfig = {
   },
   networks: {
     mainnet: {
-      url: process.env.ALCHEMY_MAINNET_RPC_URL,
+      url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
       gas: 1300000,
     },
     goerli: {
-      url: process.env.ALCHEMY_GOERLI_RPC_URL,
+      url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
       gas: "auto",
     },
     hardhat: {
       chainId: 2137,
       forking: {
-        url:
-          (appConfig.network === Network.Goerli
-            ? process.env.ALCHEMY_GOERLI_RPC_URL
-            : process.env.ALCHEMY_MAINNET_RPC_URL) || "",
+        url: appConfig.rpcUrl,
         blockNumber: 9265714,
       },
       mining: {

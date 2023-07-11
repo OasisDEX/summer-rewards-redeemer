@@ -11,7 +11,7 @@ The following environment variables are used in this project:
 - `PRIVATE_KEY_DEPLOY`: The private key to use for deploying contracts.
 - `AJNA_GRAPHQL_ENDPOINT`: The GraphQL endpoint for the Ajna API.
 - `DATABASE_URL`: The URL for the PostgreSQL database.
-- `FORKED_NETWORK`: The network name used to get contract addresses and reward distributions (since when we use fork - the name of the network is `hardhat`)
+- `NETWORK_USED`: The network name used to get contract addresses and reward distributions (since when we use fork - the name of the network is `hardhat`)
 
 To use these environment variables, create a `.env` file in the root directory of the project and set the values for each variable. You can use the `.env.example` file as a template.
 
@@ -62,7 +62,34 @@ The `config.ts` file contains the configuration for the project. It exports a `c
 
 The `addresses` and `rewardDistributions` properties are getters that return the addresses and reward distributions for the current network based on the `network` property.
 
+# Lambdas
+## Daily updates
 
+build the lambdas with `yarn generate:lambdas:daily`
+or
+```bash
+docker build -t daily-lambda -f daily.Dockerfile .
+```
+then run the container with
+```bash
+docker run -p 9000:8080 daily-lambda
+```
+and then you can test the lambda with
+```bash
+curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"body":{"dayIds":[19543]}}'
+```
+lambda docker requires these env variables:
+```env
+DATABASE_URL=<borrow db connection string>
+AJNA_GRAPHQL_ENDPOINT_GOERLI=
+AJNA_GRAPHQL_ENDPOINT_MAINNET=
+NETWORK_USED=<network used to submit weekly root>
+```
+
+usage
+```bash
+docker run -e DATABASE_URL="postgresql://user:pass@address:5432/db_name" AJNA_GRAPHQL_ENDPOINT_GOERLI xx ...
+```
 
 # Contracts
 ## Drip

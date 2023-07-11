@@ -36,11 +36,11 @@ export const addresses: Addresses = {
 export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
-  rewardStartWeek: 2782,
+  rewardStartWeek: 2792,
   multiplier: 1000,
   dryRun: true,
   weeksCount: 50,
-  network: (process.env.FORKED_NETWORK || Network.Goerli) as Network,
+  network: (process.env.NETWORK_USED || Network.Goerli) as Network,
   merkleTreeOptions: {
     sortLeaves: false,
     sortPairs: true,
@@ -49,7 +49,10 @@ export const config: Config = {
     return addresses[this.network];
   },
   get rewardDistributions() {
-    return rewardDistributions[this.network];
+    return rewardDistributions[this.network].map((distribution) => ({
+      ...distribution,
+      address: distribution.address.toLowerCase(),
+    }));
   },
   get chainId() {
     return this.network === Network.Mainnet ? 1 : 5;
@@ -68,21 +71,21 @@ export const config: Config = {
 
 export const rewardDistributions: RewardDistributions = {
   [Network.Mainnet]: [
-    { name: "RETH-DAI", address: "0x0000000000000000000000000000000000000000", share: 0.1 },
-    { name: "WBTC-DAI", address: "0x0000000000000000000000000000000000000000", share: 0.1 },
-    { name: "WSTETH-DAI", address: "0x0000000000000000000000000000000000000000", share: 0.1 },
-    { name: "ETH-USDC", address: "0x0000000000000000000000000000000000000000", share: 0.08 },
-    { name: "WBTC-USDC", address: "0x0000000000000000000000000000000000000000", share: 0.08 },
-    { name: "WSTETH-USDC", address: "0x0000000000000000000000000000000000000000", share: 0.08 },
-    { name: "USDC-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.05 },
-    { name: "USDC-WBTC", address: "0x0000000000000000000000000000000000000000", share: 0.05 },
-    { name: "CBETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.12 },
-    { name: "WSTETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.12 },
-    { name: "RETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.12 },
+    { name: "RETH-DAI", address: "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", share: 0.1 },
+    { name: "WBTC-DAI", address: "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", share: 0.1 },
+    { name: "WSTETH-DAI", address: "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", share: 0.1 },
+    { name: "ETH-USDC", address: "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", share: 0.08 },
+    { name: "WBTC-USDC", address: "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", share: 0.08 },
+    { name: "WSTETH-USDC", address: "0xE0FFABEa66627a588EFB6C870677Baa23a53b948", share: 0.08 },
+    { name: "USDC-ETH", address: "0x0Bc54b36d4Fa082eDe775Dd45f69FBbe360DDeb6", share: 0.05 },
+    { name: "USDC-WBTC", address: "0x1a9Cea49DaEB8c36EA707A9171EbDF4097796dD4", share: 0.05 },
+    { name: "CBETH-ETH", address: "0xad24FC773e125Edb223C38a39657cB64bc7C178e", share: 0.12 },
+    { name: "WSTETH-ETH", address: "0x37d3a44C905663d7B77C9b574b941D4FbF713A91", share: 0.12 },
+    { name: "RETH-ETH", address: "0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA", share: 0.12 },
   ],
   [Network.Goerli]: [
-    { name: "WBTC-USDC", address: "0xc2b64ca87090fe79786a8773009d7fb1288d3db1", share: 0.6 },
-    { name: "WETH-USDC", address: "0x3ae0ea990cb38487d7a698c68b7b520a3d57c018", share: 0.4 },
+    { name: "WBTC-USDC", address: "0xE938A854f843E143936A7c4d2c43Cb5c15c65a48", share: 0.6 },
+    { name: "WETH-USDC", address: "0xcDF3047503923b1E1fDF2190aaFe3254A7F1A632", share: 0.4 },
   ],
 };
 
@@ -124,14 +127,14 @@ export const tokens = {
   },
   // TODO: update mainnet addresses
   [Network.Mainnet]: {
-    WETH: "0x0000000000000000000000000000000000000000",
-    RETH: "0x0000000000000000000000000000000000000000",
-    WSTETH: "0x0000000000000000000000000000000000000000",
-    WBTC: "0x0000000000000000000000000000000000000000",
-    USDC: "0x0000000000000000000000000000000000000000",
-    DAI: "0x0000000000000000000000000000000000000000",
+    WETH: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    RETH: "0xae78736cd615f374d3085123a210448e74fc6393",
+    WSTETH: "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+    WBTC: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    USDC: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    DAI: "0x6b175474e89094c44da98b954eedeac495271d0f",
     AJNA: "0x9a96ec9b57fb64fbc60b423d1f4da7691bd35079",
-    CBETH: "0x0000000000000000000000000000000000000000",
+    CBETH: "0xbe9895146f7af43049ca1c1ae358b0541ea49704",
   },
 };
 
