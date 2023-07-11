@@ -37,6 +37,7 @@ export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot>
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the daily rewards snapshot.
  */
 export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> => {
+  console.log(`Fetching daily data for day ${dayId}`);
   const data = await fetchDailyData(dayId);
 
   return calculateDailySnapshot(data, dayId);

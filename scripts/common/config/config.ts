@@ -49,7 +49,10 @@ export const config: Config = {
     return addresses[this.network];
   },
   get rewardDistributions() {
-    return rewardDistributions[this.network];
+    return rewardDistributions[this.network].map((distribution) => ({
+      ...distribution,
+      address: distribution.address.toLowerCase(),
+    }));
   },
   get chainId() {
     return this.network === Network.Mainnet ? 1 : 5;
