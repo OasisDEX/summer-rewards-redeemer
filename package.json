@@ -25,10 +25,10 @@
     "format:fix": "./node_modules/.bin/prettier --write contracts/*.sol contracts/**/*.sol test/**/*.ts scripts/**/*.ts",
     "format": "./node_modules/.bin/prettier --check contracts/*.sol contracts/**/*.sol test/**/*.ts",
     "ngrok:start": "yarn db:start && ngrok tcp 5432",
-    "bundle:lambda:daily": "esbuild lambdas/daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "bundle:lambda:weekly": "esbuild lambdas/weekly/index.ts --bundle  --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
-    "generate:lambda:daily": "cp ./prisma/schema.prisma ./dist && npx prisma generate && yarn bundle:lambda:daily",
-    "generate:lambda:weekly": "cp ./prisma/schema.prisma ./dist && npx prisma generate && yarn bundle:lambda:weekly"
+    "bundle:lambda:daily": "esbuild lambdas/daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
+    "bundle:lambda:weekly": "esbuild lambdas/weekly/index.ts --bundle  --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
+    "generate:lambda:daily": " npx graphclient build && npx prisma generate && cp ./prisma/schema.prisma ./dist &&  yarn bundle:lambda:daily && cd dist && zip -r ../daily.zip . && cd ..",
+    "generate:lambda:weekly": "mkdir dist && cp ./prisma/schema.prisma ./dist && npx prisma generate && yarn bundle:lambda:weekly"
   },
   "devDependencies": {
     "@ethersproject/abstract-signer": "^5.5.0",
