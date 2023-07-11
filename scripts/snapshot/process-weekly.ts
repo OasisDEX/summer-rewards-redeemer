@@ -21,6 +21,10 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
       console.error(`Week ID ${weekId} - cant process current or future week. Chain ID: ${config.chainId}`);
       continue;
     }
+    if (weekId < config.rewardStartWeek) {
+      console.error(`Week ID ${weekId} - cant process week before reward start week. Chain ID: ${config.chainId}`);
+      continue;
+    }
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
       where: { week_number: weekId, tx_processed: true, chain_id: config.chainId },
     });
