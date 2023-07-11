@@ -4,7 +4,7 @@ COPY package.json ./
 COPY . .
 RUN yarn cache clean
 RUN yarn install
-RUN yarn generate:lambda:daily
+RUN yarn generate:lambda:daily:nozip
     
 
 FROM public.ecr.aws/lambda/nodejs:18
