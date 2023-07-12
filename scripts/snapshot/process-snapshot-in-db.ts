@@ -1,4 +1,4 @@
-import { AjnaRewardsWeeklyClaim, Prisma, PrismaPromise } from "@prisma/client";
+import { AjnaRewardsWeeklyClaim, Prisma, PrismaPromise } from "./../../prisma/client";
 import chalk from "chalk";
 import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
