@@ -228,27 +228,36 @@ function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistrib
 }
 
 export async function fetchDailyData(dayId: number) {
-  const sdk = getBuiltGraphSDK({
-    url: config.subgraphUrl,
-  });
-  const res = await sdk.DailyRewards(
-    { day: dayId.toString() },
-    {
+  try {
+    const sdk = getBuiltGraphSDK({
       url: config.subgraphUrl,
-    }
-  );
-  return res;
+    });
+    const res = await sdk.DailyRewards(
+      { day: dayId.toString() },
+      {
+        url: config.subgraphUrl,
+      }
+    );
+    return res;
+  } catch (error) {
+    throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
+  }
+
 }
 
 export async function fetchWeeklyData(weekId: number) {
-  const sdk = getBuiltGraphSDK({
-    url: config.subgraphUrl,
-  });
-  const res = await sdk.WeeklyRewards(
-    { week: weekId.toString() },
-    {
+  try {
+    const sdk = getBuiltGraphSDK({
       url: config.subgraphUrl,
-    }
-  );
-  return res;
+    });
+    const res = await sdk.WeeklyRewards(
+      { week: weekId.toString() },
+      {
+        url: config.subgraphUrl,
+      }
+    );
+    return res;
+  } catch (error) {
+    throw new Error(`Error fetching weekly data for week ${weekId}: ${error}. Graph client error.`);
+  }
 }
