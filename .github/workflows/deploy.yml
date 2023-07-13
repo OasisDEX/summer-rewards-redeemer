@@ -44,9 +44,4 @@ jobs:
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: oasis-ajna-rewards-redeemer-${{ env.ENV }}
           zip_file: ./daily.zip
-          memory_size: 512
-          timeout: 10
-          handler: index.handler
-          role: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/oasis-ajna-rewards-redeemer-${{ env.ENV }}-role
-          runtime: nodejs18.x
           dry_run: true
