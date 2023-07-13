@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - TECH-1903
+      - TECH-1903-add-action
 
 jobs:
   deploy:
