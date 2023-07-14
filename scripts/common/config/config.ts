@@ -37,7 +37,7 @@ export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
   rewardStartWeek: 2792,
-  multiplier: 10000000000,
+  multiplier: 100000000000,
   dryRun: true,
   weeksCount: 50,
   network: (process.env.NETWORK_USED || Network.Goerli) as Network,
