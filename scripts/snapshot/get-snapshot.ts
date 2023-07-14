@@ -203,10 +203,12 @@ function calculateUsersDailyRewards(
     const userAddress = reward.user!.id;
     const userShare = BigNumber.from(Math.floor(reward.reward * config.multiplier));
     const userPoolDailyRewards = poolDailyRewards.mul(userShare).div(config.multiplier);
-    if (!dailyUserRewards[userAddress]) {
-      dailyUserRewards[userAddress] = userPoolDailyRewards;
-    } else {
-      dailyUserRewards[userAddress] = dailyUserRewards[userAddress].add(userPoolDailyRewards);
+    if (!userPoolDailyRewards.isZero()) {
+      if (!dailyUserRewards[userAddress]) {
+        dailyUserRewards[userAddress] = userPoolDailyRewards;
+      } else {
+        dailyUserRewards[userAddress] = dailyUserRewards[userAddress].add(userPoolDailyRewards);
+      }
     }
   }
 }

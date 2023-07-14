@@ -121,27 +121,29 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
       }
     })
   );
-  await prisma.$transaction(async () => {
-    // Execute the database transactions
-    await prisma.$transaction(weeklyClaimEntriesTx);
 
-    // Map the snapshot array to daily claim entries
-    const dailyClaimEntries = snapshot.map((entry) => ({
-      user_address: entry.address.toLowerCase(),
-      amount: entry.amount.toString(),
-      day_number: currentDay,
-      week_number: currentWeek,
-      chain_id: config.chainId,
-    }));
-    console.log(
-      chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database. Chain ID: ${config.chainId}`)
-    );
-
-    // Create daily claim entries in the database
-    const res = await prisma.ajnaRewardsDailyClaim.createMany({
+  // Map the snapshot array to daily claim entries
+  const dailyClaimEntries = snapshot.map((entry) => ({
+    user_address: entry.address.toLowerCase(),
+    amount: entry.amount.toString(),
+    day_number: currentDay,
+    week_number: currentWeek,
+    chain_id: config.chainId,
+  }));
+  console.log(
+    chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database. Chain ID: ${config.chainId}`)
+  );
+  // Execute the database transactions
+  const res = await prisma.$transaction([
+    ...weeklyClaimEntriesTx,
+    prisma.ajnaRewardsDailyClaim.createMany({
       data: dailyClaimEntries,
       skipDuplicates: true,
-    });
-    console.log(chalk.gray(`Added ${res.count} daily claim entries to the database. Chain ID: ${config.chainId}`));
-  });
+    }),
+  ]);
+
+  console.log(
+    //@ts-ignore
+    chalk.gray(`Added ${res[res.length - 1].count} daily claim entries to the database. Chain ID: ${config.chainId}`)
+  );
 }
