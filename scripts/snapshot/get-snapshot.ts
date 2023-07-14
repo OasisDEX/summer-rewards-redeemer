@@ -25,7 +25,9 @@ import {
  */
 export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot> => {
   const data = await fetchWeeklyData(weekId);
-
+  if (!data.week) {
+    throw new Error(`No weekly rewards found for day ${weekId}`);
+  }
   return calculateWeeklySnapshot(data, weekId);
 };
 /**
@@ -39,7 +41,9 @@ export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot>
 export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> => {
   console.log(`Fetching daily data for day ${dayId}`);
   const data = await fetchDailyData(dayId);
-
+  if (!data.day) {
+    throw new Error(`No daily rewards found for day ${dayId}`);
+  }
   return calculateDailySnapshot(data, dayId);
 };
 
@@ -186,7 +190,15 @@ function calculateUsersDailyRewards(
 ): void {
   for (const reward of rewardsArray) {
     const poolAddress = reward.pool.id;
-    const poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].mul(ratio * 100).div(100);
+    let poolWeeklyRewards;
+    try {
+      poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].mul(ratio * 100).div(100);
+    } catch (error) {
+      console.warn(
+        `No weekly rewards found for pool ${poolAddress} - check the config - rewardDistributions. Might be a network mismatch`
+      );
+      continue;
+    }
     const poolDailyRewards = poolWeeklyRewards.div(7);
     const userAddress = reward.user!.id;
     const userShare = BigNumber.from(Math.floor(reward.reward * config.multiplier));
@@ -216,27 +228,36 @@ function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistrib
 }
 
 export async function fetchDailyData(dayId: number) {
-  const sdk = getBuiltGraphSDK({
-    url: config.subgraphUrl,
-  });
-  const res = await sdk.DailyRewards(
-    { day: dayId.toString() },
-    {
+  try {
+    const sdk = getBuiltGraphSDK({
       url: config.subgraphUrl,
-    }
-  );
-  return res;
+    });
+    const res = await sdk.DailyRewards(
+      { day: dayId.toString() },
+      {
+        url: config.subgraphUrl,
+      }
+    );
+    return res;
+  } catch (error) {
+    throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
+  }
+
 }
 
 export async function fetchWeeklyData(weekId: number) {
-  const sdk = getBuiltGraphSDK({
-    url: config.subgraphUrl,
-  });
-  const res = await sdk.WeeklyRewards(
-    { week: weekId.toString() },
-    {
+  try {
+    const sdk = getBuiltGraphSDK({
       url: config.subgraphUrl,
-    }
-  );
-  return res;
+    });
+    const res = await sdk.WeeklyRewards(
+      { week: weekId.toString() },
+      {
+        url: config.subgraphUrl,
+      }
+    );
+    return res;
+  } catch (error) {
+    throw new Error(`Error fetching weekly data for week ${weekId}: ${error}. Graph client error.`);
+  }
 }
