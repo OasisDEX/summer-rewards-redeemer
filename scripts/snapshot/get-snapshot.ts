@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
 
-import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
+import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery, Week } from "../../.graphclient";
 import { config, getWeeklyReward } from "../common/config";
-import { ZERO, ZERO_ADDRESS } from "../common/constants";
+import { ZERO, ZERO_ADDRESS, GRAPHQL_FIRST, GRAPHQL_SKIP } from "../common/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
@@ -229,22 +229,64 @@ function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistrib
   }
 }
 
-export async function fetchDailyData(dayId: number) {
-  try {
-    const sdk = getBuiltGraphSDK({
-      url: config.subgraphUrl,
-    });
-    const res = await sdk.DailyRewards(
-      { day: dayId.toString() },
-      {
-        url: config.subgraphUrl,
-      }
-    );
-    return res;
-  } catch (error) {
-    throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
-  }
+export async function fetchDailyData(dayId: number): Promise<DailyRewardsQuery> {
+  let allBorrowRewards: BorrowDailyRewards = [];
+  let allEarnRewards: EarnDailyRewards = [];
+  let week: Pick<Week, 'id'> | undefined;
+  const first = GRAPHQL_FIRST;
+  let skip = GRAPHQL_SKIP;
 
+  try {
+    const sdk = getBuiltGraphSDK({ url: config.subgraphUrl });
+    //Pagination logic
+    while (true) {
+      const res = await sdk.DailyRewards(
+        {
+          day: dayId.toString(),
+          first: first,
+          skip: skip,
+        },
+        {
+          url: config.subgraphUrl,
+        }
+      );
+
+      if (res.day) {
+        if (res.day.borrowDailyRewards) {
+          allBorrowRewards = allBorrowRewards.concat(res.day.borrowDailyRewards);
+        }
+        if (res.day.earnDailyRewards) {
+          allEarnRewards = allEarnRewards.concat(res.day.earnDailyRewards);
+        }
+        if (res.day.week) {
+          week = res.day.week;
+        }
+
+        if (
+          (res.day.borrowDailyRewards && res.day.borrowDailyRewards.length < first) &&
+          (res.day.earnDailyRewards && res.day.earnDailyRewards.length < first)
+        ) {
+          break;
+        }
+      } else {
+        throw new Error('Day is not defined');
+      }
+
+      skip += first;
+    }
+    if (!week) {
+      throw new Error('Week is not defined');
+    }    
+    return { day: {
+      id: dayId.toString(),
+      borrowDailyRewards: allBorrowRewards.length > 0 ? allBorrowRewards : undefined,
+      earnDailyRewards: allEarnRewards.length > 0 ? allEarnRewards : undefined,
+      week: week,
+    }};
+  } catch (error) {
+    console.error(`Error fetching daily data for day ${dayId}: ${error}`);
+    throw new Error(`Graph client error.`);
+  }
 }
 
 export async function fetchWeeklyData(weekId: number) {
