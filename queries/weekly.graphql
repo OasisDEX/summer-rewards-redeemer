@@ -1,9 +1,9 @@
-query WeeklyRewards($week: ID!) {
+query WeeklyRewards($week: ID!, $first: Int, $skip: Int) {
   week(id: $week) {
     id
     days {
       id
-      borrowDailyRewards {
+      borrowDailyRewards(first: $first, skip: $skip) {
         id
         pool {
           id
@@ -13,7 +13,7 @@ query WeeklyRewards($week: ID!) {
         }
         reward
       }
-      earnDailyRewards {
+      earnDailyRewards(first: $first, skip: $skip) {
         id
         pool {
           id

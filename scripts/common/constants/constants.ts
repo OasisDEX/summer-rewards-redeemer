@@ -15,3 +15,6 @@ export const MILLION = ethers.utils.parseEther("1000000");
 export const BILLION = ethers.utils.parseEther("1000000000");
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;
+
+export const GRAPHQL_FIRST = 1000;
+export const GRAPHQL_SKIP = 0;

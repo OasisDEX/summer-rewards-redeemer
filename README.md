@@ -15,12 +15,14 @@ The following environment variables are used in this project:
 
 To use these environment variables, create a `.env` file in the root directory of the project and set the values for each variable. You can use the `.env.example` file as a template.
 
-## Using the project 
+## Using the project
 
 - install dependencies
+
 ```
 yarn install
 ```
+
 - run `npx graphclient build` to build the GraphQL client by The Graph
 - run `yarn start:local` to start the local Hardhat node and the local DB
 - run `yarn db:seed` to seed the DB with the initial data ( it will deploy the contracts, generate snapshots and add the merkle roots to both the DB and redeemer contract ) and start local hardhat node
@@ -48,6 +50,7 @@ The following scripts are available in this project:
 - `format`: Formats the code.
 
 # Configuration
+
 The `config.ts` file contains the configuration for the project. It exports a `config` object that contains the following properties:
 
 - `earnRewardsRatio`: The ratio of rewards allocated to earning.
@@ -63,22 +66,30 @@ The `config.ts` file contains the configuration for the project. It exports a `c
 The `addresses` and `rewardDistributions` properties are getters that return the addresses and reward distributions for the current network based on the `network` property.
 
 # Lambdas
+
 ## Daily updates
 
-build the lambdas with `yarn generate:lambdas:daily`
+build the lambdas with `yarn generate:lambda:daily`
 or
+
 ```bash
 docker build -t daily-lambda -f daily.Dockerfile .
 ```
+
 then run the container with
+
 ```bash
 docker run -p 9000:8080 daily-lambda
 ```
+
 and then you can test the lambda with
+
 ```bash
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"body":{"dayIds":[19543]}}'
 ```
+
 lambda docker requires these env variables:
+
 ```env
 DATABASE_URL=<borrow db connection string>
 AJNA_GRAPHQL_ENDPOINT_GOERLI=
@@ -87,12 +98,15 @@ NETWORK_USED=<network used to submit weekly root>
 ```
 
 usage
+
 ```bash
 docker run -e DATABASE_URL="postgresql://user:pass@address:5432/db_name" AJNA_GRAPHQL_ENDPOINT_GOERLI xx ...
 ```
 
 # Contracts
+
 ## Drip
+
 - weekly amount cannot be above MAX_WEEKLY_AMOUNT which is constant
 - MAX_WEEKLY_AMOUNT set to 2_000_000
 - ADMIN_ROLE can withdraw an arbitrary amount of AJNA tokens to the multisig wallet
@@ -104,9 +118,10 @@ docker run -e DATABASE_URL="postgresql://user:pass@address:5432/db_name" AJNA_GR
 - drip contract holds all of the Ajna tokens
 - `drip()` can only be called by redeemer contract to pull tokens for weekly distribution
 - each `drip()` call is stored in `weeklyDrip` mapping so the Ajna tokens can't be pulled multiple times
-- drip can only be called for week numbers past `dripperDeploymentWeek` 
+- drip can only be called for week numbers past `dripperDeploymentWeek`
 
 ## Redeemer
+
 - operator can add weekly root ( that will pull Ajna tokens from Drip contract )
 - one root per week can be added
 - roots from the past can be added (in case they were missed)
