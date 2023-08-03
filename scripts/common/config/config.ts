@@ -36,7 +36,7 @@ export const addresses: Addresses = {
 export const config: Config = {
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
-  rewardStartWeek: 2792,
+  rewardStartWeek: 2793,
   multiplier: 100000000000,
   dryRun: true,
   weeksCount: 50,
