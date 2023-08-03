@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
-import { config, getWeeklyReward } from "../common/config";
+import { config, getRewardDistributions, getWeeklyReward } from "../common/config";
 import { ZERO, ZERO_ADDRESS } from "../common/constants";
 import {
   BorrowDailyRewards,
@@ -64,8 +64,9 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
 
   const totalWeeklyDistribution = getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
+  const rewardDistributions = getRewardDistributions(+data.week.id);
 
-  for (const pool of config.rewardDistributions) {
+  for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
@@ -116,8 +117,9 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
   const totalWeeklyDistribution = getWeeklyReward(+data.day.week.id);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
+  const rewardDistributions = getRewardDistributions(+day.week.id);
 
-  for (const pool of config.rewardDistributions) {
+  for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
@@ -244,7 +246,6 @@ export async function fetchDailyData(dayId: number) {
   } catch (error) {
     throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
   }
-
 }
 
 export async function fetchWeeklyData(weekId: number) {
