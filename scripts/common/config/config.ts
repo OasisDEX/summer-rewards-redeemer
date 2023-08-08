@@ -75,7 +75,7 @@ export const getRewardDistributions = (weekId: number) => {
   console.log(chalk.yellow(`First day of week ${weekId} is ${firstWeekDayId}`));
   switch (config.network) {
     case Network.Mainnet: {
-      if (firstWeekDayId >= 19572) {
+      if (firstWeekDayId >= 19579) {
         rewardDistributions = [
           { name: "RETH-DAI", address: "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", share: 0.085 },
           { name: "WBTC-DAI", address: "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", share: 0.085 },
