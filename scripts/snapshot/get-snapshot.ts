@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
-import { config, getWeeklyReward } from "../common/config";
+import { config, getRewardDistributions, getWeeklyReward } from "../common/config";
 import { ZERO, ZERO_ADDRESS } from "../common/constants";
 import {
   BorrowDailyRewards,
@@ -64,8 +64,9 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
 
   const totalWeeklyDistribution = getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
+  const rewardDistributions = getRewardDistributions(+data.week.id);
 
-  for (const pool of config.rewardDistributions) {
+  for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
@@ -116,14 +117,15 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
   const totalWeeklyDistribution = getWeeklyReward(+data.day.week.id);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
+  const rewardDistributions = getRewardDistributions(+day.week.id);
 
-  for (const pool of config.rewardDistributions) {
+  for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
-    totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
+    totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 1000)
       .mul(totalWeeklyDistribution)
-      .div(100);
+      .div(1000);
   }
 
   const dailyRewards = calculateDailyRewards(day, totalWeeklyDistributionPerPool);
@@ -149,8 +151,10 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
  */
 function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: DistributionAmount): DailyRewards {
   const dailyUsersRewards: UserRewardsAmount = {};
+let totalRewardsCount = 0;
 
   if (day.borrowDailyRewards && day.borrowDailyRewards.length > 0) {
+    totalRewardsCount += day.borrowDailyRewards.length;
     calculateUsersDailyRewards(
       day.borrowDailyRewards,
       totalWeeklyDistributionPerPool,
@@ -159,6 +163,7 @@ function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: Dis
     );
   }
   if (day.earnDailyRewards && day.earnDailyRewards.length > 0) {
+    totalRewardsCount += day.earnDailyRewards.length;
     calculateUsersDailyRewards(
       day.earnDailyRewards,
       totalWeeklyDistributionPerPool,
@@ -166,6 +171,7 @@ function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: Dis
       config.earnRewardsRatio
     );
   }
+  console.log(`Total rewards count for day ${day.id}: ${totalRewardsCount}`)
   const totalDailyRewards = Object.values(dailyUsersRewards).reduce((a, b) => a.add(b), ZERO);
   const dailyRewards: DailyRewards = {
     id: day.id,
@@ -244,7 +250,6 @@ export async function fetchDailyData(dayId: number) {
   } catch (error) {
     throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
   }
-
 }
 
 export async function fetchWeeklyData(weekId: number) {
