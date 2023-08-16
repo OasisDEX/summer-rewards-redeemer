@@ -18,9 +18,10 @@ export interface Distribution {
   name: string;
   address: string;
   share: number;
+  lendRatio?: number;
 }
 export interface DistributionAmount {
-  [poolAddress: string]: BigNumber;
+  [poolAddress: string]: { total: BigNumber; lendRatio?: number };
 }
 export interface UserRewardsAmount {
   [userAddress: string]: BigNumber;
