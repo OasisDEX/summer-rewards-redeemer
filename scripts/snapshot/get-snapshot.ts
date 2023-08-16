@@ -14,6 +14,7 @@ import {
   WeekDay,
   WeeklyRewards,
 } from "../common/types";
+import { roundToNearest } from "../common/utils/time.utils";
 
 /**
  * Retrieves and returns a parsed weekly snapshot of user rewards for a specified week.
@@ -190,15 +191,18 @@ function calculateUsersDailyRewards(
     const poolAddress = reward.pool.id;
     let poolWeeklyRewards;
     let ratio = isEarn ? config.earnRewardsRatio : config.borrowRewardsRatio;
-    if (totalWeeklyDistributionPerPool[poolAddress].lendRatio && isEarn) {
+    if (totalWeeklyDistributionPerPool[poolAddress].lendRatio !== undefined && isEarn) {
       ratio = totalWeeklyDistributionPerPool[poolAddress].lendRatio!;
+    } else if (totalWeeklyDistributionPerPool[poolAddress].lendRatio !== undefined && !isEarn) {
+      ratio = roundToNearest(1 - totalWeeklyDistributionPerPool[poolAddress].lendRatio!, 0.01);
     }
     try {
-      poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].total.mul(ratio * 100).div(100);
+      poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].total.mul(ratio * 1000).div(1000);
     } catch (error) {
       console.warn(
         `No weekly rewards found for pool ${poolAddress} - check the config - rewardDistributions. Might be a network mismatch`
       );
+      console.warn(error);
       continue;
     }
     const poolDailyRewards = poolWeeklyRewards.div(7);
