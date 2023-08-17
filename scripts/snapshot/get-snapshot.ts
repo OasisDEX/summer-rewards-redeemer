@@ -14,6 +14,7 @@ import {
   WeekDay,
   WeeklyRewards,
 } from "../common/types";
+import { roundToNearest } from "../common/utils/time.utils";
 
 /**
  * Retrieves and returns a parsed weekly snapshot of user rewards for a specified week.
@@ -63,16 +64,20 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
   const days = data.week.days;
 
   const totalWeeklyDistribution = getWeeklyReward(weekId);
-  const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
+  const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
   const rewardDistributions = getRewardDistributions(+data.week.id);
 
   for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
-    totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 100)
+    const total = BigNumber.from(pool.share * 1000)
       .mul(totalWeeklyDistribution)
-      .div(100);
+      .div(1000);
+    totalWeeklyDistributionPerPool[pool.address] = {
+      total,
+      lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
+    };
   }
 
   const weeklyRewards: WeeklyRewards = [];
@@ -114,7 +119,7 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
   }
 
   const day = data.day;
-  const totalWeeklyDistributionPerPool: { [poolAddress: string]: BigNumber } = {};
+  const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
   const totalWeeklyDistribution = getWeeklyReward(+data.day.week.id);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
   const rewardDistributions = getRewardDistributions(+day.week.id);
@@ -123,9 +128,13 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
-    totalWeeklyDistributionPerPool[pool.address] = BigNumber.from(pool.share * 1000)
+    const total = BigNumber.from(pool.share * 1000)
       .mul(totalWeeklyDistribution)
       .div(1000);
+    totalWeeklyDistributionPerPool[pool.address] = {
+      total,
+      lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
+    };
   }
 
   const dailyRewards = calculateDailyRewards(day, totalWeeklyDistributionPerPool);
@@ -151,27 +160,17 @@ export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): 
  */
 function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: DistributionAmount): DailyRewards {
   const dailyUsersRewards: UserRewardsAmount = {};
-let totalRewardsCount = 0;
+  let totalRewardsCount = 0;
 
   if (day.borrowDailyRewards && day.borrowDailyRewards.length > 0) {
     totalRewardsCount += day.borrowDailyRewards.length;
-    calculateUsersDailyRewards(
-      day.borrowDailyRewards,
-      totalWeeklyDistributionPerPool,
-      dailyUsersRewards,
-      config.borrowRewardsRatio
-    );
+    calculateUsersDailyRewards(day.borrowDailyRewards, totalWeeklyDistributionPerPool, dailyUsersRewards, false);
   }
   if (day.earnDailyRewards && day.earnDailyRewards.length > 0) {
     totalRewardsCount += day.earnDailyRewards.length;
-    calculateUsersDailyRewards(
-      day.earnDailyRewards,
-      totalWeeklyDistributionPerPool,
-      dailyUsersRewards,
-      config.earnRewardsRatio
-    );
+    calculateUsersDailyRewards(day.earnDailyRewards, totalWeeklyDistributionPerPool, dailyUsersRewards, true);
   }
-  console.log(`Total rewards count for day ${day.id}: ${totalRewardsCount}`)
+  console.log(`Total rewards count for day ${day.id}: ${totalRewardsCount}`);
   const totalDailyRewards = Object.values(dailyUsersRewards).reduce((a, b) => a.add(b), ZERO);
   const dailyRewards: DailyRewards = {
     id: day.id,
@@ -186,23 +185,30 @@ let totalRewardsCount = 0;
  * @param {(BorrowDailyRewards|EarnDailyRewards)} rewardsArray - An array of `BorrowDailyRewards` or `EarnDailyRewards` objects.
  * @param {DistributionAmount} totalWeeklyDistributionPerPool - An object containing the total weekly reward distribution per pool address.
  * @param {UserRewardsAmount} dailyUserRewards - An object containing the daily rewards for each user.
- * @param {number} ratio - The rewards ratio to apply to the weekly rewards per pool value , to differ rewards for earn and borrow.
+ * @param {boolean} isEarn - Is the rewards array for Earn or Borrow.
  */
 function calculateUsersDailyRewards(
   rewardsArray: BorrowDailyRewards | EarnDailyRewards,
   totalWeeklyDistributionPerPool: DistributionAmount,
   dailyUserRewards: UserRewardsAmount,
-  ratio: number
+  isEarn: boolean
 ): void {
   for (const reward of rewardsArray) {
     const poolAddress = reward.pool.id;
     let poolWeeklyRewards;
+    let ratio;
+    if (isEarn) {
+      ratio = totalWeeklyDistributionPerPool[poolAddress].lendRatio!;
+    } else {
+      ratio = roundToNearest(1 - totalWeeklyDistributionPerPool[poolAddress].lendRatio!, 0.01);
+    }
     try {
-      poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].mul(ratio * 100).div(100);
+      poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].total.mul(ratio * 1000).div(1000);
     } catch (error) {
       console.warn(
         `No weekly rewards found for pool ${poolAddress} - check the config - rewardDistributions. Might be a network mismatch`
       );
+      console.warn(error);
       continue;
     }
     const poolDailyRewards = poolWeeklyRewards.div(7);
