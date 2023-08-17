@@ -16,7 +16,7 @@ export const getEpochDayId = (): number => {
 export const getEpochWeekId = (): number => {
   const oneWeekMilliseconds = 7 * 24 * 60 * 60 * 1000;
   const today = new Date();
-  const epoch = new Date(1970, 0, 4);
+  const epoch = new Date(1970, 0, 1);
   return Math.floor((today.getTime() - epoch.getTime()) / oneWeekMilliseconds);
 };
 
