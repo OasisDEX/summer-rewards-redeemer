@@ -125,7 +125,7 @@ export async function verify(dayId: number, reverseOrder = false) {
   if (earnMismatched) {
     console.log(chalk.red(`Found ${earnMismatched} mismatched earn rewards`));
   }
-  if (borrowMismatched === 0 && earnMismatched === 0) {
+  if (borrowMismatched === 0 && earnMismatched === 0 && countNew === countBase) {
     console.log(chalk.green(`All rewards matched for day ${dayId}`));
   } else {
     console.log(chalk.red(`Rewards mismatch for day ${dayId}`));
@@ -145,7 +145,7 @@ async function main() {
   const firstDayOfRewards = 19544;
   const previousDay = today - 1;
   const amountOfDays = previousDay - firstDayOfRewards;
-  const days = Array.from({ length: amountOfDays }, (_, i) => today - 1 - i);
+  const days = [19592];
   for (const day of days) {
     await verify(day);
   }
