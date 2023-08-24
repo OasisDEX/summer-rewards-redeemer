@@ -1,4 +1,3 @@
-import { reverse } from "dns";
 import { getBuiltGraphSDK } from "../../.graphclient";
 import chalk from "chalk";
 import { getEpochDayId } from "../common/utils/time.utils";
@@ -19,6 +18,8 @@ export async function fetchDailyData(dayId: number, url: string) {
   }
 }
 // https://api.thegraph.com/subgraphs/name/halaprix/gajna2
+const url1 = "https://graph.summer.fi/subgraphs/name/oasis/ajna";
+const url2 = "https://api.thegraph.com/subgraphs/id/QmdRRdygRQNW5eBbvcrTK74sPybj6ARVRBA6cDc7tECXaF";
 
 export async function verify(dayId: number, reverseOrder = false) {
   let earnMatched = 0;
@@ -26,8 +27,6 @@ export async function verify(dayId: number, reverseOrder = false) {
   let borrowMatched = 0;
   let borrowMismatched = 0;
 
-  const url1 = "https://graph.staging.summer.fi/subgraphs/name/oasis/ajna";
-  const url2 = "https://api.thegraph.com/subgraphs/name/halaprix/gajna4";
   const baseUrl = reverseOrder ? url1 : url2;
   const newUrl = reverseOrder ? url2 : url1;
   const baseData = await fetchDailyData(dayId, baseUrl);
@@ -70,9 +69,12 @@ export async function verify(dayId: number, reverseOrder = false) {
       if (newRewardData) {
         if (newRewardData.reward !== baseRewardData.reward) {
           borrowMismatched++;
-          console.log(
-            `Mismatch for borrowDailyRewards[${index}]: ${newRewardData.reward} !== ${baseRewardData.reward}`
-          );
+          const percentage = getPercentDifference(baseRewardData.reward, newRewardData.reward);
+          if (percentage > 5) {
+            console.log(chalk.red(`mismatch for borrow reward (diff ${percentage} %): id: ${baseRewardData.id} `));
+          } else {
+            console.log(chalk.green(`match for borrow reward    (diff ${percentage} %): id: ${baseRewardData.id} `));
+          }
         } else {
           borrowMatched++;
         }
@@ -96,7 +98,12 @@ export async function verify(dayId: number, reverseOrder = false) {
       const newRewardData = newData.day?.earnDailyRewards?.[matchingNewRewardIndex];
       if (newRewardData) {
         if (newRewardData.reward !== baseRewardData.reward) {
-          console.log(`Mismatch for earnDailyRewards[${index}]: ${newRewardData.reward} !== ${baseRewardData.reward}`);
+          const percentage = getPercentDifference(baseRewardData.reward, newRewardData.reward);
+          if (percentage > 5) {
+            console.log(chalk.red(`mismatch for earn reward (diff ${percentage} %): id: ${baseRewardData.id} `));
+          } else {
+            console.log(chalk.green(`match for earn reward    (diff ${percentage} %): id: ${baseRewardData.id} `));
+          }
           earnMismatched++;
         } else {
           earnMatched++;
@@ -125,29 +132,15 @@ export async function verify(dayId: number, reverseOrder = false) {
   }
 }
 
-// // generate an array of N random integers beteen x and y
-// function randomIntegers(x: number, y: number, N: number) {
-//   const result = [];
-//   for (let i = 0; i < N; i++) {
-//     result.push(Math.floor(Math.random() * (y - x + 1) + x));
-//   }
-//   return result;
-// }
-// // generate an array of N random integers beteen x and y and check for duplicates
-// function randomIntegersNoDuplicates(x: number, y: number, N: number) {
-//   const result: number[] = [];
-//   let i = 0;
-//   while (i < N) {
-//     const r = Math.floor(Math.random() * (y - x + 1) + x);
-//     if (!result.includes(r)) {
-//       result.push(r);
-//       i++;
-//     }
-//   }
-//   return result;
-// }
-
 const today = getEpochDayId();
+function getPercentDifference(baseRewardString: string, newRewardString: string) {
+  const baseReward = parseFloat(baseRewardString);
+  const newReward = parseFloat(newRewardString);
+  const difference = Math.abs(baseReward - newReward);
+  const percentage = Math.round((difference / baseReward) * 100 * 100) / 100;
+  return percentage;
+}
+
 async function main() {
   const firstDayOfRewards = 19544;
   const previousDay = today - 1;
