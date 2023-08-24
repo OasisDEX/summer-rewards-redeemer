@@ -1,11 +1,7 @@
 import fs from "fs";
 
-import {
-  calculateDailySnapshot,
-  calculateWeeklySnapshot,
-  fetchDailyData,
-  fetchWeeklyData,
-} from "../../../scripts/snapshot/get-snapshot";
+import { calculateDailySnapshot, calculateWeeklySnapshot } from "../../../scripts/snapshot/get-snapshot";
+import { fetchWeeklyData, fetchDailyData } from "../../common/utils/graph.utils";
 async function getTestData() {
   // Define the weeks and days to generate snapshots for
   const weeks = [2791, 2790, 2789, 2788, 2787, 2786, 2785];

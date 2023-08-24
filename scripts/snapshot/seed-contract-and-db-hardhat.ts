@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
@@ -9,7 +8,7 @@ import { getOrDeployContract, impersonate, setTokenBalance } from "../common/uti
 import { createMerkleTree } from "../common";
 import { BASE_WEEKLY_AMOUNT } from "./test-data/data";
 import { EthersError, Snapshot } from "../common/types/types";
-import { prisma } from "./../../prisma/client";
+import { prisma, Prisma } from "./../../prisma/client";
 import { calculateWeeklySnapshot } from "./get-snapshot";
 
 const dataDir = "./scripts/snapshot/test-data";

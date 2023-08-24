@@ -1,45 +1,21 @@
-import { ContractReceipt, ContractTransaction } from "@ethersproject/contracts";
-import { network } from "hardhat";
+import { ContractReceipt } from "@ethersproject/contracts";
 
 import { prisma } from "../../prisma/client";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
+import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "../../typechain-types";
 import { config } from "../common/config/config";
-import { getContract, getOrDeployContract, impersonate, setTokenBalance } from "../common/utils/hardhat.utils";
-import { BASE_WEEKLY_AMOUNT } from "./test-data/data";
 import { TX_STATUS } from "../common/types/types";
+import { ethers } from "ethers";
 
-export async function processTransaction(weekId: number, root: string) {
-  const ajnaToken = await getContract<AjnaToken>("AjnaToken", config.addresses.ajnaToken);
-  const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [
-    config.addresses.ajnaToken,
-    config.addresses.admin,
-  ]);
-  const ajnaRedeemer = await getOrDeployContract<AjnaRedeemer>("AjnaRedeemer", [
-    config.addresses.ajnaToken,
-    config.addresses.operator,
-    ajnaDripper.address,
-  ]);
+export async function processTransaction(weekId: number, root: string, signer?: ethers.Signer) {
+  const contracts = await getContracts(signer);
 
   try {
-    let tx: ContractTransaction;
-    if (network.name === "hardhat") {
-      const operator = await prepareHardhatEnv(ajnaDripper, ajnaToken, ajnaRedeemer);
-      tx = await ajnaRedeemer.connect(operator).addRoot(Number(weekId), root);
-    } else {
-      tx = await ajnaRedeemer.addRoot(Number(weekId), root);
-    }
+    const tx = await contracts.ajnaRedeemer.addRoot(Number(weekId), root);
     const receipt = await tx.wait();
     await updateAjnaRewardsMerkleTree(receipt, weekId);
   } catch (error) {
     console.error(error);
   }
-}
-async function prepareHardhatEnv(ajnaDripper: AjnaDripper, ajnaToken: AjnaToken, ajnaRedeemer: AjnaRedeemer) {
-  const operator = await impersonate(config.addresses.operator);
-  const admin = await impersonate(config.addresses.admin);
-  await setTokenBalance(ajnaDripper.address, ajnaToken.address, BASE_WEEKLY_AMOUNT);
-  await (await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT)).wait();
-  return operator;
 }
 
 async function updateAjnaRewardsMerkleTree(receipt: ContractReceipt, weekId: number) {
@@ -51,4 +27,24 @@ async function updateAjnaRewardsMerkleTree(receipt: ContractReceipt, weekId: num
   } else {
     console.log(`Transaction failed for week ${weekId}. Chain ID: ${config.chainId}`);
   }
+}
+/**
+ * Creates a contract object for each contract in the config.addresses object
+ * @param signer signer is passed from hardhat tests so that we can use the same signer for all transactions and decouple
+ * the contract deployment from the transaction processing
+ * @returns object containing relevant contracts
+ */
+export async function getContracts(signer: ethers.Signer | undefined) {
+  signer = signer || (await config.signer);
+
+  const redeemerFactory = new AjnaRedeemer__factory(signer);
+  const tokenFactory = new AjnaToken__factory(signer);
+  const dripperFactory = new AjnaDripper__factory(signer);
+  const contracts = {
+    ajnaRedeemer: redeemerFactory.attach(config.addresses.ajnaRedeemer),
+    ajnaToken: tokenFactory.attach(config.addresses.ajnaToken),
+    ajnaDripper: dripperFactory.attach(config.addresses.ajnaDripper),
+  };
+
+  return contracts;
 }

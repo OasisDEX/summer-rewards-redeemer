@@ -13,6 +13,6 @@
       "@utils/*": ["utils/*"]
     }
   },
-  "include": ["./scripts/**.ts", "./test", "./typechain", "prisma/seed.ts"],
+  "include": ["./scripts/**.ts", "./test", "./typechain", "prisma/seed.ts", "scripts/snapshot/verify.ts"],
   "files": ["./hardhat.config.ts"]
 }
