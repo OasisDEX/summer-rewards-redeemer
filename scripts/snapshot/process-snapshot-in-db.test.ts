@@ -30,7 +30,7 @@ describe("processDailySnapshotInDb", () => {
   });
 
   it("should add snapshot entries to the database", async () => {
-    const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
+    const snapshotPath = path.join(__dirname, "test-data/weekly/", "weekly-snapshot-2785.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
       address: entry.address.toLowerCase(),
@@ -177,7 +177,7 @@ describe("processWeeklySnapshotInDb", () => {
   });
 
   it("should add snapshot entries and merkle tree to the database", async () => {
-    const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
+    const snapshotPath = path.join(__dirname, "test-data/weekly/", "weekly-snapshot-2785.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
       address: entry.address.toLowerCase(),
@@ -206,7 +206,7 @@ describe("processWeeklySnapshotInDb", () => {
   });
 
   it("should not add duplicate merkle tree to the database", async () => {
-    const snapshotPath = path.join(__dirname, "test-data", "weekly-snapshot-2783.json");
+    const snapshotPath = path.join(__dirname, "test-data/weekly/", "weekly-snapshot-2785.json");
     const snapshotData = fs.readFileSync(snapshotPath, "utf-8");
     const snapshot: Snapshot = JSON.parse(snapshotData).map((entry: ParsedSnapshotEntry) => ({
       address: entry.address.toLowerCase(),
