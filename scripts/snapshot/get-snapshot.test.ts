@@ -11,7 +11,7 @@ describe("First", () => {
   afterEach(async () => {
     sinon.restore();
   });
-  test.only("should verify the saved snapshot against calculation execution", async () => {
+  test("should verify the saved snapshot against calculation execution", async () => {
     const parsedSnapshot = await getWeeklySnapshot(1);
     expect(parsedSnapshot).toEqual(expectedSnapshot);
     sinon.assert.calledOnce(graphStub);
