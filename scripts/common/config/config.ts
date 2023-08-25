@@ -70,7 +70,7 @@ export const config: Config = {
       case Network.Mainnet:
         return process.env.ALCHEMY_MAINNET_RPC_URL;
       case Network.Goerli:
-        return process.env.ALCHEMY_MAINNET_RPC_URL;
+        return process.env.ALCHEMY_GOERLI_RPC_URL;
       default:
         throw new Error("ajna-worker/config: No network found");
     }
