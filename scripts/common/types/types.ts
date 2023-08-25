@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
 import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "../../../.graphclient";
@@ -47,14 +47,16 @@ export interface Config {
   rewardStartWeek: number;
   multiplier: number;
   dryRun: boolean;
+  usedNetwork: string | undefined;
   network: Network;
   weeksCount: number;
   merkleTreeOptions: Options;
   addresses: { [key: string]: string };
-  rewardDistributions: Distribution[];
   chainId: number;
   subgraphUrl: string;
-  rpcUrl: string;
+  rpcUrl: string | undefined;
+  signer: Promise<ethers.Signer>;
+  provider: Promise<ethers.providers.JsonRpcProvider>;
 }
 
 export type EthersError = {

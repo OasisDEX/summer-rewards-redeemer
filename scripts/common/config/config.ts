@@ -1,7 +1,9 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
-
+import dotenv from "dotenv";
 import { Addresses, Config, Distribution, Network, RewardDistributions } from "../types/types";
+
+dotenv.config();
 
 export const addresses: Addresses = {
   goerli: {
@@ -40,20 +42,20 @@ export const config: Config = {
   multiplier: 100000000000,
   dryRun: true,
   weeksCount: 50,
-  network: (process.env.NETWORK_USED || Network.Goerli) as Network,
+  usedNetwork: process.env.NETWORK_USED,
+  get network() {
+    if (this.usedNetwork) {
+      return this.usedNetwork as Network;
+    } else {
+      throw new Error("ajna-worker/config: No network found");
+    }
+  },
   merkleTreeOptions: {
     sortLeaves: false,
     sortPairs: true,
   },
   get addresses() {
     return addresses[this.network];
-  },
-  /* deprecated */
-  get rewardDistributions() {
-    return rewardDistributions[this.network].map((distribution) => ({
-      ...distribution,
-      address: distribution.address.toLowerCase(),
-    }));
   },
   get chainId() {
     return this.network === Network.Mainnet ? 1 : 5;
@@ -64,9 +66,34 @@ export const config: Config = {
       : process.env.AJNA_GRAPHQL_ENDPOINT_GOERLI || "";
   },
   get rpcUrl() {
-    return this.network === Network.Mainnet
-      ? process.env.ALCHEMY_MAINNET_RPC_URL || ""
-      : process.env.ALCHEMY_GOERLI_RPC_URL || "";
+    switch (this.network) {
+      case Network.Mainnet:
+        return process.env.ALCHEMY_MAINNET_RPC_URL;
+      case Network.Goerli:
+        return process.env.ALCHEMY_GOERLI_RPC_URL;
+      default:
+        throw new Error("ajna-worker/config: No network found");
+    }
+  },
+  get provider() {
+    if (this.rpcUrl) {
+      return (async () => {
+        const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
+        await provider.ready;
+        return provider;
+      })();
+    } else {
+      throw new Error("ajna-worker/config: No rpc url found");
+    }
+  },
+  get signer() {
+    return (async () => {
+      if (this.rpcUrl && process.env.PRIVATE_KEY) {
+        return new ethers.Wallet(process.env.PRIVATE_KEY, await this.provider);
+      } else {
+        throw new Error("ajna-worker/config: No rpc url found");
+      }
+    })();
   },
 };
 export const getRewardDistributions = (weekId: number) => {

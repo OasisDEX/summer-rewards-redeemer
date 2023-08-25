@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import { DailyRewardsQuery, getBuiltGraphSDK, WeeklyRewardsQuery } from "../../.graphclient";
+import { DailyRewardsQuery, WeeklyRewardsQuery } from "../../.graphclient";
 import { config, getRewardDistributions, getWeeklyReward } from "../common/config";
 import { ZERO, ZERO_ADDRESS } from "../common/constants";
 import {
@@ -15,7 +15,7 @@ import {
   WeeklyRewards,
 } from "../common/types";
 import { roundToNearest } from "../common/utils/time.utils";
-
+import { fetchWeeklyData, fetchDailyData } from "../common/utils/graph.utils";
 /**
  * Retrieves and returns a parsed weekly snapshot of user rewards for a specified week.
  *
@@ -196,13 +196,14 @@ function calculateUsersDailyRewards(
   for (const reward of rewardsArray) {
     const poolAddress = reward.pool.id;
     let poolWeeklyRewards;
-    let ratio;
-    if (isEarn) {
-      ratio = totalWeeklyDistributionPerPool[poolAddress].lendRatio!;
-    } else {
-      ratio = roundToNearest(1 - totalWeeklyDistributionPerPool[poolAddress].lendRatio!, 0.01);
-    }
+
     try {
+      let ratio;
+      if (isEarn) {
+        ratio = totalWeeklyDistributionPerPool[poolAddress].lendRatio!;
+      } else {
+        ratio = roundToNearest(1 - totalWeeklyDistributionPerPool[poolAddress].lendRatio!, 0.01);
+      }
       poolWeeklyRewards = totalWeeklyDistributionPerPool[poolAddress].total.mul(ratio * 1000).div(1000);
     } catch (error) {
       console.warn(
@@ -238,39 +239,5 @@ function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistrib
     console.log("weeklyRewardsSnapshotTotal", weeklyRewardsSnapshotTotal.toString());
     console.log("totalWeeklyDistribution", totalWeeklyDistribution.toString());
     throw new Error("Weekly rewards snapshot total is greater than total weekly rewards");
-  }
-}
-
-export async function fetchDailyData(dayId: number) {
-  try {
-    const sdk = getBuiltGraphSDK({
-      url: config.subgraphUrl,
-    });
-    const res = await sdk.DailyRewards(
-      { day: dayId.toString() },
-      {
-        url: config.subgraphUrl,
-      }
-    );
-    return res;
-  } catch (error) {
-    throw new Error(`Error fetching daily data for day ${dayId}: ${error}. Graph client error.`);
-  }
-}
-
-export async function fetchWeeklyData(weekId: number) {
-  try {
-    const sdk = getBuiltGraphSDK({
-      url: config.subgraphUrl,
-    });
-    const res = await sdk.WeeklyRewards(
-      { week: weekId.toString() },
-      {
-        url: config.subgraphUrl,
-      }
-    );
-    return res;
-  } catch (error) {
-    throw new Error(`Error fetching weekly data for week ${weekId}: ${error}. Graph client error.`);
   }
 }

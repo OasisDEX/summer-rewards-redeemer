@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 import { prisma } from "../../prisma/client";
 import { getEpochWeekId, createMerkleTree, config } from "../common";
@@ -6,6 +6,7 @@ import { ParsedSnapshot, Snapshot } from "../common";
 import { getWeeklySnapshot } from "./get-snapshot";
 import { processWeeklySnapshotInDb } from "./process-snapshot-in-db";
 import { processTransaction } from "./process-tx";
+
 /**
  * Processes weekly claims for a given array of week IDs.
  * If a week has already been processed, it skips the week and logs a message.
@@ -13,7 +14,7 @@ import { processTransaction } from "./process-tx";
  * @param weekIds An array of week IDs to process claims for. Defaults to the previous epoch week ID.
  * @returns A Promise that resolves when the claims have been processed.
  */
-export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
+export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], signer?: ethers.Signer): Promise<void> {
   const currentWeek = getEpochWeekId();
 
   for (const weekId of weekIds) {
@@ -44,6 +45,6 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Pro
     const { tree, root } = createMerkleTree(snapshot);
 
     await processWeeklySnapshotInDb(snapshot, weekId, root, tree);
-    await processTransaction(weekId, root);
+    await processTransaction(weekId, root, signer);
   }
 }
