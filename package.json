@@ -13,16 +13,16 @@
     "db:stop": "docker stop ajna_rewards && docker rm ajna_rewards",
     "db:reset": "docker exec -it ajna_rewards psql -U postgres -c 'DROP DATABASE IF EXISTS ajna_rewards'",
     "db:migrate": "npx prisma migrate dev",
-    "db:seed": "concurrently \"yarn start:local\" \"npx hardhat run --network localhost scripts/snapshot/seed-contract-and-db-hardhat.ts\"",
+    "db:seed": "concurrently \"yarn start:local\" \"npx hardhat run --network localhost packages/snapshot/seed-contract-and-db-hardhat.ts\"",
     "test": "yarn db:start && npx hardhat test",
-    "test:ts": "jest scripts/",
+    "test:ts": "jest packages/",
     "build": "npx hardhat compile && npx graphclient build",
     "clean": "rm -rf artifacts cache typechain",
-    "lint:fix": "solhint --fix -f table contracts/*.sol contracts/**/*.sol && eslint --fix test/**/*.ts scripts/**/*.ts",
+    "lint:fix": "solhint --fix -f table contracts/*.sol contracts/**/*.sol && eslint --fix test/**/*.ts packages/**/*.ts",
     "lint:contracts": "./node_modules/.bin/solhint -f table contracts/*.sol contracts/**/*.sol",
-    "lint:typescript": "./node_modules/.bin/eslint test/**/*.ts scripts/**/*.ts",
+    "lint:typescript": "./node_modules/.bin/eslint test/**/*.ts packages/**/*.ts",
     "lint": "yarn lint:contracts && yarn lint:typescript",
-    "format:fix": "./node_modules/.bin/prettier --write contracts/*.sol contracts/**/*.sol test/**/*.ts scripts/**/*.ts",
+    "format:fix": "./node_modules/.bin/prettier --write contracts/*.sol contracts/**/*.sol test/**/*.ts packages/**/*.ts",
     "format": "./node_modules/.bin/prettier --check contracts/*.sol contracts/**/*.sol test/**/*.ts",
     "ngrok:start": "yarn db:start && ngrok tcp 5432",
     "bundle:lambda:daily": "esbuild lambdas/daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
@@ -88,6 +88,11 @@
     "ethereum-waffle": "^4.0.10",
     "graphql": "^16.7.1",
     "merkletreejs": "^0.3.9",
-    "prisma": "^4.12.0"
-  }
+    "prisma": "^4.12.0",
+    "common": "*"
+  },
+  "private": "true",
+  "workspaces": [
+    "packages/*"
+  ]
 }

@@ -9,10 +9,16 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@scripts/*": ["scripts/*"],
+      "@scripts/*": ["packages/contracts/scripts/*"],
       "@utils/*": ["utils/*"]
     }
   },
-  "include": ["./scripts/**.ts", "./test", "./typechain", "prisma/seed.ts", "scripts/snapshot/verify.ts"],
-  "files": ["./hardhat.config.ts"]
+  "include": [
+    "packages/contracts/packages/contracts/tests/**.ts",
+    "./test",
+    "./typechain",
+    "prisma/seed.ts",
+    "packages/contracts/scripts/snapshot/verify.ts"
+  ],
+  "files": ["packages/contracts/hardhat.config.ts"]
 }

@@ -9761,6 +9761,11 @@ snake-case@^3.0.4:
     dot-case "^3.0.4"
     tslib "^2.0.3"
 
+snapshot@*:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/snapshot/-/snapshot-0.0.0.tgz#cb633e838f91fd54b9a4aee1000a1a94d4c1f5ff"
+  integrity sha512-1+5+C2XyTAtH7ZgtyXGX3h4AqGYJfewuMiShuYQweArsiQ07fYIhxq9uifwkl+vRjn3Yfk0SKd6uaizZZWzGSQ==
+
 solc@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.7.3.tgz#04646961bd867a744f63d2b4e3c0701ffdc7d78a"
