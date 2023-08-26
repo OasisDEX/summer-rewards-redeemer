@@ -5,11 +5,8 @@ import "@nomiclabs/hardhat-solhint";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
-
-import * as dotenv from "dotenv";
+import "./bootstrap-env";
 import { HardhatUserConfig, task } from "hardhat/config";
-
-dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
