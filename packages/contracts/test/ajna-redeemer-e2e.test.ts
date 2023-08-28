@@ -9,7 +9,7 @@ import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 import { BigNumber, Signer } from "ethers";
-import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
+import { BASE_WEEKLY_AMOUNT, weeklyRewardData } from "common/utils/data";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import sinon from "sinon";
 
@@ -27,7 +27,7 @@ let OPERATOR_ADDRESS: string;
 let CURRENT_WEEK: BigNumber = BigNumber.from(0);
 
 async function deployFixture() {
-  setupGraphStub();
+  setupGraphStub(weeklyRewardData, "weekly");
   ({ ADMIN_ADDRESS, OPERATOR_ADDRESS, owner, admin } = await getAddresses());
 
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);
