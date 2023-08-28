@@ -3,15 +3,17 @@ pragma solidity 0.8.19;
 
 import { IRewardsRedeemer } from "./interfaces/IRewardsRedeemer.sol";
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { BitMaps } from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
+import { OwnableUpgradeable as Ownable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 /** See IRewardsRedeemer.sol */
-contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
+contract RewardsRedeemer is IRewardsRedeemer, Ownable {
     using BitMaps for BitMaps.BitMap;
+    using SafeERC20 for IERC20;
 
     /// STORAGE
     IERC20 public rewardsToken; // Token used to reward users
@@ -22,12 +24,16 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
     /// INITIALIZER
 
     /* @inheritdoc IRewardsRedeemer */
-    function initialize(address _rewardsToken) external initializer {
+    function initialize(address _owner, address _rewardsToken) external initializer {
+        __Ownable_init();
+
         if (_rewardsToken == address(0)) {
             revert InvalidRewardsToken(_rewardsToken);
         }
 
         rewardsToken = IERC20(_rewardsToken);
+
+        transferOwnership(_owner);
     }
 
     /* @inheritdoc IRewardsRedeemer */
@@ -39,6 +45,11 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
     }
 
     /* @inheritdoc IRewardsRedeemer */
+    function removeRoot(uint256 index) external onlyOwner {
+        delete roots[index];
+    }
+
+    /* @inheritdoc IRewardsRedeemer */
     function getRoot(uint256 index) external view returns (bytes32) {
         return roots[index];
     }
@@ -46,6 +57,15 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
     /* @inheritdoc IRewardsRedeemer */
     function hasClaimed(address user, uint256 index) public view returns (bool) {
         return claimedRoots[user].get(index);
+    }
+
+    /* @inheritdoc IRewardsRedeemer */
+    function canClaim(
+        bytes32[] memory proof,
+        uint256 index,
+        uint256 amount
+    ) external view returns (bool) {
+        return _couldClaim(proof, index, amount) && !hasClaimed(_msgSender(), index);
     }
 
     /* @inheritdoc IRewardsRedeemer */
@@ -86,21 +106,29 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
     }
 
     /* @inheritdoc IRewardsRedeemer */
-    function canClaim(
-        bytes32[] memory proof,
-        uint256 week,
-        uint256 amount
-    ) public view returns (bool) {
-        bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), amount));
-        return MerkleProof.verify(proof, roots[week], leaf);
-    }
-
-    /* @inheritdoc IRewardsRedeemer */
     function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner {
         IERC20(token).transfer(to, amount);
     }
 
     /// INTERNALS
+
+    /**
+     * @notice Verifies that the user could claim the given amount for the given index
+     * 
+     * @param proof Merkle tree proof for the given index and amount
+     * @param index Index of the root to claim
+     * @param amount Amount to claim
+     * 
+     * @dev This function does not take into account whether the user has already claimed the given index
+     */
+    function _couldClaim(
+        bytes32[] memory proof,
+        uint256 index,
+        uint256 amount
+    ) internal view returns (bool) {
+        bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), amount));
+        return MerkleProof.verify(proof, roots[index], leaf);
+    }
 
     /**
      * @notice Verifies that the user can claim the given amount for the given index
@@ -116,12 +144,12 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
         uint256 amount,
         bytes32[] memory proof
     ) internal view {
-        if (!canClaim(proof, index, amount)) {
-            revert UserCannotClaim(_msgSender(), index, amount);
+        if (!_couldClaim(proof, index, amount)) {
+            revert UserCannotClaim(_msgSender(), index, amount, proof);
         }
 
         if (hasClaimed(_msgSender(), index)) {
-            revert UserAlreadyClaimed(_msgSender(), index, amount);
+            revert UserAlreadyClaimed(_msgSender(), index, amount, proof);
         }
     }
 
@@ -156,8 +184,6 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable, Initializable {
      * @param amount Amount of tokens to send
      */
     function _sendRewards(address to, uint256 amount) internal {
-        if (!rewardsToken.transfer(to, amount)) {
-            revert TokenTransferFailed(address(rewardsToken), to, amount);
-        }
+        rewardsToken.safeTransfer(to, amount);
     }
 }

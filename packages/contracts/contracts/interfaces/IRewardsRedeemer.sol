@@ -18,20 +18,20 @@ interface IRewardsRedeemer {
     /// ERRORS
     error InvalidRewardsToken(address token);
     error RootAlreadyAdded(uint256 index, bytes32 root);
-    error UserCannotClaim(address user, uint256 index, uint256 amount);
-    error UserAlreadyClaimed(address user, uint256 index, uint256 amount);
-    error TokenTransferFailed(address user, address token, uint256 amount);
-    error ClaimMultipleEmpty(uint256[] weekIds, uint256[] amounts, bytes32[][] proofs);
-    error ClaimMultipleLengthMismatch(uint256[] weekIds, uint256[] amounts, bytes32[][] proofs);
+    error UserCannotClaim(address user, uint256 index, uint256 amount, bytes32[] proof);
+    error UserAlreadyClaimed(address user, uint256 index, uint256 amount, bytes32[] proof);
+    error ClaimMultipleEmpty(uint256[] indices, uint256[] amounts, bytes32[][] proofs);
+    error ClaimMultipleLengthMismatch(uint256[] indices, uint256[] amounts, bytes32[][] proofs);
 
     /// INITIALIZER
     
     /**
      * @notice Initializes the contract
      *
+     * @param owner The address of the owner
      * @param rewardsToken The address of the rewards token
      */
-    function initialize(address rewardsToken) external;
+    function initialize(address owner, address rewardsToken) external;
 
     /// FUNCTIONS
 
@@ -48,6 +48,13 @@ interface IRewardsRedeemer {
      * @dev The root hash is the hash of the merkle tree root node
      */
     function addRoot(uint256 index, bytes32 root) external;
+
+    /**
+     * @notice Removes a root from the contract
+     *
+     * @param index The index for the root
+     */
+    function removeRoot(uint256 index) external;
 
     /**
      * @notice Returns the root hash for a given week
@@ -70,6 +77,19 @@ interface IRewardsRedeemer {
      */
     function hasClaimed(address user, uint256 index) external view returns (bool);
     
+    /**
+     * @notice Checks if the user can claim rewards for a given week
+     * 
+     * @param proof The merkle proof for the user
+     * @param week The week number to check
+     * @param amount The amount to check
+     */
+    function canClaim(
+        bytes32[] memory proof,
+        uint256 week,
+        uint256 amount
+    ) external view returns (bool);
+
     /**
      * @notice Claims rewards for a given index
      *
@@ -98,19 +118,6 @@ interface IRewardsRedeemer {
         uint256[] calldata amounts,
         bytes32[][] calldata proofs
     ) external;
-
-    /**
-     * @notice Checks if the user can claim rewards for a given week
-     * 
-     * @param proof The merkle proof for the user
-     * @param week The week number to check
-     * @param amount The amount to check
-     */
-    function canClaim(
-        bytes32[] memory proof,
-        uint256 week,
-        uint256 amount
-    ) external view returns (bool);
 
     /**
      * @notice Allows the owner to withdraw any ERC20 token from the contract

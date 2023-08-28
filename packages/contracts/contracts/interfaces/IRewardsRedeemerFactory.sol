@@ -38,7 +38,9 @@ interface IRewardsRedeemerFactory {
     /**
      * @notice Creates a new instance of the RewardsRedeemer contract.
      *
+     * @param rewardsToken Address of the rewards token.
+     * 
      * @return rewardsRedeemer Address of the newly created RewardsRedeemer contract.
      */
-    function createRewardsRedeemer() external returns (IRewardsRedeemer);
+    function createRewardsRedeemer(address rewardsToken) external returns (IRewardsRedeemer);
 }

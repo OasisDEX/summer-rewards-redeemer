@@ -24,7 +24,7 @@ contract RewardsRedeemerFactory is IRewardsRedeemerFactory, AccessControl {
     // solhint-disable-next-line var-name-mixedcase
     address public immutable RewardsRedeemerTemplate;
 
-    mapping(address => IRewardsRedeemer) public redeemers;
+    mapping(address /* partner */ => IRewardsRedeemer /* redeemer */) public redeemers;
 
     constructor() {
         _setupRole(ADMIN_ROLE, msg.sender);
@@ -42,10 +42,10 @@ contract RewardsRedeemerFactory is IRewardsRedeemerFactory, AccessControl {
     }
 
     /* @inheritdoc IRewardsRedeemerFactory */
-    function createRewardsRedeemer() external onlyRole(PARTNER_ROLE) returns (IRewardsRedeemer) {
+    function createRewardsRedeemer(address rewardsToken) external onlyRole(PARTNER_ROLE) returns (IRewardsRedeemer) {
         RewardsRedeemer rewardsRedeemer = RewardsRedeemer(Clones.clone(RewardsRedeemerTemplate));
 
-        rewardsRedeemer.initialize(_msgSender());
+        rewardsRedeemer.initialize(_msgSender(), rewardsToken);
 
         redeemers[_msgSender()] = rewardsRedeemer;
 

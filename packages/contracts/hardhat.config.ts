@@ -2,7 +2,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-solhint";
-import "@nomiclabs/hardhat-ethers"
+import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
@@ -47,20 +47,20 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
       gas: "auto",
     },
-    hardhat: {
-      chainId: 2137,
-      forking: {
-        url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
-        blockNumber: 9265714,
-      },
-      mining: {
-        auto: true,
-      },
-      hardfork: "london",
-      gas: "auto",
-      initialBaseFeePerGas: 1000000000,
-      allowUnlimitedContractSize: true,
-    },
+    // hardhat: {
+    //   chainId: 2137,
+    //   forking: {
+    //     url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
+    //     blockNumber: 9265714,
+    //   },
+    //   mining: {
+    //     auto: true,
+    //   },
+    //   hardfork: "london",
+    //   gas: "auto",
+    //   initialBaseFeePerGas: 1000000000,
+    //   allowUnlimitedContractSize: true,
+    // },
   },
   defaultNetwork: "hardhat",
   gasReporter: {
