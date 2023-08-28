@@ -4,8 +4,10 @@
   "globalDependencies": ["./queries/**/*.{graphql,gql}, ./node_modules", "jest.config.js"],
   "pipeline": {
     "lint": {},
-    "test": {"dotEnv": [".env"]},
+    "test": { "dotEnv": [".env"], "dependsOn": ["^build"] },
     "build": {},
-    "generate:lambda:daily": {}
+    "generate:lambda:daily": {
+      "dependsOn": ["database#build", "graphclient#build"]
+    }
   }
 }

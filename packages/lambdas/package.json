@@ -5,13 +5,13 @@
   "license": "MIT",
   "dependencies": {
     "snapshot": "*",
-    "graphclient": "*"
+    "graphclient": "*",
+    "database": "*"
   },
   "scripts": {
-    "bundle:lambda:daily": "esbuild lambdas/daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
-    "bundle:lambda:weekly": "esbuild lambdas/weekly/index.ts --bundle  --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
-    "generate:lambda:daily:nozip": " npx graphclient build && npx prisma generate && cp ./prisma/schema.prisma ./dist &&  yarn bundle:lambda:daily",
-    "generate:lambda:daily": "yarn generate:lambda:daily:nozip && cd dist && zip -r ../daily.zip . && cd ..",
-    "generate:lambda:weekly": "mkdir dist && cp ./prisma/schema.prisma ./dist && npx prisma generate && yarn bundle:lambda:weekly"
+    "bundle:lambda:daily": "esbuild daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
+    "bundle:lambda:weekly": "esbuild weekly/index.ts --bundle  --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
+    "generate:lambda:daily:nozip": "cp ../database/dist/* ./dist -r && cp ../database/dist/prisma/client/schema.prisma ./dist  &&  yarn bundle:lambda:daily",
+    "generate:lambda:daily": "mkdir dist && yarn generate:lambda:daily:nozip && cd dist && zip -r ../daily.zip . && cd .. && rm -rf dist"
   }
 }

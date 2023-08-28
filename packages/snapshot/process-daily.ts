@@ -41,7 +41,7 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
  */
 export async function processAllNetworksDailyClaims(dayIds = [getEpochDayId() - 1]): Promise<void> {
   for (const network of Object.values(Network)) {
-    config.network = network;
+    config.usedNetwork = network;
     await processDailyClaims(dayIds);
   }
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-current_dir=$(pwd)
+current_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/database
 search_pattern="${current_dir}/dist/prisma/client"
 replace_pattern="./prisma/client"
 
