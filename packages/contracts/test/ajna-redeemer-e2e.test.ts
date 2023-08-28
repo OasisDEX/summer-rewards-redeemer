@@ -3,9 +3,9 @@ import { expect } from "chai";
 import chalk from "chalk";
 import { ethers } from "hardhat";
 
-import { prisma } from "../../../prisma/client";
+import { prisma } from "database";
 import { config } from "common/config/config";
-import { deployContract, impersonate } from "common/utils/hardhat.utils";
+import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
 import { BigNumber, Signer } from "ethers";

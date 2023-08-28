@@ -3,7 +3,7 @@ import hre, { network } from "hardhat";
 
 import { AjnaDripper, AjnaRedeemer } from "../../typechain-types";
 import { config } from "common/config";
-import { getOrDeployContract } from "common";
+import { getOrDeployContract } from "../utils/hardhat.utils";
 
 async function main() {
   const ajnaDripper = await getOrDeployContract<AjnaDripper>("AjnaDripper", [

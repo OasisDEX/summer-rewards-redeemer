@@ -3,7 +3,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber, constants, Contract } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { config } from "../config/config";
+import { config } from "common/config/config";
 
 /**
  * Deploys a contract with the specified name and arguments.

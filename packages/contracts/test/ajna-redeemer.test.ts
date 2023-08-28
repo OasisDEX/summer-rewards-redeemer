@@ -5,7 +5,7 @@ import { ethers, network } from "hardhat";
 
 import { config } from "common/config/config";
 import { WEEK } from "common/constants/constants";
-import { deployContract } from "common";
+import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";

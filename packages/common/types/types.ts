@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
-import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "../../../.graphclient";
+import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
 
 export interface ParsedSnapshotEntry {
   address: string;

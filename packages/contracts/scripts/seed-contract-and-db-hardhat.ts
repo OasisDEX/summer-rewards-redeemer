@@ -2,16 +2,16 @@ import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
 
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../typechain-types";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";
 import { config } from "common/config/config";
-import { getOrDeployContract, impersonate, setTokenBalance } from "common/utils/hardhat.utils";
+import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
 import { createMerkleTree } from "common";
-import { BASE_WEEKLY_AMOUNT } from "./test-data/data";
+import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
 import { EthersError, Snapshot } from "common/types/types";
-import { prisma, Prisma } from "./../../prisma/client";
-import { calculateWeeklySnapshot } from "./get-snapshot";
+import { prisma, Prisma } from "database";
+import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 
-const dataDir = "./scripts/snapshot/test-data";
+const dataDir = "../../snapshot/test/test-data";
 
 // all rewards for a given week
 async function main() {

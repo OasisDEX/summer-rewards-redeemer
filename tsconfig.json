@@ -17,7 +17,7 @@
     "packages/contracts/packages/contracts/tests/**.ts",
     "./test",
     "./typechain",
-    "prisma/seed.ts",
+    "packages/prisma/seed.ts",
     "packages/contracts/scripts/snapshot/verify.ts"
   ],
   "files": ["packages/contracts/hardhat.config.ts"]

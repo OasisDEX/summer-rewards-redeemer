@@ -1,11 +1,10 @@
-import { AjnaRewardsWeeklyClaim, Prisma, PrismaPromise } from "./../../prisma/client";
+import { AjnaRewardsWeeklyClaim, Prisma, PrismaPromise, prisma } from "database";
 import chalk from "chalk";
 import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
 
 import { config } from "common/config";
 import { Snapshot } from "common/types";
-import { prisma } from "./../../prisma/client";
 
 export async function processWeeklySnapshotInDb(
   snapshot: Snapshot,

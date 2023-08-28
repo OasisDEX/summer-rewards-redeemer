@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 
-import { prisma } from "../../prisma/client";
+import { prisma } from "database";
 import { getEpochWeekId, createMerkleTree, config } from "common";
 import { ParsedSnapshot, Snapshot } from "common";
 import { getWeeklySnapshot } from "./get-snapshot";

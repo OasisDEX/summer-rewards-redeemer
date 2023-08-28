@@ -8,7 +8,7 @@ import path from "path";
 import { createMerkleTree, config } from "common";
 import { ParsedSnapshotEntry, Snapshot } from "common";
 import { processDailySnapshotInDb, processWeeklySnapshotInDb } from "../snapshot/process-snapshot-in-db";
-import { prisma } from "./../../prisma/client";
+import { prisma } from "database";
 
 describe("processDailySnapshotInDb", () => {
   beforeAll(async () => {

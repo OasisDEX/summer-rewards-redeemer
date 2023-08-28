@@ -16,5 +16,23 @@
   "dependencies": {
     "ajna-rewards-snapshot": "*",
     "common": "*"
+    
+  },
+  "devDependencies": {
+    "@ethersproject/abstract-signer": "^5.5.0",
+    "@ethersproject/contracts": "^5.5.0",
+    "@graphprotocol/client-cli": "^3.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@nomiclabs/hardhat-solhint": "^3.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.5",
+    "@tenderly/hardhat-tenderly": "^1.0.13",
+    "@typechain/ethers-v5": "^10.2.0",
+    "@typechain/hardhat": "^6.1.5",
+    "hardhat": "^2.16.1",
+    "hardhat-gas-reporter": "^1.0.8",
+    "hardhat-tracer": "^2.5.1",
+    "typescript": "^4.4.3"
   }
 }
+

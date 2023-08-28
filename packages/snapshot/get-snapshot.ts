@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import { DailyRewardsQuery, WeeklyRewardsQuery } from "../../.graphclient";
+import { DailyRewardsQuery, WeeklyRewardsQuery } from "graphclient";
 import { config, getRewardDistributions, getWeeklyReward } from "common/config";
 import { ZERO, ZERO_ADDRESS } from "common/constants";
 import {

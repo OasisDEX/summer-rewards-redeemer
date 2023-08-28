@@ -1,8 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", ".env"],
+  "globalDependencies": ["**/.env.*local", ".env", "./queries/**/*.{graphql,gql}, ./node_modules", "jest.config.js"],
   "pipeline": {
     "lint": {},
-    "test": {}
+    "test": {},
+    "build": {},
+    "generate:lambda:daily": {}
   }
 }

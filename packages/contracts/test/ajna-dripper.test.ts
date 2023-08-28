@@ -12,7 +12,7 @@ import {
   TWO_THOUSAND,
   WEEK,
 } from "common/constants/constants";
-import { deployContract, impersonate } from "common/utils/hardhat.utils";
+import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";
