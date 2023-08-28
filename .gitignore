@@ -16,3 +16,9 @@ out
 lib
 .graphclient
 dist
+**/.turbo
+**/.turbo-build
+**/.turbo-cache
+**/node_modules
+**/.graphclient
+**/dist

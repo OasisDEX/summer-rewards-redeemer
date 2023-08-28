@@ -1,9 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", ".env", "./queries/**/*.{graphql,gql}, ./node_modules", "jest.config.js"],
+  "globalDotEnv": [".env"],
+  "globalDependencies": ["./queries/**/*.{graphql,gql}, ./node_modules", "jest.config.js"],
   "pipeline": {
     "lint": {},
-    "test": {},
+    "test": {"dotEnv": [".env"]},
     "build": {},
     "generate:lambda:daily": {}
   }

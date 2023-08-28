@@ -4,7 +4,7 @@ import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { weeklyRewardSnapshot as expectedSnapshot } from "common/utils/data";
 import sinon from "sinon";
 
-describe("First", () => {
+describe("Process snapshot", () => {
   beforeEach(async () => {
     setupGraphStub();
   });

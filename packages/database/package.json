@@ -5,5 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "4.16.1"
+  },
+  "scripts": {
+    "build": "npx prisma generate"
   }
 }
