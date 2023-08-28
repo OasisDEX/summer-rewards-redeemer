@@ -15,7 +15,7 @@ import {
 import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 
 const { tree, leaves, root } = createMerkleTree(dummyProcessedSnaphot);
 const leaf = leaves[1];

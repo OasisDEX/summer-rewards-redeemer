@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
 
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 import { config } from "common/config/config";
 import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
 import { createMerkleTree } from "common";

@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import hre, { network } from "hardhat";
 
-import { AjnaDripper, AjnaRedeemer } from "../../typechain-types";
+import { AjnaDripper, AjnaRedeemer } from "typechain-types";
 import { config } from "common/config";
 import { getOrDeployContract } from "../utils/hardhat.utils";
 

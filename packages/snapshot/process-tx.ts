@@ -1,7 +1,7 @@
 import { ContractReceipt } from "@ethersproject/contracts";
 
 import { prisma } from "database";
-import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "../../typechain-types";
+import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "typechain-types";
 import { config } from "common/config/config";
 import { TX_STATUS } from "common/types/types";
 import { ethers } from "ethers";

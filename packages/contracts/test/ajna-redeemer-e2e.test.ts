@@ -7,7 +7,7 @@ import { prisma } from "database";
 import { config } from "common/config/config";
 import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../typechain-types";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 import { BigNumber, Signer } from "ethers";
 import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";

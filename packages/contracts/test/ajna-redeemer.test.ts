@@ -8,7 +8,7 @@ import { WEEK } from "common/constants/constants";
 import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "../../../typechain-types";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 

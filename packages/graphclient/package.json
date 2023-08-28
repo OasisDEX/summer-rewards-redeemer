@@ -1,9 +1,11 @@
 {
   "name": "graphclient",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "npx graphclient build"
+    "build": "graphclient build"
+  },
+  "devDependencies": {
+    "@graphprotocol/client-cli": "^3.0.0"
   }
 }

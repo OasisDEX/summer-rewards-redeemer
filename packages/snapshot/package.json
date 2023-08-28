@@ -1,12 +1,12 @@
 {
   "name": "ajna-rewards-snapshot",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "graphclient": "*",
     "database": "*",
-    "common": "*"
+    "common": "*",
+    "typechain-types": "*"
   },
   "scripts": {
     "test": "DOTENV_CONFIG_PATH=../../.env jest  --setupFiles dotenv/config"
