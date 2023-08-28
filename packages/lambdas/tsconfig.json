@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "declaration": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "resolveJsonModule": true
+  },
+
+  "files": ["rewards/src/*.ts"]
+}

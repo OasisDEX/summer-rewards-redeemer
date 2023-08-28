@@ -27,7 +27,7 @@ let OPERATOR_ADDRESS: string;
 let CURRENT_WEEK: BigNumber = BigNumber.from(0);
 
 async function deployFixture() {
-  setupGraphStub(weeklyRewardData, "weekly");
+  setupGraphStub(weeklyRewardData, "weeklyPartner");
   ({ ADMIN_ADDRESS, OPERATOR_ADDRESS, owner, admin } = await getAddresses());
 
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);

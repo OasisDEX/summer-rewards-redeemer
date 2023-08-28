@@ -11,17 +11,18 @@ import {
 } from "common/utils/data";
 import sinon from "sinon";
 import { BigNumber } from "ethers";
-import { ParsedSnapshot } from "common";
+import { ParsedSnapshot, getRewardDistributions } from "common";
 
 describe("Process weekly snapshot", () => {
   beforeEach(async () => {
-    setupGraphStub(weeklyRewardData, "weekly");
+    setupGraphStub(weeklyRewardData, "weeklyPartner");
   });
   afterEach(async () => {
     sinon.restore();
   });
   test("should verify the saved snapshot against calculation execution", async () => {
-    const parsedSnapshot = await getWeeklySnapshot(1);
+    const rewardDistributions = getRewardDistributions(1);
+    const parsedSnapshot = await getWeeklySnapshot(1, rewardDistributions);
     expect(parsedSnapshot).toEqual(expectedWeeklySnapshot);
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
@@ -32,13 +33,16 @@ describe("Process weekly snapshot", () => {
 
 describe("Process daily snapshot", () => {
   beforeEach(async () => {
-    setupGraphStub(dailyRewardsDataWithCustomRatios, "daily");
+    setupGraphStub(dailyRewardsDataWithCustomRatios, "dailyPartner");
   });
   afterEach(async () => {
     sinon.restore();
   });
   test("should verify the saved snapshot against calculation execution - custom earn/borrow ratio", async () => {
-    const parsedSnapshot = await getDailySnapshot(19587);
+    const dayId = 19587;
+    const weekId = Math.floor(dayId / 7);
+    const rewardDistributions = getRewardDistributions(weekId);
+    const parsedSnapshot = await getDailySnapshot(dayId, rewardDistributions);
     expect(parsedSnapshot).toEqual(expectedDailySnapshot);
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
@@ -49,13 +53,16 @@ describe("Process daily snapshot", () => {
 
 describe("Process daily snapshot - simple snapshot", () => {
   beforeEach(async () => {
-    setupGraphStub(dailyRewardsSimpleData, "daily");
+    setupGraphStub(dailyRewardsSimpleData, "dailyPartner");
   });
   afterEach(async () => {
     sinon.restore();
   });
   test("should verify the saved snapshot against calculation execution - custom earn/borrow ratio #2", async () => {
-    const parsedSnapshot = await getDailySnapshot(19588);
+    const dayId = 19587;
+    const weekId = Math.floor(dayId / 7);
+    const rewardDistributions = getRewardDistributions(weekId);
+    const parsedSnapshot = await getDailySnapshot(dayId, rewardDistributions);
     expect(parsedSnapshot).toEqual(dailyRewardsSimpleSnapshot);
 
     sinon.assert.calledOnce(graphStub);

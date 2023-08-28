@@ -3,17 +3,22 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
-    "snapshot": "*",
+    "database": "*",
     "graphclient": "*",
-    "database": "*"
+    "snapshot": "*",
+    "common": "*"
   },
   "devDependencies": {
-    "esbuild": "^0.18.11"
+    "aws-sdk-client-mock": "^3.0.0",
+    "esbuild": "^0.18.11",
+    "jest": "^29.6.4",
+    "ts-jest": "^29.1.1"
   },
   "scripts": {
     "bundle:lambda:daily": "esbuild daily/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
     "bundle:lambda:weekly": "esbuild weekly/index.ts --bundle  --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js && bash postinstall.sh",
     "generate:lambda:daily:nozip": "cp ../database/dist/* ./dist -r && cp ../database/dist/prisma/client/schema.prisma ./dist  &&  yarn bundle:lambda:daily",
-    "generate:lambda:daily": "mkdir dist && yarn generate:lambda:daily:nozip && cd dist && zip -r ../daily.zip . && cd .. && rm -rf dist"
+    "generate:lambda:daily": "mkdir dist && yarn generate:lambda:daily:nozip && cd dist && zip -r ../daily.zip . && cd .. && rm -rf dist",
+    "test": "DOTENV_CONFIG_PATH=../../.env jest ./rewards/src --setupFiles dotenv/config"
   }
 }

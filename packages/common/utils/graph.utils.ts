@@ -4,10 +4,10 @@ import { config } from "../config/config";
 export const graphClient = getBuiltGraphSDK({
   url: config.subgraphUrl,
 });
-export async function fetchDailyData(dayId: number) {
+export async function fetchDailyData(dayId: number, pools: string[]) {
   try {
-    const res = await graphClient.DailyRewards(
-      { day: dayId.toString() },
+    const res = await graphClient.DailyPartnerRewards(
+      { day: dayId.toString(), pools },
       {
         url: config.subgraphUrl,
       }
@@ -18,10 +18,10 @@ export async function fetchDailyData(dayId: number) {
   }
 }
 
-export async function fetchWeeklyData(weekId: number) {
+export async function fetchWeeklyData(weekId: number, pools: string[]) {
   try {
-    const res = await graphClient.WeeklyRewards(
-      { week: weekId.toString() },
+    const res = await graphClient.WeeklyPartnerRewards(
+      { week: weekId.toString(), pools },
       {
         url: config.subgraphUrl,
       }
