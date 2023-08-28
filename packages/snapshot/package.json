@@ -5,9 +5,14 @@
   "license": "MIT",
   "dependencies": {
     "graphclient": "*",
-    "database": "*"
+    "database": "*",
+    "common": "*"
   },
   "scripts": {
-    "test": "jest ."
+    "test": "DOTENV_CONFIG_PATH=../../.env jest  --setupFiles dotenv/config"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0"
   }
 }
