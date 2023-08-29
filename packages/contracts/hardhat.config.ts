@@ -6,7 +6,7 @@ import "@nomiclabs/hardhat-ethers"
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
-import "./bootstrap-env";
+import "common/bootstrap-env";
 import { HardhatUserConfig, task } from "hardhat/config";
 
 // This is a sample Hardhat task. To learn how to create your own go to
