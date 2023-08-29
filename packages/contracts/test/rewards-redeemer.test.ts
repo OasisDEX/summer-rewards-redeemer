@@ -10,10 +10,12 @@ import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
 import { RewardsRedeemerFactory, RewardsRedeemer, AjnaToken } from "typechain-types";
 import { createRedeemer } from "./utils";
+import exp from "constants";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
 const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
+const dataForSecondUser = [dummyProcessedSnaphot[2].address, dummyProcessedSnaphot[2].amount];
 
 /* leaf and proof with index 1 -> address is the firstUser address from hardhat accounts 
  0 indexed user is saved for the owner */
@@ -46,7 +48,27 @@ async function deployBaseFixture() {
   };
 }
 
-describe("AjnaRedeemer", () => {
+describe.only("AjnaRedeemer", () => {
+  describe("Ownable", () => {
+    it("Should return partner as owner", async () => {
+      const { ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      expect(await ajnaRedeemer.owner()).to.be.equal(partner.address);
+    });
+    it("Should not allow anybody except partner to change owner", async () => {
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      await expect(ajnaRedeemer.connect(randomUser).transferOwnership(randomUser.address)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
+    });
+    it("Should allow partner to change owner", async () => {
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      expect(await ajnaRedeemer.connect(partner).transferOwnership(randomUser.address)).to.be.not.reverted;
+      expect(await ajnaRedeemer.owner()).to.be.equal(randomUser.address);
+    });
+  });
   describe("Add/Get/Remove Root", () => {
     it("Should allow only partner to add/remove roots", async () => {
       const { ajnaRedeemer, partner, firstUser } = await loadFixture(deployBaseFixture);
@@ -88,7 +110,7 @@ describe("AjnaRedeemer", () => {
       await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
 
       const testUser = ethers.provider.getSigner(dataForFirstUser[0] as string);
-      expect(await ajnaRedeemer.connect(testUser).canClaim(proof, currentIndex, dataForFirstUser[1])).to.equal(true);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(true);
     });
     it("Should return false (user=unclaimed, index=incorrect, amount=correct, proof=correct)", async () => {
       const currentIndex = 24;
@@ -97,7 +119,7 @@ describe("AjnaRedeemer", () => {
       await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
 
       const testUser = ethers.provider.getSigner(dataForFirstUser[0] as string);
-      expect(await ajnaRedeemer.connect(testUser).canClaim(proof, currentIndex + 1, dataForFirstUser[1])).to.equal(
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex + 1, dataForFirstUser[1], proof)).to.equal(
         false
       );
     });
@@ -110,7 +132,7 @@ describe("AjnaRedeemer", () => {
       const wrongProof = tree.getHexProof(leaves[2]);
 
       const testUser = ethers.provider.getSigner(dataForFirstUser[0] as string);
-      expect(await ajnaRedeemer.connect(testUser).canClaim(wrongProof, currentIndex + 1, dataForFirstUser[1])).to.equal(
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex + 1, dataForFirstUser[1], wrongProof)).to.equal(
         false
       );
     });
@@ -123,7 +145,7 @@ describe("AjnaRedeemer", () => {
       const wrongAmount = (dataForFirstUser[1] as BigNumber).add(1);
 
       const testUser = ethers.provider.getSigner(dataForFirstUser[0] as string);
-      expect(await ajnaRedeemer.connect(testUser).canClaim(proof, currentIndex, wrongAmount)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, wrongAmount, proof)).to.equal(false);
     });
     it("Should return false for wrong user", async () => {
       const currentIndex = 26;
@@ -132,21 +154,64 @@ describe("AjnaRedeemer", () => {
       await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
 
       expect(
-        await ajnaRedeemer.connect(randomUser.address).canClaim(proof, currentIndex, dataForFirstUser[1])
+        await ajnaRedeemer.connect(randomUser.address).canClaim(currentIndex, dataForFirstUser[1], proof)
       ).to.equal(false);
     });
   });
 
   describe("Single Claim", () => {
-    it.only("Should not claim if user is not correct", async () => {
+    it("Should not claim if user is not correct", async () => {
       const currentIndex = 66;
       const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
 
       await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
 
-      await expect(
-        ajnaRedeemer.connect(ajnaRedeemer.address).claim(currentIndex, dataForFirstUser[1], proof)
-      ).to.be.revertedWith("UserCannotClaim");
+      await expect(ajnaRedeemer.connect(randomUser).claim(currentIndex, dataForFirstUser[1], proof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(randomUser.address, currentIndex, dataForFirstUser[1], proof);
+    });
+    it("Should not claim if index is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex + 1, dataForFirstUser[1], proof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex + 1, dataForFirstUser[1], proof);
+    });
+    it("Should not claim if amount is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+
+      const wrongAmount = (dataForFirstUser[1] as BigNumber).add(1);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, wrongAmount, proof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex, wrongAmount, proof);
+    });
+    it("Should not claim if proof is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+
+      const wrongProof = tree.getHexProof(leaves[2]);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], wrongProof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex, dataForFirstUser[1], wrongProof);
     });
 
     it("Should not claim if redeemer has not enough tokens", async () => {
@@ -159,403 +224,440 @@ describe("AjnaRedeemer", () => {
       await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], proof)).to.be.revertedWith(
         "ERC20: transfer amount exceeds balance"
       );
+
+      await ajnaToken.transfer(ajnaRedeemer.address, dataForFirstUser[1].sub(1));
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], proof)).to.be.revertedWith(
+        "ERC20: transfer amount exceeds balance"
+      );
     });
 
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify the users balance after claim", async () => {
+    it("Should claim the reward and marked it as claimed, no second claimed allowed", async () => {
       const currentIndex = 66;
-      const { ajnaToken, ajnaRedeemer, firstUser, partner } = await loadFixture(deployBaseFixture);
+
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
 
       await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
 
-      await expect(ajnaRedeemer.connect(firstUser).claim(currentWeek, dataForFirstUser[1], proof)).to.not.be.reverted;
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/already-claimed");
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await ajnaToken.transfer(ajnaRedeemer.address, dataForFirstUser[1]);
+
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(true);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], proof)).to.not.be.reverted;
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], proof))
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(testUserAddress, currentIndex, dataForFirstUser[1], proof);
+
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(false);
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(testUserAddress)).to.eql(dataForFirstUser[1]);
     });
-    it("shouldn't claim if insufficient funds", async () => {
-      const { ajnaRedeemer, ajnaToken, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+    it("Should claim for 2 users, 2 indices", async () => {
+      const currentIndex = 66;
 
-      const balanceToBurn = await ajnaToken.balanceOf(ajnaRedeemer.address);
-      await ajnaToken.burn(ajnaRedeemer.address, balanceToBurn);
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
 
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
-    });
-    it("shouldn't claim if there are no week numbers provided", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      const user1Address = dataForFirstUser[0] as string;
+      const user1 = ethers.provider.getSigner(user1Address);
+      const user2Address = dataForSecondUser[0] as string;
+      const user2 = ethers.provider.getSigner(user2Address);
 
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/cannot-claim-zero");
-    });
-    it("shouldn't claim with mismatched data lengths", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const totalAmount = (dataForFirstUser[1] as BigNumber).add(dataForSecondUser[1] as BigNumber).mul(2);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      await ajnaToken.transfer(ajnaRedeemer.address, totalAmount);
 
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/invalid-params");
-    });
-    it("shouldn't allow a random user to use someone's elses claim, using same input", async () => {
-      const { ajnaToken, ajnaRedeemer, randomUser, firstUserAddress, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      // User 1
+      const proofUser1 = tree.getHexProof(leaves[1]);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex, dataForFirstUser[1], proofUser1)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex + 1, dataForFirstUser[1], proofUser1)).to.equal(
+        true
+      );
 
-      await expect(
-        ajnaRedeemer.connect(randomUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/cannot-claim");
-
-      expect(await ajnaToken.connect(randomUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
-    });
-    it("not allow to claim twice the same week - in one call", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(
-        ajnaRedeemer
-          .connect(firstUser)
-          .claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
-      ).to.be.reverted;
-      await expect(
-        ajnaRedeemer
-          .connect(firstUser)
-          .claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
-      ).to.be.reverted;
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
-    });
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balance to be 0", async () => {
-      const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      for (let i = 0; i < dummyProcessedSnaphot.length; i++) {
-        await network.provider.request({
-          method: "hardhat_impersonateAccount",
-          params: [dummyProcessedSnaphot[i].address],
-        });
-        const randomUser = ethers.provider.getSigner(dummyProcessedSnaphot[i].address);
-        const randomUserAddress = await randomUser.getAddress();
-        const proofForRandomUserFromDummyProcessedSnaphot = tree.getHexProof(leaves[i]);
-        await expect(
-          ajnaRedeemer
-            .connect(randomUser)
-            .claimMultiple(
-              [currentWeek],
-              [dummyProcessedSnaphot[i].amount],
-              [proofForRandomUserFromDummyProcessedSnaphot]
-            )
-        ).to.not.be.reverted;
-
-        await expect(
-          ajnaRedeemer
-            .connect(randomUser)
-            .claimMultiple(
-              [currentWeek],
-              [dummyProcessedSnaphot[i].amount],
-              [proofForRandomUserFromDummyProcessedSnaphot]
-            )
-        ).to.be.reverted;
-        expect(await ajnaToken.connect(randomUser).balanceOf(randomUserAddress)).to.eql(
-          dummyProcessedSnaphot[i].amount
-        );
-        await network.provider.request({
-          method: "hardhat_stopImpersonatingAccount",
-          params: [dummyProcessedSnaphot[i].address],
-        });
-      }
-      expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.eql(BigNumber.from(0));
-    });
-    it(`should NOT claim ${config.weeksCount} past weeks (gas check)`, async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-
-      let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-      const weeks = [];
-      const amounts = [];
-      const proofs = [];
-
-      for (let i = 0; i < config.weeksCount; i++) {
-        await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await time.increase(WEEK);
-        weeks.push(currentWeek);
-        currentWeek = Number(currentWeek) + 1;
-        amounts.push(dataForFirstUser[1]);
-        proofs.push(proof);
-      }
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple([weeks[0]], [amounts[0]], [proofs[0]])).to.not.be
+      await expect(ajnaRedeemer.connect(user1).claim(currentIndex, dataForFirstUser[1], proofUser1)).to.not.be.reverted;
+      await expect(ajnaRedeemer.connect(user1).claim(currentIndex, dataForFirstUser[1], proofUser1))
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user1Address, currentIndex, dataForFirstUser[1], proofUser1);
+      await expect(ajnaRedeemer.connect(user1).claim(currentIndex + 1, dataForFirstUser[1], proofUser1)).to.not.be
         .reverted;
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.be.revertedWith(
-        "redeemer/already-claimed"
+      await expect(ajnaRedeemer.connect(user1).claim(currentIndex + 1, dataForFirstUser[1], proofUser1))
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user1Address, currentIndex + 1, dataForFirstUser[1], proofUser1);
+
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex, dataForFirstUser[1], proofUser1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex + 1, dataForFirstUser[1], proofUser1)).to.equal(
+        false
+      );
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex + 1)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(user1Address)).to.eql((dataForFirstUser[1] as BigNumber).mul(2));
+
+      // User 2
+      const proofUser2 = tree.getHexProof(leaves[2]);
+
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex, dataForSecondUser[1], proofUser2)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex + 1, dataForSecondUser[1], proofUser2)).to.equal(
+        true
       );
 
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
-        BigNumber.from(dataForFirstUser[1])
+      await expect(ajnaRedeemer.connect(user2).claim(currentIndex, dataForSecondUser[1], proofUser2)).to.not.be
+        .reverted;
+      await expect(ajnaRedeemer.connect(user2).claim(currentIndex, dataForSecondUser[1], proofUser2))
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user2Address, currentIndex, dataForSecondUser[1], proofUser2);
+      await expect(ajnaRedeemer.connect(user2).claim(currentIndex + 1, dataForSecondUser[1], proofUser2)).to.not.be
+        .reverted;
+      await expect(ajnaRedeemer.connect(user2).claim(currentIndex + 1, dataForSecondUser[1], proofUser2))
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user2Address, currentIndex + 1, dataForSecondUser[1], proofUser2);
+
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex, dataForSecondUser[1], proofUser2)).to.equal(
+        false
       );
-    });
-
-    it(`should claim ${config.weeksCount} past weeks (gas check)`, async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-
-      let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-      const weeks = [];
-      const amounts = [];
-      const proofs = [];
-
-      for (let i = 0; i < config.weeksCount; i++) {
-        await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await time.increase(WEEK);
-        weeks.push(currentWeek);
-        currentWeek = Number(currentWeek) + 1;
-        amounts.push(dataForFirstUser[1]);
-        proofs.push(proof);
-      }
-
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.not.be.reverted;
-
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
-        BigNumber.from(dataForFirstUser[1]).mul(config.weeksCount)
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex + 1, dataForSecondUser[1], proofUser2)).to.equal(
+        false
       );
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex + 1)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(user2Address)).to.eql((dataForSecondUser[1] as BigNumber).mul(2));
     });
   });
 
   describe("Multiple Claim", () => {
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify the users balance after claim", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUser, firstUserAddress, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+    it("Should not claim if parameters are empty", async () => {
+      const { ajnaRedeemer, randomUser } = await loadFixture(deployBaseFixture);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])).to.not
-        .be.reverted;
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/already-claimed");
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(dataForFirstUser[1]);
+      await expect(ajnaRedeemer.connect(randomUser).claimMultiple([], [], []))
+        .to.be.revertedWith("ClaimMultipleEmpty")
+        .withArgs([], [], []);
     });
-    it("shouldn't claim if insufficient funds", async () => {
-      const { ajnaRedeemer, ajnaToken, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+    it("Should not claim if parameters have different lengths", async () => {
+      const { ajnaRedeemer, randomUser } = await loadFixture(deployBaseFixture);
 
-      const balanceToBurn = await ajnaToken.balanceOf(ajnaRedeemer.address);
-      await ajnaToken.burn(ajnaRedeemer.address, balanceToBurn);
+      // TODO: Cannot compare the return parameters of the ClaimMultipleLengthMismatch because the matchers get
+      // TODO: confused with the format of the proof
+
+      await expect(ajnaRedeemer.connect(randomUser).claimMultiple([77], [34, 35], [proof, proof])).to.be.revertedWith(
+        "ClaimMultipleLengthMismatch"
+      );
+
+      await expect(ajnaRedeemer.connect(randomUser).claimMultiple([77, 78], [34], [proof, proof])).to.be.revertedWith(
+        "ClaimMultipleLengthMismatch"
+      );
 
       await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
+        ajnaRedeemer.connect(randomUser).claimMultiple([77, 78], [dataForFirstUser[1], dataForFirstUser[1]], [proof])
+      ).to.be.revertedWith("ClaimMultipleLengthMismatch");
+    });
+
+    it("Should not claim if user is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      await expect(
+        ajnaRedeemer
+          .connect(randomUser)
+          .claimMultiple([currentIndex, currentIndex + 1], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
+      )
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(randomUser.address, currentIndex, dataForFirstUser[1], proof);
+    });
+
+    it("Should not claim if index is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(
+        ajnaRedeemer
+          .connect(testUser)
+          .claimMultiple(
+            [currentIndex + 1, currentIndex + 2],
+            [dataForFirstUser[1], dataForFirstUser[1]],
+            [proof, proof]
+          )
+      )
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex + 2, dataForFirstUser[1], proof);
+    });
+
+    it("Should not claim if amount is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const wrongAmount = (dataForFirstUser[1] as BigNumber).add(1);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, wrongAmount, proof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex, wrongAmount, proof);
+    });
+
+    it("Should not claim if proof is not correct", async () => {
+      const currentIndex = 66;
+      const { ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const wrongProof = tree.getHexProof(leaves[2]);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      await expect(ajnaRedeemer.connect(testUser).claim(currentIndex, dataForFirstUser[1], wrongProof))
+        .to.be.revertedWith("UserCannotClaim")
+        .withArgs(testUserAddress, currentIndex, dataForFirstUser[1], wrongProof);
+    });
+
+    it("Should not claim if redeemer has not enough tokens", async () => {
+      const currentIndex = 66;
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const testUser = ethers.provider.getSigner(dataForFirstUser[0] as string);
+      await expect(
+        ajnaRedeemer
+          .connect(testUser)
+          .claimMultiple([currentIndex, currentIndex + 1], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
+      ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+
+      const totalAmount = (dataForFirstUser[1] as BigNumber).mul(2);
+      await ajnaToken.transfer(ajnaRedeemer.address, totalAmount.sub(1));
+
+      await expect(
+        ajnaRedeemer
+          .connect(testUser)
+          .claimMultiple([currentIndex, currentIndex + 1], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
       ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
     });
-    it("shouldn't claim if there are no week numbers provided", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+    it("Should not be allowed to claim same week in same call", async () => {
+      const currentIndex = 66;
 
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/cannot-claim-zero");
-    });
-    it("shouldn't claim with mismatched data lengths", async () => {
-      const { ajnaRedeemer, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
 
-      await expect(
-        ajnaRedeemer.connect(firstUser).claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/invalid-params");
-    });
-    it("shouldn't allow a random user to use someone's elses claim, using same input", async () => {
-      const { ajnaToken, ajnaRedeemer, randomUser, firstUserAddress, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      const totalAmount = (dataForFirstUser[1] as BigNumber).mul(2);
+      await ajnaToken.transfer(ajnaRedeemer.address, totalAmount);
 
-      await expect(
-        ajnaRedeemer.connect(randomUser).claimMultiple([currentWeek], [dataForFirstUser[1]], [proof])
-      ).to.be.revertedWith("redeemer/cannot-claim");
-
-      expect(await ajnaToken.connect(randomUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
-    });
-    it("not allow to claim twice the same week - in one call", async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex + 1, dataForFirstUser[1], proof)).to.equal(
+        true
+      );
 
       await expect(
         ajnaRedeemer
-          .connect(firstUser)
-          .claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
-      ).to.be.reverted;
+          .connect(testUser)
+          .claimMultiple([currentIndex, currentIndex], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
+      )
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(testUserAddress, currentIndex, dataForFirstUser[1], proof);
+    });
+
+    it("Should claim the reward and marked it as claimed, no second claimed allowed", async () => {
+      const currentIndex = 66;
+
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const testUserAddress = dataForFirstUser[0] as string;
+      const testUser = ethers.provider.getSigner(testUserAddress);
+
+      const totalAmount = (dataForFirstUser[1] as BigNumber).mul(2);
+      await ajnaToken.transfer(ajnaRedeemer.address, totalAmount);
+
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex + 1, dataForFirstUser[1], proof)).to.equal(
+        true
+      );
+
       await expect(
         ajnaRedeemer
-          .connect(firstUser)
-          .claimMultiple([currentWeek, currentWeek], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
-      ).to.be.reverted;
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(ethers.utils.parseEther("0"));
+          .connect(testUser)
+          .claimMultiple([currentIndex, currentIndex + 1], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
+      ).to.not.be.reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(testUser)
+          .claimMultiple([currentIndex, currentIndex + 1], [dataForFirstUser[1], dataForFirstUser[1]], [proof, proof])
+      )
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(testUserAddress, currentIndex, dataForFirstUser[1], proof);
+
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex, dataForFirstUser[1], proof)).to.equal(false);
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex)).to.equal(true);
+      expect(await ajnaRedeemer.connect(testUser).canClaim(currentIndex + 1, dataForFirstUser[1], proof)).to.equal(
+        false
+      );
+      expect(await ajnaRedeemer.hasClaimed(testUserAddress, currentIndex + 1)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(testUserAddress)).to.eql(totalAmount);
     });
-    it("should claim the reward and flip the hasClaimed flag - revert on second try - verify ALL users balances after claim - contract balance to be 0", async () => {
-      const { ajnaToken, ajnaRedeemer, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
 
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
+    it("Should claim for 2 users, 2 indices", async () => {
+      const currentIndex = 66;
 
-      for (let i = 0; i < dummyProcessedSnaphot.length; i++) {
-        await network.provider.request({
-          method: "hardhat_impersonateAccount",
-          params: [dummyProcessedSnaphot[i].address],
-        });
-        const randomUser = ethers.provider.getSigner(dummyProcessedSnaphot[i].address);
-        const randomUserAddress = await randomUser.getAddress();
-        const proofForRandomUserFromDummyProcessedSnaphot = tree.getHexProof(leaves[i]);
+      const { ajnaToken, ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);
+
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex, root);
+      await ajnaRedeemer.connect(partner).addRoot(currentIndex + 1, root);
+
+      const user1Address = dataForFirstUser[0] as string;
+      const user1 = ethers.provider.getSigner(user1Address);
+      const user2Address = dataForSecondUser[0] as string;
+      const user2 = ethers.provider.getSigner(user2Address);
+
+      const totalAmount = (dataForFirstUser[1] as BigNumber).add(dataForSecondUser[1] as BigNumber).mul(2);
+
+      await ajnaToken.transfer(ajnaRedeemer.address, totalAmount);
+
+      // User 1
+      const proofUser1 = tree.getHexProof(leaves[1]);
+
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex, dataForFirstUser[1], proofUser1)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex + 1, dataForFirstUser[1], proofUser1)).to.equal(
+        true
+      );
+
+      await expect(
+        ajnaRedeemer
+          .connect(user1)
+          .claimMultiple(
+            [currentIndex, currentIndex + 1],
+            [dataForFirstUser[1], dataForFirstUser[1]],
+            [proofUser1, proofUser1]
+          )
+      ).to.not.be.reverted;
+      await expect(
+        ajnaRedeemer
+          .connect(user1)
+          .claimMultiple(
+            [currentIndex, currentIndex + 1],
+            [dataForFirstUser[1], dataForFirstUser[1]],
+            [proofUser1, proofUser1]
+          )
+      )
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user1Address, currentIndex, dataForFirstUser[1], proofUser1);
+
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex, dataForFirstUser[1], proofUser1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user1).canClaim(currentIndex + 1, dataForFirstUser[1], proofUser1)).to.equal(
+        false
+      );
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user1Address, currentIndex + 1)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(user1Address)).to.eql((dataForFirstUser[1] as BigNumber).mul(2));
+
+      // User 2
+      const proofUser2 = tree.getHexProof(leaves[2]);
+
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex, dataForSecondUser[1], proofUser2)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex + 1)).to.equal(false);
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex + 1, dataForSecondUser[1], proofUser2)).to.equal(
+        true
+      );
+
+      await expect(
+        ajnaRedeemer
+          .connect(user2)
+          .claimMultiple(
+            [currentIndex, currentIndex + 1],
+            [dataForSecondUser[1], dataForSecondUser[1]],
+            [proofUser2, proofUser2]
+          )
+      ).to.not.be.reverted;
+
+      await expect(
+        ajnaRedeemer
+          .connect(user2)
+          .claimMultiple(
+            [currentIndex, currentIndex + 1],
+            [dataForSecondUser[1], dataForSecondUser[1]],
+            [proofUser2, proofUser2]
+          )
+      )
+        .to.be.revertedWith("UserAlreadyClaimed")
+        .withArgs(user2Address, currentIndex, dataForSecondUser[1], proofUser2);
+
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex, dataForSecondUser[1], proofUser2)).to.equal(
+        false
+      );
+      expect(await ajnaRedeemer.connect(user2).canClaim(currentIndex + 1, dataForSecondUser[1], proofUser2)).to.equal(
+        false
+      );
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex)).to.equal(true);
+      expect(await ajnaRedeemer.hasClaimed(user2Address, currentIndex + 1)).to.equal(true);
+
+      expect(await ajnaToken.balanceOf(user2Address)).to.eql((dataForSecondUser[1] as BigNumber).mul(2));
+    });
+
+    describe("emergencyWithdraw", () => {
+      it("Shouldn't allow a random user to withdraw", async () => {
+        const { ajnaRedeemer, ajnaToken, randomUser } = await loadFixture(deployBaseFixture);
+
+        await ajnaToken.transfer(ajnaRedeemer.address, totalWeekAmount);
+
         await expect(
-          ajnaRedeemer
-            .connect(randomUser)
-            .claimMultiple(
-              [currentWeek],
-              [dummyProcessedSnaphot[i].amount],
-              [proofForRandomUserFromDummyProcessedSnaphot]
-            )
-        ).to.not.be.reverted;
+          ajnaRedeemer.connect(randomUser).emergencyWithdraw(ajnaToken.address, randomUser.address, totalWeekAmount)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+      it("Should allow partner to withdraw tokens", async () => {
+        const { ajnaToken, ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
 
-        await expect(
-          ajnaRedeemer
-            .connect(randomUser)
-            .claimMultiple(
-              [currentWeek],
-              [dummyProcessedSnaphot[i].amount],
-              [proofForRandomUserFromDummyProcessedSnaphot]
-            )
-        ).to.be.reverted;
-        expect(await ajnaToken.connect(randomUser).balanceOf(randomUserAddress)).to.eql(
-          dummyProcessedSnaphot[i].amount
-        );
-        await network.provider.request({
-          method: "hardhat_stopImpersonatingAccount",
-          params: [dummyProcessedSnaphot[i].address],
-        });
-      }
-      expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.eql(BigNumber.from(0));
-    });
-    it(`should NOT claim ${config.weeksCount} past weeks (gas check)`, async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
+        await ajnaToken.transfer(ajnaRedeemer.address, totalWeekAmount);
 
-      let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-      const weeks = [];
-      const amounts = [];
-      const proofs = [];
+        expect(await ajnaToken.balanceOf(randomUser.address)).to.equal(0);
 
-      for (let i = 0; i < config.weeksCount; i++) {
-        await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await time.increase(WEEK);
-        weeks.push(currentWeek);
-        currentWeek = Number(currentWeek) + 1;
-        amounts.push(dataForFirstUser[1]);
-        proofs.push(proof);
-      }
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple([weeks[0]], [amounts[0]], [proofs[0]])).to.not.be
-        .reverted;
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.be.revertedWith(
-        "redeemer/already-claimed"
-      );
+        await ajnaRedeemer.connect(partner).emergencyWithdraw(ajnaToken.address, randomUser.address, totalWeekAmount);
 
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
-        BigNumber.from(dataForFirstUser[1])
-      );
-    });
-
-    it(`should claim ${config.weeksCount} past weeks (gas check)`, async () => {
-      const { ajnaToken, ajnaRedeemer, firstUserAddress, firstUser, operator } = await loadFixture(deployBaseFixture);
-
-      let currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-      const weeks = [];
-      const amounts = [];
-      const proofs = [];
-
-      for (let i = 0; i < config.weeksCount; i++) {
-        await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-        await time.increase(WEEK);
-        weeks.push(currentWeek);
-        currentWeek = Number(currentWeek) + 1;
-        amounts.push(dataForFirstUser[1]);
-        proofs.push(proof);
-      }
-
-      await expect(ajnaRedeemer.connect(firstUser).claimMultiple(weeks, amounts, proofs)).to.not.be.reverted;
-
-      expect(await ajnaToken.connect(firstUser).balanceOf(firstUserAddress)).to.eql(
-        BigNumber.from(dataForFirstUser[1]).mul(config.weeksCount)
-      );
-    });
-  });
-  describe("AccessControl", () => {
-    it("should return no admin for DEFAULT_ADMIN_ROLE", async () => {
-      const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
-
-      expect(
-        await ajnaRedeemer.getRoleAdmin(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]))
-      ).to.be.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
-    });
-  });
-  describe("emergencyWithdraw", () => {
-    it("should allow the operator to withdraw to dripper contract - confirm company wallet balance after", async () => {
-      const { ajnaToken, ajnaRedeemer, owner, ajnaDripper, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      const beneficiaryBalanceBefore = await ajnaToken.balanceOf(ajnaDripper.address);
-      const redeemerBalanceBefore = await ajnaToken.balanceOf(ajnaRedeemer.address);
-
-      await ajnaRedeemer.connect(owner).emergencyWithdraw();
-      const beneficiaryBalanceAfter = await ajnaToken.balanceOf(ajnaDripper.address);
-
-      expect(beneficiaryBalanceAfter.sub(beneficiaryBalanceBefore)).to.eql(redeemerBalanceBefore);
-    });
-    it("shouldn't allow a random user to withdraw", async () => {
-      const { ajnaRedeemer, randomUser, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-
-      await expect(ajnaRedeemer.connect(randomUser).emergencyWithdraw()).to.be.reverted;
-    });
-  });
-  describe("changeOperator", () => {
-    it("should not allow the operator (deployer) to grant operator role", async () => {
-      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(
-        ajnaRedeemer
-          .connect(owner)
-          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
-      ).to.be.reverted;
-    });
-    it("should not allow the operator (deployer) to grant admin role", async () => {
-      const { ajnaRedeemer, firstUserAddress, owner, operator } = await loadFixture(deployBaseFixture);
-      const currentWeek = (await ajnaRedeemer.getCurrentWeek()).toNumber();
-
-      await ajnaRedeemer.connect(operator).addRoot(currentWeek, root);
-      await expect(
-        ajnaRedeemer
-          .connect(owner)
-          .grantRole(ethers.utils.solidityKeccak256(["string"], ["DEFAULT_ADMIN_ROLE"]), firstUserAddress)
-      ).to.be.reverted;
+        expect(await ajnaToken.balanceOf(randomUser.address)).to.equal(totalWeekAmount);
+      });
     });
   });
 });

@@ -80,14 +80,14 @@ interface IRewardsRedeemer {
     /**
      * @notice Checks if the user can claim rewards for a given week
      * 
-     * @param proof The merkle proof for the user
-     * @param week The week number to check
+     * @param index The index to check
      * @param amount The amount to check
+     * @param proof The merkle proof for the user
      */
     function canClaim(
-        bytes32[] memory proof,
-        uint256 week,
-        uint256 amount
+        uint256 index,
+        uint256 amount,
+        bytes32[] memory proof
     ) external view returns (bool);
 
     /**
@@ -107,14 +107,14 @@ interface IRewardsRedeemer {
     /**
      * @notice Claims rewards for several weeks at once
      *
-     * @param weekIds The week numbers to claim
+     * @param indices The indices to claim
      * @param amounts The amounts to claim for each week
      * @param proofs The merkle proofs for each week
      * 
      * @dev The root hash is the hash of the merkle tree root node
      */
     function claimMultiple(
-        uint256[] calldata weekIds,
+        uint256[] calldata indices,
         uint256[] calldata amounts,
         bytes32[][] calldata proofs
     ) external;

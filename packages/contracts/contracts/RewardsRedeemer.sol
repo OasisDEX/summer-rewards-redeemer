@@ -10,6 +10,8 @@ import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerklePr
 import { OwnableUpgradeable as Ownable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+import "hardhat/console.sol";
+
 /** See IRewardsRedeemer.sol */
 contract RewardsRedeemer is IRewardsRedeemer, Ownable {
     using BitMaps for BitMaps.BitMap;
@@ -61,11 +63,11 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
 
     /* @inheritdoc IRewardsRedeemer */
     function canClaim(
-        bytes32[] memory proof,
         uint256 index,
-        uint256 amount
+        uint256 amount,
+        bytes32[] memory proof
     ) external view returns (bool) {
-        return _couldClaim(proof, index, amount) && !hasClaimed(_msgSender(), index);
+        return _couldClaim(index, amount, proof) && !hasClaimed(_msgSender(), index);
     }
 
     /* @inheritdoc IRewardsRedeemer */
@@ -122,9 +124,9 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
      * @dev This function does not take into account whether the user has already claimed the given index
      */
     function _couldClaim(
-        bytes32[] memory proof,
         uint256 index,
-        uint256 amount
+        uint256 amount,
+        bytes32[] memory proof
     ) internal view returns (bool) {
         bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), amount));
         return MerkleProof.verify(proof, roots[index], leaf);
@@ -144,7 +146,7 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
         uint256 amount,
         bytes32[] memory proof
     ) internal view {
-        if (!_couldClaim(proof, index, amount)) {
+        if (!_couldClaim(index, amount, proof)) {
             revert UserCannotClaim(_msgSender(), index, amount, proof);
         }
 
