@@ -22,7 +22,7 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
       console.error(`Day ID ${dayId} - cant process current or future day`);
       continue;
     }
-    console.log(`Processing daily claims for day ${dayId}`);
+    console.info(`Processing daily claims for day ${dayId}`);
 
     const parsedSnapshot: ParsedSnapshot = await getDailySnapshot(dayId);
     const snapshot: Snapshot = parsedSnapshot.map((entry) => ({

@@ -14,7 +14,7 @@ export async function processWeeklySnapshotInDb(
 ) {
   await prisma.$transaction(async () => {
     try {
-      console.log(chalk.gray(`Adding week #${currentWeek} to the db. Chain ID: ${config.chainId}`));
+      console.info(chalk.gray(`Adding week #${currentWeek} to the db. Chain ID: ${config.chainId}`));
       await prisma.ajnaRewardsMerkleTree.create({
         data: { tree_root: root, week_number: Number(currentWeek), chain_id: config.chainId },
       });
@@ -52,7 +52,7 @@ export async function processWeeklySnapshotInDb(
       });
     });
 
-    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}`));
+    console.info(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}`));
     try {
       await prisma.$transaction(snapshotEntries);
     } catch (error) {
@@ -65,7 +65,7 @@ export async function processWeeklySnapshotInDb(
 export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: number): Promise<void> {
   const currentWeek = Math.floor(currentDay / 7);
   const weeklyClaimEntriesTx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];
-  console.log(chalk.gray(`Adding day #${currentDay} to the db`));
+  console.info(chalk.gray(`Adding day #${currentDay} to the db`));
   await Promise.all(
     snapshot.map(async (entry) => {
       // Check if a weekly claim already exists for the current week and user address
@@ -129,7 +129,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
     week_number: currentWeek,
     chain_id: config.chainId,
   }));
-  console.log(
+  console.info(
     chalk.gray(`Adding ${dailyClaimEntries.length} daily claim entries to the database. Chain ID: ${config.chainId}`)
   );
   // Execute the database transactions
@@ -141,7 +141,7 @@ export async function processDailySnapshotInDb(snapshot: Snapshot, currentDay: n
     }),
   ]);
 
-  console.log(
+  console.info(
     //@ts-ignore
     chalk.gray(`Added ${res[res.length - 1].count} daily claim entries to the database. Chain ID: ${config.chainId}`)
   );

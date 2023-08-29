@@ -2,14 +2,20 @@ import fs from "fs";
 
 import { calculateDailySnapshot, calculateWeeklySnapshot } from "../get-snapshot";
 import { fetchWeeklyData, fetchDailyData } from "common/utils/graph.utils";
+import { get } from "http";
+import { getRewardDistributions } from "common";
 async function getTestData() {
   // Define the weeks and days to generate snapshots for
   const weeks = [2791, 2790, 2789, 2788, 2787, 2786, 2785];
 
   // Generate snapshots for each week and day
   for (const week of weeks) {
-    const data = await fetchWeeklyData(week);
-    const weeklySnapshot = calculateWeeklySnapshot(data, week);
+    const rewardDistributions = getRewardDistributions(week);
+    const data = await fetchWeeklyData(
+      week,
+      rewardDistributions.map((pool) => pool.address)
+    );
+    const weeklySnapshot = calculateWeeklySnapshot(data, week, rewardDistributions);
 
     // Save the input data and resulting snapshot as JSON files
     const weeklyDataFilename = `weekly-data-${week}.json`;
@@ -18,9 +24,12 @@ async function getTestData() {
     fs.writeFileSync(weeklySnapshotFilename, JSON.stringify(weeklySnapshot));
     data.week?.days?.forEach(async (d) => {
       const day = +d.id;
-      const dailyData = await fetchDailyData(day);
+      const dailyData = await fetchDailyData(
+        day,
+        rewardDistributions.map((pool) => pool.address)
+      );
       console.log(`processing day ${day} from week : ${week}`);
-      const dailySnapshot = calculateDailySnapshot(dailyData, day);
+      const dailySnapshot = calculateDailySnapshot(dailyData, day, rewardDistributions);
 
       // Save the input data and resulting snapshot as JSON files
       const weeklyDataFilename = `daily-data-${day}.json`;

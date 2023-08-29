@@ -47,7 +47,7 @@ export const getOrDeployContract = async <T extends Contract>(contractName: stri
   if (config.addresses[getCorrectName(contractName)] === ethers.constants.AddressZero) {
     contract = await deployContract(contractName, args);
   } else {
-    console.info(`${contractName} already deployed`);
+    console.log(`${contractName} already deployed`);
     contract = await getContract(contractName, config.addresses[getCorrectName(contractName)]);
   }
   return contract;

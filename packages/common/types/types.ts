@@ -46,10 +46,6 @@ export enum Network {
   Goerli = "goerli",
 }
 
-export type RewardDistributions = {
-  [network in Network]: Distribution[];
-};
-
 export type Addresses = {
   [network in Network]: {
     [contractName: string]: string;
@@ -57,6 +53,8 @@ export type Addresses = {
 };
 
 export interface Config {
+  environment: string;
+  loggingEnabled: boolean;
   earnRewardsRatio: number;
   borrowRewardsRatio: number;
   rewardStartWeek: number;

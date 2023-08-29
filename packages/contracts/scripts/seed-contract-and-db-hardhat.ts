@@ -3,7 +3,7 @@ import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
 
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
-import { config } from "common/config/config";
+import { config, getRewardDistributions } from "common/config/config";
 import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
@@ -19,7 +19,7 @@ async function main() {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
     await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
   } catch (error) {
-    console.info("No previous data to delete");
+    console.log("No previous data to delete");
   }
 
   const files = fs.readdirSync(dataDir).filter((file: any) => /^weekly-data-\d+.json$/.test(file));
@@ -45,7 +45,8 @@ async function main() {
   // add the weekly roots and weekly claims for all the users from the list
   for (let i = 0; i < files.length; i++) {
     console.log(chalk.dim(`Processing week ${weekIds[i]}`));
-    const result = calculateWeeklySnapshot(data[i], weekIds[i]);
+    const rewardDistributions = getRewardDistributions(weekIds[i]);
+    const result = calculateWeeklySnapshot(data[i], weekIds[i], rewardDistributions);
     const snapshot: Snapshot = result.map((user) => ({
       address: user.address,
       amount: BigNumber.from(user.amount),
@@ -94,7 +95,9 @@ async function main() {
       };
     });
 
-    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`));
+    config.loggingEnabled
+      ? console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`))
+      : null;
     await prisma.ajnaRewardsWeeklyClaim.createMany({
       data: snapshotEntries,
       skipDuplicates: true,

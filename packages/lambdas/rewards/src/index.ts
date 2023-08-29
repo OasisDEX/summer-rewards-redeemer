@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       proof: tree.getHexProof(leaves[index]),
     }));
     let res = graphRes ? JSON.stringify({ tree, root, parsedSnapshotWithProofs }) : "{}";
-console.log("Time taken: ", Date.now() - startTime);
+    console.info("Time taken: ", Date.now() - startTime);
     return {
       statusCode: 200,
       body: res,

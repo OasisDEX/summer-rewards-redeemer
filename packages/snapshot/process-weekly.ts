@@ -31,11 +31,11 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
     });
 
     if (existingWeek) {
-      console.log(`Week ${weekId} has already been processed. Chain ID: ${config.chainId}`);
+      console.info(`Week ${weekId} has already been processed. Chain ID: ${config.chainId}`);
       continue;
     }
 
-    console.log(`Processing weekly claims for week ${weekId}. Chain ID: ${config.chainId}`);
+    console.info(`Processing weekly claims for week ${weekId}. Chain ID: ${config.chainId}`);
 
     const rewardDistributions = getRewardDistributions(weekId);
     const parsedSnapshot: ParsedSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
