@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity 0.8.19;
 
-// Uncomment this line to use console.log
-
-//import "hardhat/console.sol";
 import { IRewardsRedeemerFactory } from "./interfaces/IRewardsRedeemerFactory.sol";
 
 import { IRewardsRedeemer } from "./interfaces/IRewardsRedeemer.sol";
