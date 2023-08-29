@@ -3,7 +3,7 @@ query WeeklyPartnerRewards($week: ID!, $pools: [ID!]!) {
     id
     days {
       id
-      borrowDailyRewards(first: 1000, where: { pool_: { id_in: $pools } }) {
+      borrowDailyRewards(first: 5000, where: { pool_: { id_in: $pools } }) {
         id
         pool {
           id
@@ -13,7 +13,7 @@ query WeeklyPartnerRewards($week: ID!, $pools: [ID!]!) {
         }
         reward
       }
-      earnDailyRewards(first: 1000, where: { pool_: { id_in: $pools } }) {
+      earnDailyRewards(first: 5000, where: { pool_: { id_in: $pools } }) {
         id
         pool {
           id
