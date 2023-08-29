@@ -1,9 +1,8 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
-import dotenv from "dotenv";
 import { Addresses, Config, Distribution, Network } from "../types/types";
 
-dotenv.config();
+import "../bootstrap-env";
 
 const originalLog = console.info;
 console.info = (message: any, ...optionalParams: any[]) => {
@@ -42,7 +41,7 @@ export const addresses: Addresses = {
 export const config: Config = {
   environment: process.env.NODE_ENV || "production",
   get loggingEnabled() {
-    return false
+    return this.environment === "production";
   },
   earnRewardsRatio: 0.6,
   borrowRewardsRatio: 0.4,
@@ -52,6 +51,7 @@ export const config: Config = {
   weeksCount: 50,
   usedNetwork: process.env.NETWORK_USED,
   get network() {
+
     if (this.usedNetwork) {
       return this.usedNetwork as Network;
     } else {

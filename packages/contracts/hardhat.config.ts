@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
       chainId: 2137,
       forking: {
         url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
-        blockNumber: 9265714,
+        blockNumber: 17950835,
       },
       mining: {
         auto: true,
