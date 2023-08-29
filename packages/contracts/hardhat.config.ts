@@ -47,20 +47,20 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
       gas: "auto",
     },
-    // hardhat: {
-    //   chainId: 2137,
-    //   forking: {
-    //     url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
-    //     blockNumber: 9265714,
-    //   },
-    //   mining: {
-    //     auto: true,
-    //   },
-    //   hardfork: "london",
-    //   gas: "auto",
-    //   initialBaseFeePerGas: 1000000000,
-    //   allowUnlimitedContractSize: true,
-    // },
+    hardhat: {
+      chainId: 2137,
+      forking: {
+        url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
+        blockNumber: 9265714,
+      },
+      mining: {
+        auto: true,
+      },
+      hardfork: "london",
+      gas: "auto",
+      initialBaseFeePerGas: 1000000000,
+      allowUnlimitedContractSize: true,
+    },
   },
   defaultNetwork: "hardhat",
   gasReporter: {
