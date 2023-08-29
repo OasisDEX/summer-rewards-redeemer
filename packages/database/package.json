@@ -1,0 +1,16 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "npx prisma generate",
+    "ngrok:start": "yarn db:start && ngrok tcp 5432"
+  },
+  "dependencies": {
+    "@prisma/client": "4.16.1"
+  },
+  "devDependencies": {
+    "prisma": "^4.12.0"
+  }
+}

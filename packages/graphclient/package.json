@@ -1,0 +1,11 @@
+{
+  "name": "graphclient",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "graphclient build"
+  },
+  "devDependencies": {
+    "@graphprotocol/client-cli": "^3.0.0"
+  }
+}

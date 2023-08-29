@@ -2,8 +2,6 @@ node_modules
 .env
 coverage
 coverage.json
-typechain
-typechain-types
 
 #Hardhat files
 cache
@@ -16,3 +14,9 @@ out
 lib
 .graphclient
 dist
+**/.turbo
+**/.turbo-build
+**/.turbo-cache
+**/node_modules
+**/.graphclient
+**/dist
