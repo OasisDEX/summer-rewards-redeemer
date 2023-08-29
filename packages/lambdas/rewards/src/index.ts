@@ -10,20 +10,18 @@ interface CallBody {
   totalWeeklyRewards: string;
 }
 
+interface ErrorResponse {
+  error: string;
+}
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     if (!event.body) {
-      return {
-        statusCode: 400,
-        body: "No body provided",
-      };
+      return createErrorResponse("No body provided");
     }
-    const parsedBody: CallBody = JSON.parse(event.body);
-    if (!isCallBody(parsedBody)) {
-      return {
-        statusCode: 400,
-        body: "Invalid body provided",
-      };
+    const parsedBody = parseCallBody(event.body);
+    if (!parsedBody) {
+      return createErrorResponse("Invalid body provided");
     }
     const graphRes = await fetchWeeklyData(
       parsedBody.weekId,
@@ -48,20 +46,46 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ...entry,
       proof: tree.getHexProof(leaves[index]),
     }));
-    let res = graphRes ? JSON.stringify({ root, parsedSnapshotWithProofs }) : "{}";
-    return {
-      statusCode: 200,
-      body: res,
-    };
+    const responseBody = JSON.stringify({ root, parsedSnapshotWithProofs });
+    return createSuccessResponse(responseBody);
   } catch (error) {
     console.error("Error", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify(error),
-    };
+    return createErrorResponse("Internal server error", 500);
   }
 };
 
+function parseCallBody(body: string): CallBody | null {
+  try {
+    const parsedBody = JSON.parse(body) as CallBody;
+    if (isCallBody(parsedBody)) {
+      return parsedBody;
+    }
+  } catch (error) {
+    console.error("Error parsing body", error);
+  }
+  return null;
+}
+
 function isCallBody(body: any): body is CallBody {
   return typeof body === "object" && body !== null && "weekId" in body && "distribution" in body;
+}
+
+function createSuccessResponse(body: string): APIGatewayProxyResult {
+  return {
+    statusCode: 200,
+    body,
+  };
+}
+
+function createErrorResponse(error: unknown, statusCode?: number): APIGatewayProxyResult {
+  const responseBody: ErrorResponse = { error: "Unknown error" };
+  if (typeof error === "object" && error !== null && "message" in error && typeof error.message === "string") {
+    responseBody.error = error.message;
+  } else if (typeof error === "string") {
+    responseBody.error = error;
+  }
+  return {
+    statusCode: statusCode || 400,
+    body: JSON.stringify(responseBody),
+  };
 }

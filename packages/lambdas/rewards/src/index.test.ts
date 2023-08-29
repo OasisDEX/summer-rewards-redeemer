@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyEvent } from "aws-lambda";
 import { describe, jest, test } from "@jest/globals";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { weeklyRewardData } from "common/utils/data";
@@ -28,13 +28,13 @@ describe("Run handler", () => {
   beforeEach(() => {
     inputEvent = testEvent;
   });
-  beforeEach(async () => {
+  beforeAll(async () => {
     setupGraphStub(weeklyRewardData, "weeklyPartner");
   });
-  afterEach(async () => {
+  afterAll(async () => {
     sinon.restore();
   });
-  test("Process merkle tree", async () => {
+  test("should return a success response if a valid body is provided", async () => {
     inputEvent.body = JSON.stringify({
       weekId: 2795,
       distribution: testDistributions.map((distribution) => ({
@@ -43,14 +43,30 @@ describe("Run handler", () => {
       })),
       totalWeeklyRewards: "1000000000000000000000000",
     });
-    const processed = await handler(inputEvent);
+    const response = await handler(inputEvent);
     const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedSnapshotWithProofs } = JSON.parse(
-      processed.body
+      response.body
     );
+    expect(response.statusCode).toEqual(200);
+    expect(JSON.parse(response.body)).toHaveProperty("root");
+    expect(JSON.parse(response.body)).toHaveProperty("parsedSnapshotWithProofs");
     expect(parsedResponse.root).toEqual("0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38");
+
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
   });
 
-  jest.setTimeout(100000); // 100 seconds
+  it("should return an error response if no body is provided", async () => {
+    inputEvent.body = "";
+    const response = await handler(inputEvent);
+    expect(response.statusCode).toEqual(400);
+    expect(JSON.parse(response.body)).toEqual({ error: "No body provided" });
+  });
+
+  it("should return an error response if an invalid body is provided", async () => {
+    inputEvent.body = '{ "invalid": "body" }';
+    const response = await handler(inputEvent);
+    expect(response.statusCode).toEqual(400);
+    expect(JSON.parse(response.body)).toEqual({ error: "Invalid body provided" });
+  });
 });
