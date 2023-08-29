@@ -1,10 +1,9 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { RewardsRedeemer, RewardsRedeemerFactory } from "typechain-types";
-import { ethers } from "hardhat";
+import { RewardsRedeemer, RewardsRedeemerFactory, RewardsRedeemer__factory } from "typechain-types";
+import { Signer } from "ethers";
 
 export async function createRedeemer(
   factory: RewardsRedeemerFactory,
-  partner: SignerWithAddress,
+  partner: Signer,
   rewardsTokenAddress: string
 ): Promise<RewardsRedeemer> {
   const tx = await factory.connect(partner).createRewardsRedeemer(rewardsTokenAddress);
@@ -24,7 +23,7 @@ export async function createRedeemer(
 
   const [rewardsRedeemerAddress] = event?.args;
 
-  const rewardsRedeemer = (await ethers.getContractAt("RewardsRedeemer", rewardsRedeemerAddress)) as RewardsRedeemer;
+  const rewardsRedeemer = new RewardsRedeemer__factory(partner).attach(rewardsRedeemerAddress);
 
   return rewardsRedeemer;
 }
