@@ -21,7 +21,7 @@ contract RewardsRedeemerFactory is IRewardsRedeemerFactory, AccessControl {
     // solhint-disable-next-line var-name-mixedcase
     address public immutable RewardsRedeemerTemplate;
 
-    mapping(address /* partner */ => IRewardsRedeemer /* redeemer */) public redeemers;
+    mapping(address partner => IRewardsRedeemer redeemer) public redeemers;
 
     constructor() {
         _setupRole(ADMIN_ROLE, msg.sender);
