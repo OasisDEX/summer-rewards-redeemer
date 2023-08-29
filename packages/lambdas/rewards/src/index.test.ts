@@ -1,13 +1,11 @@
+import sinon from "sinon";
+import { APIGatewayEvent } from "aws-lambda";
 import { describe, jest, test } from "@jest/globals";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { weeklyRewardData } from "common/utils/data";
-import sinon from "sinon";
-import { handler } from "./index";
-import testEvent from "../../events/unit-test-event.json";
-import { APIGatewayProxyEvent } from "aws-lambda";
-
-import MerkleTree from "merkletreejs";
 import { ParsedSnapshotWithProofs } from "common";
+import testEvent from "../../events/unit-test-event.json";
+import { handler } from "./index";
 
 const testDistributions = [
   { name: "RETH-DAI", address: "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", share: 0.09 },
@@ -26,7 +24,7 @@ const testDistributions = [
 ];
 
 describe("Run handler", () => {
-  let inputEvent: APIGatewayProxyEvent = testEvent;
+  let inputEvent: APIGatewayEvent = testEvent;
   beforeEach(() => {
     inputEvent = testEvent;
   });
@@ -46,8 +44,9 @@ describe("Run handler", () => {
       totalWeeklyRewards: "1000000000000000000000000",
     });
     const processed = await handler(inputEvent);
-    const parsedResponse: { tree: MerkleTree; root: string; parsedSnapshotWithProofs: ParsedSnapshotWithProofs } =
-      JSON.parse(processed.body);
+    const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedSnapshotWithProofs } = JSON.parse(
+      processed.body
+    );
     expect(parsedResponse.root).toEqual("0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38");
     sinon.assert.calledOnce(graphStub);
     sinon.restore();

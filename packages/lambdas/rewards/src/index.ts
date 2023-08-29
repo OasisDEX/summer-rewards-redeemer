@@ -11,7 +11,6 @@ interface CallBody {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const startTime = Date.now();
   try {
     if (!event.body) {
       return {
@@ -20,6 +19,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
     const parsedBody: CallBody = JSON.parse(event.body);
+    if (!isCallBody(parsedBody)) {
+      return {
+        statusCode: 400,
+        body: "Invalid body provided",
+      };
+    }
     const graphRes = await fetchWeeklyData(
       parsedBody.weekId,
       parsedBody.distribution.map((pool: any) => pool.address)
@@ -33,20 +38,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })),
       BigNumber.from(parsedBody.totalWeeklyRewards)
     );
-
     const { tree, leaves, root } = createMerkleTree(
       parsedSnapshot.map((entry) => ({
         address: entry.address,
         amount: BigNumber.from(entry.amount),
       }))
     );
-
     const parsedSnapshotWithProofs: ParsedSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
       ...entry,
       proof: tree.getHexProof(leaves[index]),
     }));
-    let res = graphRes ? JSON.stringify({ tree, root, parsedSnapshotWithProofs }) : "{}";
-    console.info("Time taken: ", Date.now() - startTime);
+    let res = graphRes ? JSON.stringify({ root, parsedSnapshotWithProofs }) : "{}";
     return {
       statusCode: 200,
       body: res,
@@ -55,7 +57,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     console.error("Error", error);
     return {
       statusCode: 500,
-      body: "",
+      body: JSON.stringify(error),
     };
   }
 };
+
+function isCallBody(body: any): body is CallBody {
+  return typeof body === "object" && body !== null && "weekId" in body && "distribution" in body;
+}

@@ -7,9 +7,8 @@
     "outDir": "dist",
     "declaration": true,
     "moduleResolution": "node",
-    "baseUrl": "./",
     "resolveJsonModule": true
   },
 
-  "files": ["rewards/src/*.ts"]
+  "files": ["./rewards/src/*.ts"]
 }
