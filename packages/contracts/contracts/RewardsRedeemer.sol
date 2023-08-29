@@ -10,8 +10,6 @@ import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerklePr
 import { OwnableUpgradeable as Ownable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-import "hardhat/console.sol";
-
 /** See IRewardsRedeemer.sol */
 contract RewardsRedeemer is IRewardsRedeemer, Ownable {
     using BitMaps for BitMaps.BitMap;
