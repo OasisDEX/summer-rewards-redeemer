@@ -1,6 +1,6 @@
 import sinon from "sinon";
-import { APIGatewayEvent, APIGatewayProxyEvent } from "aws-lambda";
-import { describe, jest, test } from "@jest/globals";
+import { APIGatewayProxyEvent } from "aws-lambda";
+import { describe, test } from "@jest/globals";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { weeklyRewardData } from "common/utils/data";
 import { ParsedSnapshotWithProofs } from "common";
@@ -24,7 +24,7 @@ const testDistributions = [
 ];
 
 describe("Run handler", () => {
-  let inputEvent: APIGatewayEvent = testEvent;
+  let inputEvent: APIGatewayProxyEvent = testEvent;
   beforeEach(() => {
     inputEvent = testEvent;
   });
