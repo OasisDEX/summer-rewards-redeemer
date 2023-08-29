@@ -48,7 +48,20 @@ async function deployBaseFixture() {
   };
 }
 
-describe.only("AjnaRedeemer", () => {
+describe("AjnaRedeemer", () => {
+  describe("Deploy Time", () => {
+    it("Should have deploy time in the past and non-zero", async () => {
+      const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
+
+      const deployedAt = await ajnaRedeemer.deployedAt();
+
+      expect(deployedAt).to.be.gt(0);
+
+      const currentBlockTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+
+      expect(deployedAt).to.be.lte(currentBlockTimestamp);
+    });
+  });
   describe("Ownable", () => {
     it("Should return partner as owner", async () => {
       const { ajnaRedeemer, partner } = await loadFixture(deployBaseFixture);

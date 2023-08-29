@@ -16,10 +16,11 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
     using SafeERC20 for IERC20;
 
     /// STORAGE
+    uint256 public deployedAt; // Timestamp of when the contract was deployed
     IERC20 public rewardsToken; // Token used to reward users
 
-    mapping(uint256 /* index */ => bytes32 /* rootHash */) public roots; // Merkle tree roots for each time period
-    mapping(address /* user */ => BitMaps.BitMap /* timePeriodBitmap */ ) private claimedRoots; // Bitmaps to keep track of which time periods the user has already claimed
+    mapping(uint256 index => bytes32 rootHash) public roots; // Merkle tree roots for each time period
+    mapping(address user => BitMaps.BitMap timePeriodBitmap) private claimedRoots; // Bitmaps to keep track of which time periods the user has already claimed
 
     /// INITIALIZER
 
@@ -34,6 +35,8 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
         rewardsToken = IERC20(_rewardsToken);
 
         transferOwnership(_owner);
+
+        deployedAt = block.timestamp;
     }
 
     /* @inheritdoc IRewardsRedeemer */
