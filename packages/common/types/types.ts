@@ -2,17 +2,32 @@ import { BigNumber, ethers } from "ethers";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
 import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
+import { type } from "os";
 
 export interface ParsedSnapshotEntry {
   address: string;
   amount: string;
 }
 export type ParsedSnapshot = ParsedSnapshotEntry[];
+
 export interface SnapshotEntry {
   address: string;
   amount: BigNumber;
 }
 export type Snapshot = SnapshotEntry[];
+
+export type SnapshotWithProofsEntry = {
+  address: string;
+  amount: BigNumber;
+  proof: string[];
+};
+export type SnapshotWithProofs = SnapshotWithProofsEntry[];
+
+export type ParsedSnapshotWithProofsEntry = Omit<SnapshotWithProofsEntry, "amount"> & {
+  amount: string;
+};
+
+export type ParsedSnapshotWithProofs = ParsedSnapshotWithProofsEntry[];
 
 export interface Distribution {
   name: string;

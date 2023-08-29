@@ -4,21 +4,22 @@ import { graphClient } from "./graph.utils";
 export let graphStub: any;
 
 export function setupGraphStub(rewards: any, queryType: "daily" | "weekly" | "weeklyPartner" | "dailyPartner") {
-  if (queryType == "daily") {
-    graphStub = sinon.stub(graphClient, "DailyRewards");
-    graphStub.onCall(0).resolves(rewards);
-    return graphStub;
-  } else if (queryType == "weekly") {
-    graphStub = sinon.stub(graphClient, "WeeklyRewards");
-    graphStub.onCall(0).resolves(rewards);
-    return graphStub;
-  } else if (queryType == "weeklyPartner") {
-    graphStub = sinon.stub(graphClient, "WeeklyPartnerRewards");
-    graphStub.onCall(0).resolves(rewards);
-    return graphStub;
-  }else if (queryType == "dailyPartner") {
-    graphStub = sinon.stub(graphClient, "DailyPartnerRewards");
-    graphStub.onCall(0).resolves(rewards);
-    return graphStub;
+  switch (queryType) {
+    case "daily":
+      graphStub = sinon.stub(graphClient, "DailyRewards");
+      break;
+    case "weekly":
+      graphStub = sinon.stub(graphClient, "WeeklyRewards");
+      break;
+    case "weeklyPartner":
+      graphStub = sinon.stub(graphClient, "WeeklyPartnerRewards");
+      break;
+    case "dailyPartner":
+      graphStub = sinon.stub(graphClient, "DailyPartnerRewards");
+      break;
+    default:
+      throw new Error(`Invalid query type: ${queryType}`);
   }
+  graphStub.onCall(0).resolves(rewards);
+  return graphStub;
 }
