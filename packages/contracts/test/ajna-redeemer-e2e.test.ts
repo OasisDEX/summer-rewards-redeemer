@@ -27,7 +27,17 @@ let OPERATOR_ADDRESS: string;
 let CURRENT_WEEK: BigNumber = BigNumber.from(0);
 
 async function deployFixture() {
-  setupGraphStub(weeklyRewardData, "weekly");
+  // reset the hardhat fork to the latest block
+  await ethers.provider.send("hardhat_reset", [
+    {
+      forking: {
+        jsonRpcUrl: config.rpcUrl,
+        blockNumber: 17950835,
+      },
+    },
+  ]);
+
+  setupGraphStub(weeklyRewardData, "weeklyPartner");
   ({ ADMIN_ADDRESS, OPERATOR_ADDRESS, owner, admin } = await getAddresses());
 
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);

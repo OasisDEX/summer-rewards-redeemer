@@ -1,11 +1,12 @@
 import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, WeeklyRewardsQuery } from "graphclient";
-import { config, getRewardDistributions, getWeeklyReward } from "common/config";
+import { config, getWeeklyReward, validateRewardDistributions } from "common/config";
 import { ZERO, ZERO_ADDRESS } from "common/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
+  Distribution,
   DistributionAmount,
   EarnDailyRewards,
   ParsedSnapshot,
@@ -21,15 +22,20 @@ import { fetchWeeklyData, fetchDailyData } from "common/utils/graph.utils";
  *
  * @async
  * @param {number} weekId - The id of the week for which to retrieve the weekly snapshot.
- *
+ * @param {Distribution[]} rewardDistributions - An array of `Distribution` objects containing the reward distribution data for each pool.
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the weekly rewards snapshot.
  */
-export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot> => {
-  const data = await fetchWeeklyData(weekId);
+export const getWeeklySnapshot = async (
+  weekId: number,
+  rewardDistributions: Distribution[]
+): Promise<ParsedSnapshot> => {
+  validateRewardDistributions(rewardDistributions);
+  const poolList = rewardDistributions.map((pool) => pool.address);
+  const data = await fetchWeeklyData(weekId, poolList);
   if (!data.week) {
     throw new Error(`No weekly rewards found for day ${weekId}`);
   }
-  return calculateWeeklySnapshot(data, weekId);
+  return calculateWeeklySnapshot(data, weekId, rewardDistributions);
 };
 /**
  * Retrieves and returns a parsed daily snapshot of user rewards for a specified day.
@@ -39,13 +45,15 @@ export const getWeeklySnapshot = async (weekId: number): Promise<ParsedSnapshot>
  *
  * @returns {Promise<ParsedSnapshot>} - A promise that resolves to a `ParsedSnapshot` object representing the daily rewards snapshot.
  */
-export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> => {
-  console.log(`Fetching daily data for day ${dayId}`);
-  const data = await fetchDailyData(dayId);
+export const getDailySnapshot = async (dayId: number, rewardDistributions: Distribution[]): Promise<ParsedSnapshot> => {
+  validateRewardDistributions(rewardDistributions);
+  const poolList = rewardDistributions.map((pool) => pool.address);
+  console.info(`Fetching daily data for day ${dayId}`);
+  const data = await fetchDailyData(dayId, poolList);
   if (!data.day) {
     throw new Error(`No daily rewards found for day ${dayId}`);
   }
-  return calculateDailySnapshot(data, dayId);
+  return calculateDailySnapshot(data, dayId, rewardDistributions);
 };
 
 /**
@@ -53,19 +61,24 @@ export const getDailySnapshot = async (dayId: number): Promise<ParsedSnapshot> =
  *
  * @param {WeeklyRewardsQuery} data - A `WeeklyRewardsQuery` object containing the data needed to calculate the weekly snapshot.
  * @param {number} weekId - The id of the week for which to calculate the weekly snapshot.
- *
+ * @param {Distribution[]} rewardDistributions - An array of `Distribution` objects containing the reward distribution data for each pool.
  * @returns {ParsedSnapshot} - A `ParsedSnapshot` object representing the weekly rewards snapshot.
  */
-export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number): ParsedSnapshot {
+export function calculateWeeklySnapshot(
+  data: WeeklyRewardsQuery,
+  weekId: number,
+  rewardDistributions: Distribution[],
+  totalWeeklyDistribution?: BigNumber
+): ParsedSnapshot {
+  validateRewardDistributions(rewardDistributions);
+
   if (!data.week) {
     throw new Error(`No weekly rewards found for week ${weekId}`);
   }
 
   const days = data.week.days;
-
-  const totalWeeklyDistribution = getWeeklyReward(weekId);
+  totalWeeklyDistribution = totalWeeklyDistribution ? totalWeeklyDistribution : getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
-  const rewardDistributions = getRewardDistributions(+data.week.id);
 
   for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
@@ -113,16 +126,21 @@ export function calculateWeeklySnapshot(data: WeeklyRewardsQuery, weekId: number
  *
  * @returns {ParsedSnapshot} - A `ParsedSnapshot` object representing the daily rewards snapshot.
  */
-export function calculateDailySnapshot(data: DailyRewardsQuery, dayId: number): ParsedSnapshot {
+export function calculateDailySnapshot(
+  data: DailyRewardsQuery,
+  dayId: number,
+  rewardDistributions: Distribution[],
+  totalWeeklyDistribution?: BigNumber
+): ParsedSnapshot {
+  validateRewardDistributions(rewardDistributions);
   if (!data.day) {
     throw new Error(`No weekly rewards found for day ${dayId}`);
   }
 
   const day = data.day;
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
-  const totalWeeklyDistribution = getWeeklyReward(+data.day.week.id);
+  totalWeeklyDistribution = totalWeeklyDistribution ? totalWeeklyDistribution : getWeeklyReward(+data.day.week.id);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
-  const rewardDistributions = getRewardDistributions(+day.week.id);
 
   for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
@@ -170,7 +188,7 @@ function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: Dis
     totalRewardsCount += day.earnDailyRewards.length;
     calculateUsersDailyRewards(day.earnDailyRewards, totalWeeklyDistributionPerPool, dailyUsersRewards, true);
   }
-  console.log(`Total rewards count for day ${day.id}: ${totalRewardsCount}`);
+  console.info(`Total rewards count for day ${day.id}: ${totalRewardsCount}`);
   const totalDailyRewards = Object.values(dailyUsersRewards).reduce((a, b) => a.add(b), ZERO);
   const dailyRewards: DailyRewards = {
     id: day.id,
@@ -236,8 +254,8 @@ function calculateUsersDailyRewards(
 function validateTotalAmount(weeklyRewardsSnapshot: Snapshot, totalWeeklyDistribution: BigNumber) {
   const weeklyRewardsSnapshotTotal = weeklyRewardsSnapshot.reduce((a, b) => a.add(b.amount), ZERO);
   if (weeklyRewardsSnapshotTotal.gt(totalWeeklyDistribution)) {
-    console.log("weeklyRewardsSnapshotTotal", weeklyRewardsSnapshotTotal.toString());
-    console.log("totalWeeklyDistribution", totalWeeklyDistribution.toString());
+    console.info("weeklyRewardsSnapshotTotal", weeklyRewardsSnapshotTotal.toString());
+    console.info("totalWeeklyDistribution", totalWeeklyDistribution.toString());
     throw new Error("Weekly rewards snapshot total is greater than total weekly rewards");
   }
 }
