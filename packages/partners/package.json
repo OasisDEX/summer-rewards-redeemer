@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "partner:manage": " ts-node ./scripts/manage-partner.ts",
-    "redeemer:manage": " ts-node ./scripts/manage-redeemer.ts"
+    "redeemer:manage": " ts-node ./scripts/manage-redeemer.ts",
+    "rewards:request": "ts-node ./scripts/request-rewards.ts"
   }
 }

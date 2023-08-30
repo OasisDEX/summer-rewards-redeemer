@@ -127,3 +127,27 @@ export enum TX_STATUS {
   "REVERTED" = 0,
   "SUCCESSFUL" = 1,
 }
+
+export type PoolRewardsConfig = {
+  name: string; // Name of the pool, typically the token pair
+  address: string; // Address of the pool contract
+  share: number; // Percentage of the total rewards allocated to this pool
+  lendRatio?: number; // Optional percentage of allocation between lending and borrowing
+};
+
+export type PoolRewardsDistributionRequest = {
+  weekId: number; // Week ID since the start of the rewards program
+  distribution: PoolRewardsConfig[]; // List of pools and their share of the rewards
+  totalWeeklyRewards: string; // Total amount of rewards for the week
+};
+
+export type UserRewards = {
+  address: string; // User address
+  amount: string; // Amount of rewards
+  proof: string[]; // Merkle proof
+};
+
+export type PoolRewardsDistributionResponse = {
+  root: string; // Merkle root
+  parsedSnapshotWithProofs: UserRewards[]; // List of users with their rewards and merkle proofs
+};
