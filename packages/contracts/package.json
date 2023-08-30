@@ -18,13 +18,17 @@
     "lint:typescript": "./node_modules/.bin/eslint test/**/*.ts packages/**/*.ts",
     "lint": "yarn lint:contracts && yarn lint:typescript",
     "format:fix": "prettier --write contracts/*.sol contracts/**/*.sol test/**/*.ts packages/**/*.ts",
-    "format": "prettier --check contracts/*.sol contracts/**/*.sol test/**/*.ts"
+    "format": "prettier --check contracts/*.sol contracts/**/*.sol test/**/*.ts",
+    "partner:manage": " ts-node ./partner-scripts/manage-partner.ts",
+    "redeemer:manage": " ts-node ./partner-scripts/manage-redeemer.ts"
   },
   "dependencies": {
     "ajna-rewards-snapshot": "*",
     "common": "*",
     "database": "*",
-    "graphclient": "*"
+    "graphclient": "*",
+    "hardhat-abi-exporter": "^2.10.1",
+    "stdio": "^2.1.1"
   },
   "devDependencies": {
     "@ethersproject/abstract-signer": "^5.5.0",

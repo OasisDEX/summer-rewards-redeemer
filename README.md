@@ -46,6 +46,9 @@ The following scripts are available in this project:
 - `lint`: Lints the code.
 - `format:fix`: Formats the code and fixes any issues.
 - `format`: Formats the code.
+- `partner:manage`: Add or remove partner from the whitelist.
+- `redeemer:manage`: Get redeemer address for partner's EOA or create new redeemer.
+
 
 # Configuration
 The `config.ts` file contains the configuration for the project. It exports a `config` object that contains the following properties:
