@@ -1,14 +1,12 @@
-import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 
-import { config } from "common/config/config";
-import { WEEK } from "common/constants/constants";
 import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
-import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
-import { RewardsRedeemerFactory, RewardsRedeemer, AjnaToken } from "typechain-types";
+import { dummyProcessedSnaphot } from "common/utils/data";
+import { RewardsRedeemerFactory, AjnaToken } from "typechain-types";
 import { createRedeemer } from "./utils";
 import exp from "constants";
 
