@@ -6,6 +6,8 @@
   "scripts": {
     "partner:manage": " ts-node ./scripts/manage-partner.ts",
     "redeemer:manage": " ts-node ./scripts/manage-redeemer.ts",
-    "rewards:request": "ts-node ./scripts/request-rewards.ts"
+    "rewards:request": "ts-node ./scripts/request-rewards.ts",
+    "rewards:manage": "ts-node ./scripts/manage-rewards.ts",
+    "rewards:send": "ts-node ./scripts/send-rewards.ts"
   }
 }

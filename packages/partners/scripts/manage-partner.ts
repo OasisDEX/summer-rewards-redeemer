@@ -5,17 +5,25 @@ import { RewardsRedeemerFactory__factory } from "typechain-types";
 
 import "common/bootstrap-env";
 
-// CONFIG
-const config = {
-  rewardsRedeemerFactory: "0x6484EB0792c646A4827638Fc1B6F20461418eB00",
-};
-
 // SETUP
+if (!process.env.JSON_RPC_URL) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the JSON_RPC_URL variable");
+}
+if (!process.env.PRIVATE_KEY_DEPLOY) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the PRIVATE_KEY_DEPLOY variable");
+}
+if (!process.env.REWARDS_REDEEMER_FACTORY_ADDRESS) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the REWARDS_REDEEMER_FACTORY_ADDRESS variable");
+}
+
+const PartnerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("PARTNER_ROLE"));
 const JsonRpcUrl = process.env.JSON_RPC_URL!;
 const PrivKey = process.env.PRIVATE_KEY_DEPLOY!;
+const RewardsRedeemerFactoryAddress = process.env.REWARDS_REDEEMER_FACTORY_ADDRESS!;
+
 const PartnerWallet = new ethers.Wallet(PrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 const RewardsRedeemerFactoryInstance = new RewardsRedeemerFactory__factory(PartnerWallet).attach(
-  config.rewardsRedeemerFactory
+  RewardsRedeemerFactoryAddress
 );
 
 async function whitelistPartner(argv: any) {
@@ -38,8 +46,18 @@ async function blacklistPartner(argv: any) {
   console.log(`PARTNER REMOVED FROM WHITELIST: ${argv.partnerAddress}`);
 }
 
+async function checkPartner(argv: any) {
+  if (!ethers.utils.isAddress(argv.partnerAddress)) {
+    throw new Error("Invalid partner address format");
+  }
+
+  const isWhitelisted = await RewardsRedeemerFactoryInstance.hasRole(PartnerRole, argv.partnerAddress);
+
+  console.log(`PARTNER ${argv.partnerAddress} ${isWhitelisted ? "IS" : "IS NOT"} WHITELISTED`);
+}
+
 async function main() {
-  await yargs
+  const argv = await yargs
     .command(
       "add",
       "Add partner to whitelist",
@@ -66,12 +84,26 @@ async function main() {
       },
       blacklistPartner
     )
-    .command("*", "", () => {
-      yargs.showHelp();
-    })
+    .command(
+      "check",
+      "Check partner status",
+      {
+        partnerAddress: {
+          alias: "a",
+          description: "Partner address",
+          type: "string",
+          demandOption: true,
+        },
+      },
+      checkPartner
+    )
     .demandCommand()
     .help()
     .alias("help", "h").argv;
+
+  if (argv._.length === 0 || !["add", "remove", "check"].includes(argv._[0] as string)) {
+    yargs.showHelp();
+  }
 }
 
 main()

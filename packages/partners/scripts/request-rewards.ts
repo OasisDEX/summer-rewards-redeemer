@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { PoolRewardsDistributionRequest, PoolRewardsDistributionResponse } from "common";
 
-import "./bootstrap-env";
+import "common/bootstrap-env";
 
 async function requestMerkleTree(
   endpointUrl: string,
