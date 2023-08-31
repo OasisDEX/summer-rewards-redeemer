@@ -1,0 +1,19 @@
+{
+  "weekId": 2795,
+  "distribution": [
+    { "name": "RETH-DAI", "address": "0x42d3f9c4df0b98c3974fd539a7ea9d0847f37ef5", "share": 0.09 },
+    { "name": "WBTC-DAI", "address": "0xdb30a08ebc49af1baf87f57824f85056ced33d5f", "share": 0.07 },
+    { "name": "WSTETH-DAI", "address": "0x8519be08b8d83baeb11eba52a7889967dced9ae0", "share": 0.07 },
+    { "name": "ETH-USDC", "address": "0x1c50ce3550d1846134f3b7c09785e7005f6a1566", "share": 0.065 },
+    { "name": "WBTC-USDC", "address": "0x65374cd7db203e0c9ea8b7da28a25dc770becb9e", "share": 0.09 },
+    { "name": "WSTETH-USDC", "address": "0xe0ffabea66627a588efb6c870677baa23a53b948", "share": 0.09 },
+    { "name": "USDC-ETH", "address": "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6", "share": 0.05 },
+    { "name": "USDC-WBTC", "address": "0x1a9cea49daeb8c36ea707a9171ebdf4097796dd4", "share": 0.05 },
+    { "name": "CBETH-ETH", "address": "0xad24fc773e125edb223c38a39657cb64bc7c178e", "share": 0.1, "lendRatio": 0.95 },
+    { "name": "WSTETH-ETH", "address": "0x37d3a44c905663d7b77c9b574b941d4fbf713a91", "share": 0.1, "lendRatio": 0.95 },
+    { "name": "RETH-ETH", "address": "0xa2ffdc7efef98469d11370d91c0a17dc83ec2bda", "share": 0.1, "lendRatio": 0.95 },
+    { "name": "YFI-DAI", "address": "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78", "share": 0.025 },
+    { "name": "SDAI-USDC", "address": "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d", "share": 0.1, "lendRatio": 0.95 }
+  ],
+  "totalWeeklyRewards": "1000000000000000000000000"
+}

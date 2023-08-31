@@ -2,5 +2,9 @@
   "name": "partner-rewards-tool",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "partner:manage": " ts-node ./scripts/manage-partner.ts",
+    "redeemer:manage": " ts-node ./scripts/manage-redeemer.ts"
+  }
 }

@@ -7,8 +7,7 @@ import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { dummyProcessedSnaphot } from "common/utils/data";
 import { RewardsRedeemerFactory, AjnaToken } from "typechain-types";
-import { createRedeemer } from "./utils";
-import exp from "constants";
+import { createRedeemer } from "contracts/utils";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 

@@ -6,7 +6,9 @@ import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
+
 import "common/bootstrap-env";
+
 import { HardhatUserConfig, task } from "hardhat/config";
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -60,6 +62,11 @@ const config: HardhatUserConfig = {
       gas: "auto",
       initialBaseFeePerGas: 1000000000,
       allowUnlimitedContractSize: true,
+    },
+    local: {
+      url: "http://127.0.0.1:8545",
+      timeout: 1000000,
+      chainId: 2137,
     },
   },
   defaultNetwork: "hardhat",
