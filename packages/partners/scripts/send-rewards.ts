@@ -9,14 +9,14 @@ import "common/bootstrap-env";
 if (!process.env.JSON_RPC_URL) {
   throw new Error("Please copy '.env.example' to '.env' and fill the JSON_RPC_URL variable");
 }
-if (!process.env.PRIVATE_KEY_DEPLOY) {
-  throw new Error("Please copy '.env.example' to '.env' and fill the PRIVATE_KEY_DEPLOY variable");
+if (!process.env.PARTNER_WALLET_PRIVATE_KEY) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_WALLET_PRIVATE_KEY variable");
 }
 
 const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PrivKey = process.env.PRIVATE_KEY_DEPLOY!;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY!;
 
-const SignerWallet = new ethers.Wallet(PrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
+const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 
 // COMMANDS HANDLERS
 async function sendTokens(argv: any) {
@@ -34,7 +34,7 @@ async function sendTokens(argv: any) {
     throw new Error(`Invalid amount format: ${error}`);
   }
 
-  const token = new ERC20__factory(SignerWallet).attach(argv.tokenAddress);
+  const token = new ERC20__factory(PartnerWallet).attach(argv.tokenAddress);
 
   try {
     const tx = await token.transfer(argv.redeemerAddress, amountBN);

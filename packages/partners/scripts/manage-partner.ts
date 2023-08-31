@@ -18,11 +18,11 @@ if (!process.env.REWARDS_REDEEMER_FACTORY_ADDRESS) {
 
 const PartnerRole = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("PARTNER_ROLE"));
 const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PrivKey = process.env.PRIVATE_KEY_DEPLOY!;
+const AdminPrivKey = process.env.PRIVATE_KEY_DEPLOY!;
 const RewardsRedeemerFactoryAddress = process.env.REWARDS_REDEEMER_FACTORY_ADDRESS!;
 
-const PartnerWallet = new ethers.Wallet(PrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
-const RewardsRedeemerFactoryInstance = new RewardsRedeemerFactory__factory(PartnerWallet).attach(
+const AdminWallet = new ethers.Wallet(AdminPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
+const RewardsRedeemerFactoryInstance = new RewardsRedeemerFactory__factory(AdminWallet).attach(
   RewardsRedeemerFactoryAddress
 );
 
@@ -63,7 +63,7 @@ async function main() {
       "Add partner to whitelist",
       {
         partnerAddress: {
-          alias: "a",
+          alias: "p",
           description: "Partner address",
           type: "string",
           demandOption: true,
@@ -76,7 +76,7 @@ async function main() {
       "Remove partner from whitelist",
       {
         partnerAddress: {
-          alias: "a",
+          alias: "p",
           description: "Partner address",
           type: "string",
           demandOption: true,
@@ -89,7 +89,7 @@ async function main() {
       "Check partner status",
       {
         partnerAddress: {
-          alias: "a",
+          alias: "p",
           description: "Partner address",
           type: "string",
           demandOption: true,

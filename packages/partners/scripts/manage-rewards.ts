@@ -10,14 +10,14 @@ import "common/bootstrap-env";
 if (!process.env.JSON_RPC_URL) {
   throw new Error("Please copy '.env.example' to '.env' and fill the JSON_RPC_URL variable");
 }
-if (!process.env.PRIVATE_KEY_DEPLOY) {
-  throw new Error("Please copy '.env.example' to '.env' and fill the PRIVATE_KEY_DEPLOY variable");
+if (!process.env.PARTNER_WALLET_PRIVATE_KEY) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_WALLET_PRIVATE_KEY variable");
 }
 
 const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PrivKey = process.env.PRIVATE_KEY_DEPLOY!;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY!;
 
-const SigningWallet = new ethers.Wallet(PrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
+const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 
 async function addMerkleTreeRoot(argv: any) {
   if (!ethers.utils.isAddress(argv.redeemerAddress)) {
@@ -48,7 +48,7 @@ async function addMerkleTreeRoot(argv: any) {
     merkleTreeRoot = argv.merkleTreeRoot;
   }
 
-  const redeemerInstance = new RewardsRedeemer__factory(SigningWallet).attach(argv.redeemerAddress);
+  const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
   try {
     const tx = await redeemerInstance.addRoot(argv.weekId, merkleTreeRoot);
@@ -70,7 +70,7 @@ async function removeMerkleTreeRoot(argv: any) {
     throw new Error("Invalid week ID format");
   }
 
-  const redeemerInstance = new RewardsRedeemer__factory(SigningWallet).attach(argv.redeemerAddress);
+  const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
   try {
     const tx = await redeemerInstance.removeRoot(argv.weekId);
@@ -92,7 +92,7 @@ async function getMerkleTreeRoot(argv: any) {
     throw new Error("Invalid week ID format");
   }
 
-  const redeemerInstance = new RewardsRedeemer__factory(SigningWallet).attach(argv.redeemerAddress);
+  const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
   const merkleTreeRoot = await redeemerInstance.getRoot(argv.weekId);
 
@@ -118,16 +118,16 @@ async function claimRewards(argv: any) {
   const usersData = JSON.parse(fs.readFileSync(argv.userDataFile, "utf8")) as PoolRewardsDistributionResponse;
 
   const claimingUserData = usersData.parsedSnapshotWithProofs.filter(
-    (entry) => entry.address === SigningWallet.address
+    (entry) => entry.address === PartnerWallet.address
   );
   if (!claimingUserData || claimingUserData.length === 0) {
-    throw new Error(`User ${SigningWallet.address} not found in the user data file`);
+    throw new Error(`User ${PartnerWallet.address} not found in the user data file`);
   }
   if (claimingUserData.length > 1) {
-    throw new Error(`User ${SigningWallet.address} found multiple times in the user data file`);
+    throw new Error(`User ${PartnerWallet.address} found multiple times in the user data file`);
   }
 
-  const redeemerInstance = new RewardsRedeemer__factory(SigningWallet).attach(argv.redeemerAddress);
+  const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
   try {
     const tx = await redeemerInstance.claim(argv.weekId, claimingUserData[0].amount, claimingUserData[0].proof);
@@ -139,7 +139,7 @@ async function claimRewards(argv: any) {
   }
 
   console.log(
-    `CLAIMED ${claimingUserData[0].amount} for WEEK ID ${argv.weekId} in REDEEMER ${argv.redeemerAddress} for user ${SigningWallet.address}`
+    `CLAIMED ${claimingUserData[0].amount} for WEEK ID ${argv.weekId} in REDEEMER ${argv.redeemerAddress} for user ${PartnerWallet.address}`
   );
 }
 
@@ -200,7 +200,7 @@ async function main() {
       "Retrieves the Merkle Tree root for a certain Week ID",
       {
         redeemerAddress: {
-          alias: "a",
+          alias: "r",
           description: "Redeemer address",
           type: "string",
           demandOption: true,
@@ -219,7 +219,7 @@ async function main() {
       "Claims the rewards for a certain Week ID, intended for testing purposes. User address is taken from the configured private key",
       {
         redeemerAddress: {
-          alias: "a",
+          alias: "r",
           description: "Redeemer address",
           type: "string",
           demandOption: true,
