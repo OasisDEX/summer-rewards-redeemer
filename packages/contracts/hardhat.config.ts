@@ -8,7 +8,6 @@ import "solidity-coverage";
 import "hardhat-tracer";
 
 import "common/bootstrap-env";
-import "hardhat-abi-exporter";
 
 import { HardhatUserConfig, task } from "hardhat/config";
 
@@ -79,14 +78,6 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-  },
-  abiExporter: {
-    path: "abi",
-    runOnCompile: true,
-    clear: true,
-    flat: false,
-    spacing: 2,
-    pretty: false,
   },
 };
 
