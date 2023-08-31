@@ -154,7 +154,7 @@ Where:
 - `<rewards_token_address>` is the address of the rewards token
 - `<amount>` is the amount of tokens to transfer, as a string (in quotes), in wei, considering the number of decimals of the token
 - `<redeemer_contract_address>` is the address of the Redeemer contract
-- `<decimals>` is the number of decimals of the token as a number
+- `<decimals>` is the number of decimals of the token as a number. If you use the number of decimals of the token, the `<amount>` field is given as a floating point number, i.e.: 5.0 for 5 tokens. If you use 0 for the decimals, then the `<amount>` field is given in wei, i.e.: 5000000000000000000 for 5 tokens.
 
 Again, in order for this to work, the wallet address defined by the `PARTNER_WALLET_PRIVATE_KEY` environment variable must hold enough tokens for the transfer to succeed.
 

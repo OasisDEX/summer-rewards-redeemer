@@ -118,7 +118,7 @@ async function claimRewards(argv: any) {
   const usersData = JSON.parse(fs.readFileSync(argv.userDataFile, "utf8")) as PoolRewardsDistributionResponse;
 
   const claimingUserData = usersData.parsedSnapshotWithProofs.filter(
-    (entry) => entry.address === PartnerWallet.address
+    (entry) => entry.address.toLowerCase() === PartnerWallet.address.toLowerCase()
   );
   if (!claimingUserData || claimingUserData.length === 0) {
     throw new Error(`User ${PartnerWallet.address} not found in the user data file`);
@@ -242,7 +242,7 @@ async function main() {
     .help()
     .alias("help", "h").argv;
 
-  if (argv._.length === 0 || !["add", "remove", "get"].includes(argv._[0] as string)) {
+  if (argv._.length === 0 || !["add", "remove", "get", "claim"].includes(argv._[0] as string)) {
     yargs.showHelp();
   }
 }
