@@ -8,7 +8,9 @@ The request body must be a JSON object with the following properties:
 - `weekId` (string, required): The ID of the week to snapshot.
 - `distribution` (array, required): An array of token distribution objects, where each object has the following properties:
   - `address` (string, required): The address of the token contract.
-  - `weight` (string, required): The weight of the token in the distribution.
+  - `name` (string, required): Pair of the tokens - as pool name.
+  - 'share' (string, required): The share of the tokens for a given pool. Sums up to 1.
+  - 'lendRatio' (string, optional): The lend ratio of the pool (amount of the rewards that go to lender). Defaults to 0.6.
 - `totalWeeklyRewards` (string, required): The total amount of rewards for the week.
 
 Example request body:
@@ -41,28 +43,25 @@ Example response body:
 
 ```json
 {
-  "statusCode": 200,
-  "body": {
-    "root": "0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38",
-    "parsedSnapshotWithProofs": [
-      {
-        "address": "0xf4f9e8cdae4b69ff3e0beca0dff65b9b718c3161",
-        "amount": "0x0431986b2ca8704156bb",
-        "proof": [
-          "0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
-          "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
-        ]
-      },
-      {
-        "address": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
-        "amount": "0x83568a4ead839275b3",
-        "proof": [
-          "0x358f41e4581ceaa0da1087ce1291cf962ebcf23b685cacbbd383bd4e755a4619",
-          "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
-        ]
-      }
-    ]
-  }
+  "root": "0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38",
+  "parsedSnapshotWithProofs": [
+    {
+      "address": "0xf4f9e8cdae4b69ff3e0beca0dff65b9b718c3161",
+      "amount": "0x0431986b2ca8704156bb",
+      "proof": [
+        "0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
+        "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
+      ]
+    },
+    {
+      "address": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
+      "amount": "0x83568a4ead839275b3",
+      "proof": [
+        "0x358f41e4581ceaa0da1087ce1291cf962ebcf23b685cacbbd383bd4e755a4619",
+        "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
+      ]
+    }
+  ]
 }
 ```
 
@@ -76,7 +75,9 @@ The request body must be a JSON object with the following properties:
 - `dayId` (string, required): The ID of the week to snapshot.
 - `distribution` (array, required): An array of token distribution objects, where each object has the following properties:
   - `address` (string, required): The address of the token contract.
-  - `weight` (string, required): The weight of the token in the distribution.
+  - `name` (string, required): Pair of the tokens - as pool name.
+  - 'share' (string, required): The share of the tokens for a given pool. Sums up to 1.
+  - 'lendRatio' (string, optional): The lend ratio of the pool (amount of the rewards that go to lender). Defaults to 0.6.
 - `totalWeeklyRewards` (string, required): The total amount of rewards for the week.
 
 Example request body:
@@ -136,7 +137,7 @@ Example response body:
 
 ## `/pools/token-pairs` Endpoint
 
-This endpoint returns a list of pools for specified token pairs.
+This endpoint returns a list of pools for specified token pairs. First token in each token pair is the colalteral token and the second one is the quote token.
 
 Example request body:
 
@@ -197,7 +198,7 @@ Example response body:
 
 ## `/pools/curated-tokens` Endpoint
 
-This endpoint accepts a list of curated tokens. It returns a list of pools in which both colalteral and quote tokens are in the list of curated tokens.
+This endpoint accepts a list of curated tokens. It returns a list of pools in which both collateral and quote tokens are in the list of curated tokens.
 
 Example request body:
 
