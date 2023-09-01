@@ -45,7 +45,7 @@ async function deployBaseFixture() {
   };
 }
 
-describe("AjnaRedeemer", () => {
+describe("Rewards Redeemer Implementation", () => {
   describe("Deploy Time", () => {
     it("Should have deploy time in the past and non-zero", async () => {
       const { ajnaRedeemer } = await loadFixture(deployBaseFixture);
