@@ -130,11 +130,6 @@ yarn rewards:manage add -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 -u
 
 # Claiming Rewards
 
-```
-PARTNER_WALLET_PRIVATE_KEY="5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
-
-```
-
 ## Check Balance
 
 ```
