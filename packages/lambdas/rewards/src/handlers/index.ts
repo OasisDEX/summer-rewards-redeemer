@@ -11,6 +11,7 @@ import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph
 import { BigNumber } from "ethers";
 import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
 import { calculateWeeklySnapshot, calculateDailySnapshot } from "ajna-rewards-snapshot/get-snapshot";
+import { TokenPairQuery } from "graphclient";
 
 export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
@@ -118,11 +119,19 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
       return createErrorResponse("Invalid body provided");
     }
 
-    const graphRes = await graphClient.TokenPair({
-      collateralAddress: validatedBody.pairs[0][0],
-      quoteTokenAddress: validatedBody.pairs[0][1],
-    });
-    const pools = graphRes.pools.map((pool: any) => pool.id);
+    const graphRes = await Promise.all(
+      validatedBody.pairs.map((pair) =>
+        graphClient
+          .TokenPair({
+            collateralAddress: pair[0],
+            quoteTokenAddress: pair[1],
+          })
+          .then((data) => data.pools)
+      )
+    );
+
+    const poolsRes = graphRes.reduce((acc, val) => acc.concat(val), []);
+    const pools = poolsRes.map((pool: any) => pool.id);
 
     const responseBody = JSON.stringify({ pools });
     return createSuccessResponse(responseBody);
