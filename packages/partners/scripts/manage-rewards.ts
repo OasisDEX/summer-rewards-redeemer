@@ -4,7 +4,9 @@ import fs from "fs";
 
 import { RewardsRedeemer__factory } from "typechain-types";
 import { PoolRewardsDistributionResponse } from "common";
+
 import "common/bootstrap-env";
+import { processTx } from "common/utils";
 
 // SETUP
 if (!process.env.JSON_RPC_URL) {
@@ -14,8 +16,8 @@ if (!process.env.PARTNER_WALLET_PRIVATE_KEY) {
   throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_WALLET_PRIVATE_KEY variable");
 }
 
-const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY!;
+const JsonRpcUrl = process.env.JSON_RPC_URL;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY;
 
 const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 
@@ -50,12 +52,10 @@ async function addMerkleTreeRoot(argv: any) {
 
   const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
-  try {
-    const tx = await redeemerInstance.addRoot(argv.weekId, merkleTreeRoot);
-    tx.wait();
-  } catch (error) {
-    console.log(error);
-    console.log("ERROR: Adding root to redeemer, please check logs above");
+  const result = await processTx(redeemerInstance.addRoot(argv.weekId, merkleTreeRoot));
+  if (!result.success) {
+    console.log(result.error);
+    console.log(`ERROR: Adding root to redeemer, please check logs above`);
     process.exit(1);
   }
 
@@ -72,11 +72,9 @@ async function removeMerkleTreeRoot(argv: any) {
 
   const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
 
-  try {
-    const tx = await redeemerInstance.removeRoot(argv.weekId);
-    tx.wait();
-  } catch (error) {
-    console.log(error);
+  const result = await processTx(redeemerInstance.removeRoot(argv.weekId));
+  if (!result.success) {
+    console.log(result.error);
     console.log("ERROR: Removing root from redeemer, please check logs above");
     process.exit(1);
   }
@@ -102,6 +100,13 @@ async function getMerkleTreeRoot(argv: any) {
 }
 
 async function claimRewards(argv: any) {
+  if (!process.env.REWARDS_DEMO_USER_PRIVATE_KEY) {
+    throw new Error("Please copy '.env.example' to '.env' and fill the REWARDS_DEMO_USER_PRIVATE_KEY variable");
+  }
+
+  const DemoUserPrivKey = process.env.REWARDS_DEMO_USER_PRIVATE_KEY;
+  const DemoUserWallet = new ethers.Wallet(DemoUserPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
+
   if (!ethers.utils.isAddress(argv.redeemerAddress)) {
     throw new Error("Invalid partner address format");
   }
@@ -118,28 +123,28 @@ async function claimRewards(argv: any) {
   const usersData = JSON.parse(fs.readFileSync(argv.userDataFile, "utf8")) as PoolRewardsDistributionResponse;
 
   const claimingUserData = usersData.parsedSnapshotWithProofs.filter(
-    (entry) => entry.address.toLowerCase() === PartnerWallet.address.toLowerCase()
+    (entry) => entry.address.toLowerCase() === DemoUserWallet.address.toLowerCase()
   );
   if (!claimingUserData || claimingUserData.length === 0) {
-    throw new Error(`User ${PartnerWallet.address} not found in the user data file`);
+    throw new Error(`User ${DemoUserWallet.address} not found in the user data file`);
   }
   if (claimingUserData.length > 1) {
-    throw new Error(`User ${PartnerWallet.address} found multiple times in the user data file`);
+    throw new Error(`User ${DemoUserWallet.address} found multiple times in the user data file`);
   }
 
-  const redeemerInstance = new RewardsRedeemer__factory(PartnerWallet).attach(argv.redeemerAddress);
+  const redeemerInstance = new RewardsRedeemer__factory(DemoUserWallet).attach(argv.redeemerAddress);
 
-  try {
-    const tx = await redeemerInstance.claim(argv.weekId, claimingUserData[0].amount, claimingUserData[0].proof);
-    tx.wait();
-  } catch (error) {
-    console.log(error);
+  const result = await processTx(
+    redeemerInstance.claim(argv.weekId, claimingUserData[0].amount, claimingUserData[0].proof)
+  );
+  if (!result.success) {
+    console.log(result.error);
     console.log("ERROR: Claiming rewards from redeemer, please check logs above");
     process.exit(1);
   }
 
   console.log(
-    `CLAIMED ${claimingUserData[0].amount} for WEEK ID ${argv.weekId} in REDEEMER ${argv.redeemerAddress} for user ${PartnerWallet.address}`
+    `CLAIMED ${claimingUserData[0].amount} for WEEK ID ${argv.weekId} in REDEEMER ${argv.redeemerAddress} for user ${DemoUserWallet.address}`
   );
 }
 

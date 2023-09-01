@@ -33,7 +33,7 @@ Then copy the `.env.example` file to `.env` and fill in the values in the `PARTN
 
 - `JSON_RPC_URL` msut point to your RPC endpoint provided by Alchemy, Infura or any other, for the network that you intend to deploy the contract to. Please consult with us which networks are supported for the rewards program.
 - `PARTNER_REWARDS_ENDPOINT_URL` must point to the endpoint provided by us. This endpoint will be used to query the data about the pools usage.
-- `PARTNER_REWARDS_ENDPOINT_TOKEN` must be the token provided by us to access the endpoint.
+- `PARTNER_REWARDS_ENDPOINT_API_KEY` must be the token provided by us to access the endpoint.
 - `REWARDS_REDEEMER_FACTORY_ADDRESS` must be the address of the Rewards Redeemer Factory contract. This address will be provided by us for the specific network that you want to use.
 - `PARTNER_WALLET_PRIVATE_KEY` must be the private key of the wallet that will be used to deploy the Rewards Redeemer contract and to publish the rewards in the Redeemer. This wallet must be whitelisted by us in order to access the functionality. The private key is only used to sign transactions and it is never sent to any server.
 
@@ -146,7 +146,7 @@ This can be done directly through a wallet manager like Metamask. To query for t
 If reward tokens are held in the same wallet that the partner is using to publish the rewards in the Redeemer, then a command can be used to transfer the tokens to the Redeemer contract:
 
 ```
-$ yarn rewards:send -t <rewards_token_address> -m <amount> -r <redeemer_contract_address> -d <decimals>
+$ yarn rewards:send -t <rewards_token_address> -m <amount> -r <redeemer_contract_address>
 ```
 
 Where:
@@ -154,7 +154,6 @@ Where:
 - `<rewards_token_address>` is the address of the rewards token
 - `<amount>` is the amount of tokens to transfer, as a string (in quotes), in wei, considering the number of decimals of the token
 - `<redeemer_contract_address>` is the address of the Redeemer contract
-- `<decimals>` is the number of decimals of the token as a number. If you use the number of decimals of the token, the `<amount>` field is given as a floating point number, i.e.: 5.0 for 5 tokens. If you use 0 for the decimals, then the `<amount>` field is given in wei, i.e.: 5000000000000000000 for 5 tokens.
 
 Again, in order for this to work, the wallet address defined by the `PARTNER_WALLET_PRIVATE_KEY` environment variable must hold enough tokens for the transfer to succeed.
 

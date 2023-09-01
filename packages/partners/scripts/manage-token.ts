@@ -4,6 +4,7 @@ import yargs from "yargs";
 import { ERC20__factory } from "typechain-types";
 
 import "common/bootstrap-env";
+import { processTx } from "common/utils";
 
 // SETUP
 if (!process.env.JSON_RPC_URL) {
@@ -13,8 +14,8 @@ if (!process.env.PARTNER_WALLET_PRIVATE_KEY) {
   throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_WALLET_PRIVATE_KEY variable");
 }
 
-const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY!;
+const JsonRpcUrl = process.env.JSON_RPC_URL;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY;
 
 const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 
@@ -27,20 +28,20 @@ async function sendTokens(argv: any) {
     throw new Error("Invalid token address format");
   }
 
+  const token = new ERC20__factory(PartnerWallet).attach(argv.tokenAddress);
+
+  const decimals = await token.decimals();
+
   let amountBN: ethers.BigNumber;
   try {
-    amountBN = ethers.utils.parseUnits(argv.amount, argv.decimals !== undefined ? argv.decimals : "wei");
+    amountBN = ethers.utils.parseUnits(argv.amount, decimals);
   } catch (error) {
     throw new Error(`Invalid amount format: ${error}`);
   }
 
-  const token = new ERC20__factory(PartnerWallet).attach(argv.tokenAddress);
-
-  try {
-    const tx = await token.transfer(argv.redeemerAddress, amountBN);
-    await tx.wait();
-  } catch (error) {
-    console.log(error);
+  const result = await processTx(token.transfer(argv.redeemerAddress, amountBN));
+  if (!result.success) {
+    console.log(result.error);
     console.log("ERROR: Sending tokens, please check logs above");
     process.exit(1);
   }
@@ -54,12 +55,13 @@ async function balanceOf(argv: any) {
   }
 
   const token = new ERC20__factory(PartnerWallet).attach(argv.tokenAddress);
+  const decimals = await token.decimals();
 
   const balance = await token.balanceOf(PartnerWallet.address);
   console.log(
     `BALANCE of ${PartnerWallet.address} for token ${argv.tokenAddress} is ${ethers.utils.formatUnits(
       balance,
-      argv.decimals !== undefined ? argv.decimals : "wei"
+      decimals
     )}`
   );
 }
@@ -88,12 +90,6 @@ async function main() {
           type: "string",
           demandOption: true,
         },
-        decimals: {
-          alias: "d",
-          description: "Token decimals",
-          type: "number",
-          demandOption: false,
-        },
       },
       sendTokens
     )
@@ -106,12 +102,6 @@ async function main() {
           description: "Token address",
           type: "string",
           demandOption: true,
-        },
-        decimals: {
-          alias: "d",
-          description: "Token decimals",
-          type: "number",
-          demandOption: false,
         },
       },
       balanceOf

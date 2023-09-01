@@ -36,6 +36,7 @@ PARTNER_REWARDS_ENDPOINT_URL="<Hidden on purpose>"
 PARTNER_REWARDS_ENDPOINT_API_KEY="<Hidden on purpose>"
 REWARDS_REDEEMER_FACTORY_ADDRESS="0xa85EffB2658CFd81e0B1AaD4f2364CdBCd89F3a1"
 PARTNER_WALLET_PRIVATE_KEY="59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+REWARDS_DEMO_USER_PRIVATE_KEY="5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
 ```
 
 # Deployment
@@ -43,7 +44,7 @@ PARTNER_WALLET_PRIVATE_KEY="59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4
 ```
 cd packages/contracts
 npx hardhat node
-npx hardhat run scripts/deployment/deploy-test.js --network localhost
+npx hardhat run scripts/deployment/deploy-test.ts --network localhost
 ```
 
 ```
@@ -72,7 +73,7 @@ RewardsRedeemer = 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971
 
 ## Demo Config
 
-`pools-demo-config.ts`
+Create a `pools-demo-config.ts` containing the data below:
 
 ```
 {
@@ -96,7 +97,7 @@ RewardsRedeemer = 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971
 }
 ```
 
-## Query Data
+## Create Snapshot
 
 ```
 yarn rewards:request -p pools-demo-config.json -o users-data.json
@@ -111,7 +112,7 @@ PARTNER_WALLET_PRIVATE_KEY="ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae78
 ```
 
 ```
-yarn token:manage send -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -m "1000" -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -d 18
+yarn token:manage send -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -m "1000" -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971
 ```
 
 # Publish Rewards
@@ -129,8 +130,6 @@ yarn rewards:manage add -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 -u
 
 # Claiming Rewards
 
-Change the `PARTNER_WALLET_PRIVATE_KEY` in `.env` to the private key of the user wallet:
-
 ```
 PARTNER_WALLET_PRIVATE_KEY="5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
 
@@ -139,7 +138,7 @@ PARTNER_WALLET_PRIVATE_KEY="5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9
 ## Check Balance
 
 ```
-yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -d 18
+yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
 
 ```
 
@@ -153,6 +152,6 @@ yarn rewards:manage claim -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 
 # Confirm Rewards
 
 ```
-yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -d 18
+yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
 
 ```

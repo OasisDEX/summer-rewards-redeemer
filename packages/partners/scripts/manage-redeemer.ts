@@ -5,6 +5,7 @@ import { createRedeemer } from "contracts/utils";
 import { RewardsRedeemerFactory__factory } from "typechain-types";
 
 import "common/bootstrap-env";
+import { processTx } from "common/utils";
 
 // SETUP
 if (!process.env.JSON_RPC_URL) {
@@ -17,9 +18,9 @@ if (!process.env.REWARDS_REDEEMER_FACTORY_ADDRESS) {
   throw new Error("Please copy '.env.example' to '.env' and fill the REWARDS_REDEEMER_FACTORY_ADDRESS variable");
 }
 
-const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY!;
-const RewardsRedeemerFactoryAddress = process.env.REWARDS_REDEEMER_FACTORY_ADDRESS!;
+const JsonRpcUrl = process.env.JSON_RPC_URL;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY;
+const RewardsRedeemerFactoryAddress = process.env.REWARDS_REDEEMER_FACTORY_ADDRESS;
 
 const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 const RewardsRedeemerFactoryInstance = new RewardsRedeemerFactory__factory(PartnerWallet).attach(
