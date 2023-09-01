@@ -133,7 +133,7 @@ yarn rewards:manage add -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 -u
 ## Check Balance
 
 ```
-yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
+yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -u 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
 
 ```
 
@@ -147,6 +147,6 @@ yarn rewards:manage claim -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 
 # Confirm Rewards
 
 ```
-yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
+yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -u 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
 
 ```

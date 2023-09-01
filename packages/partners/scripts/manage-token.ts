@@ -53,16 +53,19 @@ async function balanceOf(argv: any) {
   if (!ethers.utils.isAddress(argv.tokenAddress)) {
     throw new Error("Invalid token address format");
   }
+  if (!ethers.utils.isAddress(argv.userAddress)) {
+    throw new Error("Invalid user address format");
+  }
 
   const token = new ERC20__factory(PartnerWallet).attach(argv.tokenAddress);
   const decimals = await token.decimals();
 
-  const balance = await token.balanceOf(PartnerWallet.address);
+  const balance = await token.balanceOf(argv.userAddress);
   console.log(
-    `BALANCE of ${PartnerWallet.address} for token ${argv.tokenAddress} is ${ethers.utils.formatUnits(
+    `BALANCE of ${argv.userAddress} for token ${argv.tokenAddress} is ${ethers.utils.formatUnits(
       balance,
       decimals
-    )}`
+    )} (${ethers.utils.formatUnits(balance, 0)} wei))`
   );
 }
 
@@ -100,6 +103,12 @@ async function main() {
         tokenAddress: {
           alias: "t",
           description: "Token address",
+          type: "string",
+          demandOption: true,
+        },
+        userAddress: {
+          alias: "u",
+          description: "User address",
           type: "string",
           demandOption: true,
         },
