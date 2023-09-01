@@ -5,18 +5,26 @@ import { createRedeemer } from "contracts/utils";
 import { RewardsRedeemerFactory__factory } from "typechain-types";
 
 import "common/bootstrap-env";
-
-// CONFIG
-const config = {
-  rewardsRedeemerFactory: "0x6484EB0792c646A4827638Fc1B6F20461418eB00",
-};
+import { processTx } from "common/utils";
 
 // SETUP
-const JsonRpcUrl = process.env.JSON_RPC_URL!;
-const PrivKey = process.env.PRIVATE_KEY_DEPLOY!;
-const PartnerWallet = new ethers.Wallet(PrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
+if (!process.env.JSON_RPC_URL) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the JSON_RPC_URL variable");
+}
+if (!process.env.PARTNER_WALLET_PRIVATE_KEY) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_WALLET_PRIVATE_KEY variable");
+}
+if (!process.env.REWARDS_REDEEMER_FACTORY_ADDRESS) {
+  throw new Error("Please copy '.env.example' to '.env' and fill the REWARDS_REDEEMER_FACTORY_ADDRESS variable");
+}
+
+const JsonRpcUrl = process.env.JSON_RPC_URL;
+const PartnerPrivKey = process.env.PARTNER_WALLET_PRIVATE_KEY;
+const RewardsRedeemerFactoryAddress = process.env.REWARDS_REDEEMER_FACTORY_ADDRESS;
+
+const PartnerWallet = new ethers.Wallet(PartnerPrivKey, new ethers.providers.JsonRpcProvider(JsonRpcUrl));
 const RewardsRedeemerFactoryInstance = new RewardsRedeemerFactory__factory(PartnerWallet).attach(
-  config.rewardsRedeemerFactory
+  RewardsRedeemerFactoryAddress
 );
 
 // COMMANDS HANDLERS
@@ -31,19 +39,16 @@ async function getRedeemerAddress(argv: any) {
 }
 
 async function createRewardsRedeemer(argv: any) {
-  if (!ethers.utils.isAddress(argv.partnerAddress)) {
-    throw new Error("Invalid partner address format");
-  }
   if (!ethers.utils.isAddress(argv.tokenAddress)) {
     throw new Error("Invalid token address format");
   }
   const redeemer = await createRedeemer(RewardsRedeemerFactoryInstance, PartnerWallet, argv.tokenAddress);
 
-  console.log(`CREATED REDEEMER at address ${redeemer.address} for partner ${argv.partnerAddress}`);
+  console.log(`CREATED REDEEMER at address ${redeemer.address} for partner ${PartnerWallet.address}`);
 }
 
 async function main() {
-  await yargs
+  const argv = await yargs
     .command(
       "get",
       "Get redeemer address for a partner EOA",
@@ -59,14 +64,8 @@ async function main() {
     )
     .command(
       "create",
-      "Create new redeemer for partner and token",
+      "Create new redeemer for token",
       {
-        partnerAddress: {
-          alias: "a",
-          description: "Partner address",
-          type: "string",
-          demandOption: true,
-        },
         tokenAddress: {
           alias: "t",
           description: "Token address",
@@ -76,12 +75,13 @@ async function main() {
       },
       createRewardsRedeemer
     )
-    .command("*", "", () => {
-      yargs.showHelp();
-    })
     .demandCommand(1, "You need at least one command before moving on")
     .help()
     .alias("help", "h").argv;
+
+  if (argv._.length === 0 || !["get", "create"].includes(argv._[0] as string)) {
+    yargs.showHelp();
+  }
 }
 
 main()
