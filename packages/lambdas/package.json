@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
+    "common": "*",
     "database": "*",
     "graphclient": "*",
-    "snapshot": "*",
-    "common": "*"
+    "joi": "^17.10.1",
+    "ajna-rewards-snapshot": "*"
   },
   "devDependencies": {
     "aws-sdk-client-mock": "^3.0.0",

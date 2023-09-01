@@ -12,3 +12,4 @@ documents:
   - ./queries/daily.graphql
   - ./queries/partnerRewardsDaily.graphql
   - ./queries/partnerRewardsWeekly.graphql
+  - ./queries/pools.graphql
