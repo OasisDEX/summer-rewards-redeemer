@@ -35,6 +35,8 @@ describe("Run handler", () => {
     sinon.restore();
   });
   test("should return a success response if a valid body is provided", async () => {
+    inputEvent.path = "/";
+    inputEvent.httpMethod = "POST";
     inputEvent.body = JSON.stringify({
       weekId: 2795,
       distribution: testDistributions.map((distribution) => ({
@@ -57,6 +59,8 @@ describe("Run handler", () => {
   });
 
   it("should return an error response if no body is provided", async () => {
+    inputEvent.path = "/";
+    inputEvent.httpMethod = "POST";
     inputEvent.body = "";
     const response = await handler(inputEvent);
     expect(response.statusCode).toEqual(400);
@@ -64,9 +68,93 @@ describe("Run handler", () => {
   });
 
   it("should return an error response if an invalid body is provided", async () => {
+    inputEvent.path = "/";
+    inputEvent.httpMethod = "POST";
     inputEvent.body = '{ "invalid": "body" }';
     const response = await handler(inputEvent);
     expect(response.statusCode).toEqual(400);
     expect(JSON.parse(response.body)).toEqual({ error: "Invalid body provided" });
+  });
+
+  it("should return an error response if no body is provided", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/",
+      body: null,
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toEqual({ error: "No body provided" });
+  });
+
+  it("should return an error response if an invalid body is provided", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/",
+      body: '{ "invalid": "body" }',
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toEqual({ error: "Invalid body provided" });
+  });
+
+  it("should return a success response for the token pairs request", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/pools/token-pairs",
+      body: JSON.stringify({
+        pairs: [["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"]],
+      }),
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    console.log(response);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toHaveProperty("pools");
+  });
+
+  it("should return a success response for the token request", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/pools/token",
+      body: '{ "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" }',
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toHaveProperty("pools");
+  });
+
+  it("should return a success response for the curated tokens request", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/pools/curated-tokens",
+      body: JSON.stringify({
+        tokens: ["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"],
+      }),
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toHaveProperty("pools");
+  });
+
+  it("should return an error response for an invalid path", async () => {
+    const event = {
+      httpMethod: "POST",
+      path: "/invalid",
+      body: '{ "weekId": 1, "distribution": [], "totalWeeklyRewards": "100" }',
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toEqual({ error: "Invalid path" });
+  });
+
+  it("should return an error response for a non-POST request", async () => {
+    const event = {
+      httpMethod: "GET",
+      path: "/",
+      body: '{ "weekId": 1, "distribution": [], "totalWeeklyRewards": "100" }',
+    } as APIGatewayProxyEvent;
+    const response = await handler(event);
+    expect(response.statusCode).toBe(405);
+    expect(JSON.parse(response.body)).toEqual({ error: "Method not allowed" });
   });
 });

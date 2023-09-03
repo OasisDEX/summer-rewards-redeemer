@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "declaration": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@scripts/*": ["packages/contracts/scripts/*"],
+      "@utils/*": ["utils/*"]
+    }
+  },
+  "include": [
+    "packages/contracts/packages/contracts/tests/**.ts",
+    "./test",
+    "./typechain",
+    "packages/prisma/seed.ts",
+    "packages/contracts/scripts/snapshot/verify.ts"
+  ],
+  "files": ["packages/contracts/hardhat.config.ts"]
+}
