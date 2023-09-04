@@ -11,7 +11,7 @@ import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph
 import { BigNumber } from "ethers";
 import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
 import { calculateWeeklySnapshot, calculateDailySnapshot } from "ajna-rewards-snapshot/get-snapshot";
-import { Pool, Token, TokenPairQuery } from "graphclient";
+import { Pool, Token } from "graphclient";
 
 export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
@@ -28,7 +28,7 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     }
     const graphRes = await fetchWeeklyData(
       validatedBody.weekId,
-      validatedBody.distribution.map((pool: any) => pool.address)
+      validatedBody.distribution.map((pool: any) => pool.address.toLowerCase())
     );
     let parsedSnapshot = calculateWeeklySnapshot(
       graphRes,
@@ -76,7 +76,7 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
     }
     const graphRes = await fetchDailyData(
       validatedBody.dayId,
-      validatedBody.distribution.map((pool: any) => pool.address)
+      validatedBody.distribution.map((pool: any) => pool.address.toLowerCase())
     );
     let parsedSnapshot = calculateDailySnapshot(
       graphRes,
@@ -127,8 +127,8 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
       validatedBody.pairs.map((pair) =>
         graphClient
           .TokenPair({
-            collateralAddress: pair[0],
-            quoteTokenAddress: pair[1],
+            collateralAddress: pair[0].toLowerCase(),
+            quoteTokenAddress: pair[1].toLowerCase(),
           })
           .then((data) => data.pools)
       )
@@ -180,7 +180,7 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
       return createErrorResponse("Invalid body provided");
     }
     const graphRes = await graphClient.CuratedTokens({
-      tokens: validatedBody.tokens,
+      tokens: validatedBody.tokens.map((token) => token.toLowerCase()),
     });
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
