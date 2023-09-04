@@ -32,7 +32,7 @@ $ yarn install
 Then copy the `.env.example` file to `.env` and fill in the values in the `PARTNER REWARDS PROGRAM` section:
 
 - `JSON_RPC_URL` msut point to your RPC endpoint provided by Alchemy, Infura or any other, for the network that you intend to deploy the contract to. Please consult with us which networks are supported for the rewards program.
-- `PARTNER_REWARDS_ENDPOINT_URL` must point to the endpoint provided by us. This endpoint will be used to query the data about the pools usage.
+- `PARTNER_REWARDS_ENDPOINT_BASE_URL` must point to the endpoint provided by us. This endpoint will be used to query the data about the pools usage.
 - `PARTNER_REWARDS_ENDPOINT_API_KEY` must be the token provided by us to access the endpoint.
 - `REWARDS_REDEEMER_FACTORY_ADDRESS` must be the address of the Rewards Redeemer Factory contract. This address will be provided by us for the specific network that you want to use.
 - `PARTNER_WALLET_PRIVATE_KEY` must be the private key of the wallet that will be used to deploy the Rewards Redeemer contract and to publish the rewards in the Redeemer. This wallet must be whitelisted by us in order to access the functionality. The private key is only used to sign transactions and it is never sent to any server.

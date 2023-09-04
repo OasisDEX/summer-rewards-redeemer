@@ -8,6 +8,7 @@
     "redeemer:manage": " ts-node ./scripts/manage-redeemer.ts",
     "rewards:request": "ts-node ./scripts/request-rewards.ts",
     "rewards:manage": "ts-node ./scripts/manage-rewards.ts",
-    "token:manage": "ts-node ./scripts/manage-token.ts"
+    "token:manage": "ts-node ./scripts/manage-token.ts",
+    "pools:request": "ts-node ./scripts/request-pools.ts"
   }
 }

@@ -1,15 +1,18 @@
 import yargs from "yargs";
 import fs from "fs";
 
-import { PoolRewardsDistributionRequest, PoolRewardsDistributionResponse } from "common";
+import { PoolRewardsDistributionRequest, PoolRewardsDistributionResponse, RewardsType } from "common";
 
 import "common/bootstrap-env";
 
-async function requestMerkleTree(
-  endpointUrl: string,
+async function requestRewardsForUsers(
+  endpointBaseUrl: string,
   apiKey: string,
-  poolRequest: PoolRewardsDistributionRequest
+  poolRequest: PoolRewardsDistributionRequest,
+  type: RewardsType = "weekly"
 ): Promise<PoolRewardsDistributionResponse> {
+  const endpointUrl = `${endpointBaseUrl}/snapshot/${type}`;
+
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
@@ -27,8 +30,8 @@ async function requestMerkleTree(
 }
 
 async function main() {
-  if (!process.env.PARTNER_REWARDS_ENDPOINT_URL) {
-    throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_REWARDS_ENDPOINT_URL variable");
+  if (!process.env.PARTNER_REWARDS_ENDPOINT_BASE_URL) {
+    throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_REWARDS_ENDPOINT_BASE_URL variable");
   }
   if (!process.env.PARTNER_REWARDS_ENDPOINT_API_KEY) {
     throw new Error("Please copy '.env.example' to '.env' and fill the PARTNER_REWARDS_ENDPOINT_API_KEY variable");
@@ -49,6 +52,14 @@ async function main() {
       demandOption: true,
       type: "string",
     })
+    .option("type", {
+      alias: "t",
+      description: "Type of rewards to request",
+      demandOption: false,
+      type: "string",
+      choices: ["daily", "weekly"],
+      default: "weekly",
+    })
     .help()
     .alias("help", "h").argv;
 
@@ -60,13 +71,14 @@ async function main() {
   }
 
   console.log(`Initiating request for Merkle Tree for week ${poolsRequestConfig.weekId}...`);
-  console.log(` - Endpoint: ${process.env.PARTNER_REWARDS_ENDPOINT_URL}`);
+  console.log(` - Endpoint: ${process.env.PARTNER_REWARDS_ENDPOINT_BASE_URL}`);
   console.log(` - API Key: ${process.env.PARTNER_REWARDS_ENDPOINT_API_KEY}\n`);
 
-  const merkleTreeData = await requestMerkleTree(
-    process.env.PARTNER_REWARDS_ENDPOINT_URL,
+  const merkleTreeData = await requestRewardsForUsers(
+    process.env.PARTNER_REWARDS_ENDPOINT_BASE_URL,
     process.env.PARTNER_REWARDS_ENDPOINT_API_KEY,
-    poolsRequestConfig
+    poolsRequestConfig,
+    args.type as RewardsType
   );
 
   console.log(`Merkle Tree successfully requested for week ${poolsRequestConfig.weekId}`);
