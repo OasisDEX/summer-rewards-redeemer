@@ -107,7 +107,6 @@ describe("Run handler", () => {
       }),
     } as APIGatewayProxyEvent;
     const response = await handler(event);
-    console.log(response);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });
