@@ -137,7 +137,7 @@ Example response body:
 
 ## `/pools/token-pairs` Endpoint
 
-This endpoint returns a list of pools for specified token pairs. First token in each token pair is the colalteral token and the second one is the quote token.
+This endpoint returns a list of pools for specified token pairs. First token in each token pair is the collateral token and the second one is the quote token.
 
 Example request body:
 
