@@ -1,15 +1,33 @@
 query CuratedTokens($tokens: [Bytes!]!) {
   pools(where: { and: [{ collateralAddress_in: $tokens }, { quoteTokenAddress_in: $tokens }] }) {
     id
+    collateralToken {
+      symbol
+    }
+    quoteToken {
+      symbol
+    }
   }
 }
 query TokenPair($collateralAddress: Bytes!, $quoteTokenAddress: Bytes!) {
   pools(where: { and: [{ collateralAddress: $collateralAddress }, { quoteTokenAddress: $quoteTokenAddress }] }) {
     id
+    collateralToken {
+      symbol
+    }
+    quoteToken {
+      symbol
+    }
   }
 }
 query Token($token: Bytes!) {
   pools(where: { or: [{ collateralAddress: $token }, { quoteTokenAddress: $token }] }) {
     id
+    collateralToken {
+      symbol
+    }
+    quoteToken {
+      symbol
+    }
   }
 }
