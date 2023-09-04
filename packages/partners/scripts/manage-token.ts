@@ -65,7 +65,7 @@ async function balanceOf(argv: any) {
     `BALANCE of ${argv.userAddress} for token ${argv.tokenAddress} is ${ethers.utils.formatUnits(
       balance,
       decimals
-    )} (${ethers.utils.formatUnits(balance, 0)} wei))`
+    )} (${ethers.utils.formatUnits(balance, 0)} wei)`
   );
 }
 

@@ -69,15 +69,21 @@ yarn redeemer:manage create -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
 RewardsRedeemer = 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971
 ```
 
-# Query Users Data
+# Prepare Rewards
+
+## Query Pools
+
+```
+yarn pools:request token -t 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -o pools-demo-config.json
+```
 
 ## Demo Config
 
-Create a `pools-demo-config.ts` containing the data below:
+Edit the previously created `pools-demo-config.ts` to add the `weekId` and the `totalWeeklyRewards`. This can be time consuming. For a quick demo just create a new `pools-demo-config.ts` containing the data below:
 
 ```
 {
-  "weekId": 2795,
+  "weekId": 2799,
   "distribution": [
     { "name": "RETH-DAI", "address": "0x42d3f9c4df0b98c3974fd539a7ea9d0847f37ef5", "share": 0.09 },
     { "name": "WBTC-DAI", "address": "0xdb30a08ebc49af1baf87f57824f85056ced33d5f", "share": 0.07 },

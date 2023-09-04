@@ -42,8 +42,8 @@ async function requestPoolsForSingleToken(argv: any) {
     token: argv.tokenAddress,
   };
 
-  console.log(endpointUrl);
-  console.log(request);
+  console.log(`Requesting pools for token ${argv.tokenAddress}...`);
+
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
@@ -75,6 +75,8 @@ async function requestPoolsForTokenPairs(argv: any) {
     pairs: tokenPairs,
   };
 
+  console.log(`Requesting pools for token pairs ${argv.tokenPairs}...`);
+
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
@@ -105,6 +107,8 @@ async function requestPoolsForCuratedTokens(argv: any) {
   const request: PoolsCuratedTokensRequest = {
     tokens: curatedTokens,
   };
+
+  console.log(`Requesting pools for curated tokens ${argv.curatedTokens}...`);
 
   const response = await fetch(endpointUrl, {
     method: "POST",
