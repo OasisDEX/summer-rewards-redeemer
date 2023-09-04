@@ -94,9 +94,7 @@ $ yarn pools:request token -t 0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e -o pool
 To query by token pair you use the following command:
 
 ```
-
 $ yarn pools:request token-pairs -t <token_pairs> -o <output_file>
-
 ```
 
 Where `<token_pairs>` is a list of token pairs, separated by commas, and `<output_file>` is the path to the file where the data will be written to.
@@ -188,7 +186,6 @@ The file format is the following:
 ],
 "totalWeeklyRewards": "1000000000000000000000000"
 }
-
 ```
 
 Where:
@@ -204,9 +201,7 @@ Where:
 You should write the data to a file, for example `pools-config.json` and then run:
 
 ```
-
 $ yarn rewards:request -p <pools_config> -o <output_file>
-
 ```
 
 Where `<pools_config>` is the path to the file with the pools configuration (i.e. `pools-config.json` in the example), and `<output_file>` is the path to the file where the data will be written to.
@@ -214,7 +209,6 @@ Where `<pools_config>` is the path to the file with the pools configuration (i.e
 The created file should contain something like:
 
 ```
-
 {
 "root": "0x2044c78c44a548d3fd74e6c820ab9534718ec3cc5d3b04fc52620bcccbd20e21",
 "parsedSnapshotWithProofs": [
@@ -234,7 +228,6 @@ The created file should contain something like:
 },
 {
 "address": ...,
-
 ```
 
 With the list of users and their proofs in the `parsedSnapshotWithProofs` field.
@@ -250,9 +243,7 @@ This can be done directly through a wallet manager like Metamask. To query for t
 If reward tokens are held in the same wallet that the partner is using to publish the rewards in the Redeemer, then a command can be used to transfer the tokens to the Redeemer contract:
 
 ```
-
 $ yarn rewards:send -t <rewards_token_address> -m <amount> -r <redeemer_contract_address>
-
 ```
 
 Where:
@@ -272,9 +263,7 @@ If you are concerned about holding rewards tokens in a hot wallet, then please m
 Once the Redeemer contract has been created, and the pools usage data has been queried, the partner can publish the rewards in the Redeemer contract by running:
 
 ```
-
 $ yarn rewards:manage add -r <redeemer_contract_address> -w <weekId> [ -m <merkle_root> | -u <user_data_file>]
-
 ```
 
 Where:
@@ -293,9 +282,7 @@ Once the root is published in the Redeemer contract, the rewards are immediately
 A root that has been published in the Redeemer contract cannot be published again. If you made a mistake or want to update the root for any reason, you have to remove the root first by running:
 
 ```
-
 $ yarn rewards:manage remove -r <redeemer_contract_address> -w <weekId>
-
 ```
 
 Where:
@@ -310,9 +297,7 @@ After removing the root, you can publish it again by running the `rewards:manage
 To check the root that is currently published in the Redeemer contract for a certain week, you can run:
 
 ```
-
 $ yarn rewards:manage get -r <redeemer_contract_address> -w <weekId>
-
 ```
 
 Where:
@@ -347,9 +332,7 @@ In order to access the privileged operations, you need to provide the private ke
 To whitelist a new partner in the Redeemer Factory, run:
 
 ```
-
 $ yarn partner:manage add -p <partner_wallet_address>
-
 ```
 
 Where:
@@ -363,9 +346,7 @@ This will enable the partner to create new Redeemer contracts and publish reward
 To remove a partner from the Redeemer Factory, run:
 
 ```
-
 $ yarn partner:manage remove -p <partner_wallet_address>
-
 ```
 
 Where:
@@ -373,11 +354,3 @@ Where:
 - `<partner_wallet_address>` is the address of the wallet that was used by the partner to manage the rewards program.
 
 This will prevent the partner from creating new Redeemer contracts and publishing rewards in them. However the already created Redeemer contracts will still under the ownership of the partner and they can continue using them.
-
-```
-
-```
-
-```
-
-```
