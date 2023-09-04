@@ -139,6 +139,8 @@ Example response body:
 
 This endpoint returns a list of pools for specified token pairs. First token in each token pair is the collateral token and the second one is the quote token.
 
+Response contains name consisting of token symbols, pool address, share of the pool in the total liquidity ( one divided by number of pools by default) and lendRatio set to 0.6 by deafult.
+
 Example request body:
 
 ```json
@@ -156,21 +158,21 @@ Example response body:
 
 ```json
 {
-  "statusCode": 200,
-  "body": {
-{
-    "pools": [
-        "0x038bedf0eb7c0f322eac4ac445a582fe199285e7",
-        "0x07b48cbfafa35683e8fe82283a54964442814e96",
-    ]
-}
-  }
+  "distribution": [
+    { "name": "RETH-DAI", "address": "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-DAI", "address": "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WSTETH-DAI", "address": "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "ETH-USDC", "address": "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-USDC", "address": "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", "share": 0.2, "lendRatio": 0.6 }
+  ]
 }
 ```
 
 ## `/pools/token` Endpoint
 
 This endpoint returns all pools that have `token` as collateral token or as quote token.
+
+Response contains name consisting of token symbols, pool address, share of the pool in the total liquidity ( one divided by number of pools by default) and lendRatio set to 0.6 by deafult.
 
 Example request body:
 
@@ -184,21 +186,21 @@ Example response body:
 
 ```json
 {
-  "statusCode": 200,
-  "body": {
-    "pools": [
-      "0x038bedf0eb7c0f322eac4ac445a582fe199285e7",
-      "0x07b48cbfafa35683e8fe82283a54964442814e96",
-      "0x038bedf0eb7c0f322eac4ac445a582fe199285e7",
-      "0x07b48cbfafa35683e8fe82283a54964442814e96"
-    ]
-  }
+  "distribution": [
+    { "name": "RETH-DAI", "address": "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-DAI", "address": "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WSTETH-DAI", "address": "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "ETH-USDC", "address": "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-USDC", "address": "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", "share": 0.2, "lendRatio": 0.6 }
+  ]
 }
 ```
 
 ## `/pools/curated-tokens` Endpoint
 
 This endpoint accepts a list of curated tokens. It returns a list of pools in which both collateral and quote tokens are in the list of curated tokens.
+
+Response contains name consisting of token symbols, pool address, share of the pool in the total liquidity ( one divided by number of pools by default) and lendRatio set to 0.6 by deafult.
 
 Example request body:
 
@@ -212,14 +214,12 @@ Example response body:
 
 ```json
 {
-  "statusCode": 200,
-  "body": {
-    "pools": [
-      "0x038bedf0eb7c0f322eac4ac445a582fe199285e7",
-      "0x07b48cbfafa35683e8fe82283a54964442814e96",
-      "0x038bedf0eb7c0f322eac4ac445a582fe199285e7",
-      "0x07b48cbfafa35683e8fe82283a54964442814e96"
-    ]
-  }
+  "distribution": [
+    { "name": "RETH-DAI", "address": "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-DAI", "address": "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WSTETH-DAI", "address": "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "ETH-USDC", "address": "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", "share": 0.2, "lendRatio": 0.6 },
+    { "name": "WBTC-USDC", "address": "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", "share": 0.2, "lendRatio": 0.6 }
+  ]
 }
 ```

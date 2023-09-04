@@ -11,7 +11,7 @@ import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph
 import { BigNumber } from "ethers";
 import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
 import { calculateWeeklySnapshot, calculateDailySnapshot } from "ajna-rewards-snapshot/get-snapshot";
-import { TokenPairQuery } from "graphclient";
+import { Pool, Token, TokenPairQuery } from "graphclient";
 
 export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
@@ -41,7 +41,9 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     );
     // uncomment for testing
     // parsedSnapshot[0].address = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
-    // parsedSnapshot[0].amount = BigNumber.from("10000000000").toString();
+    // parsedSnapshot[0].amount = BigNumber.from("10000000000").toHexString();
+    // parsedSnapshot[1].address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+    // parsedSnapshot[1].amount = BigNumber.from("10000000000").toHexString();
     const { tree, leaves, root } = createMerkleTree(
       parsedSnapshot.map((entry) => ({
         address: entry.address,
@@ -87,7 +89,9 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
     );
     // uncomment for testing
     // parsedSnapshot[0].address = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
-    // parsedSnapshot[0].amount = BigNumber.from("10000000000").toString();
+    // parsedSnapshot[0].amount = BigNumber.from("10000000000").toHexString();
+    // parsedSnapshot[1].address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+    // parsedSnapshot[1].amount = BigNumber.from("10000000000").toHexString();
     const { tree, leaves, root } = createMerkleTree(
       parsedSnapshot.map((entry) => ({
         address: entry.address,
@@ -129,17 +133,15 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
           .then((data) => data.pools)
       )
     );
-
     const poolsRes = graphRes.reduce((acc, val) => acc.concat(val), []);
-    const pools = poolsRes.map((pool: any) => pool.id);
-
-    const responseBody = JSON.stringify({ pools });
+    const responseBody = prepareResponse(poolsRes);
     return createSuccessResponse(responseBody);
   } catch (error) {
     console.error("Error", error);
     return createErrorResponse("Internal server error", 500);
   }
 }
+
 export async function handleToken(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
     if (!event.body) {
@@ -157,9 +159,7 @@ export async function handleToken(event: APIGatewayProxyEvent): Promise<APIGatew
     const graphRes = await graphClient.Token({
       token: validatedBody.token.toLowerCase(),
     });
-    const pools = graphRes.pools.map((pool: any) => pool.id);
-
-    const responseBody = JSON.stringify({ pools });
+    const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
     console.error("Error", error);
@@ -182,12 +182,30 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
     const graphRes = await graphClient.CuratedTokens({
       tokens: validatedBody.tokens,
     });
-    const pools = graphRes.pools.map((pool: any) => pool.id);
-
-    const responseBody = JSON.stringify({ pools });
+    const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
     console.error("Error", error);
     return createErrorResponse("Internal server error", 500);
   }
+}
+
+function prepareResponse(
+  graphRes: (Pick<Pool, "id"> & {
+    collateralToken: Pick<Token, "symbol">;
+    quoteToken: Pick<Token, "symbol">;
+  })[]
+) {
+  const poolCount = graphRes.length;
+  const pools = graphRes.map((pool) => {
+    return {
+      name: `${pool.collateralToken.symbol}-${pool.quoteToken.symbol}`,
+      address: pool.id,
+      share: (1 / poolCount).toFixed(2).toString(),
+      lendRatio: 0.6,
+    };
+  });
+
+  const responseBody = JSON.stringify({ distribution: pools });
+  return responseBody;
 }

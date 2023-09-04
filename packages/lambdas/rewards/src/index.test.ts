@@ -109,7 +109,7 @@ describe("Run handler", () => {
     const response = await handler(event);
     console.log(response);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveProperty("pools");
+    expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });
 
   it("should return a success response for the token request", async () => {
@@ -120,7 +120,7 @@ describe("Run handler", () => {
     } as APIGatewayProxyEvent;
     const response = await handler(event);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveProperty("pools");
+    expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });
 
   it("should return a success response for the curated tokens request", async () => {
@@ -133,7 +133,7 @@ describe("Run handler", () => {
     } as APIGatewayProxyEvent;
     const response = await handler(event);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveProperty("pools");
+    expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });
 
   it("should return an error response for an invalid path", async () => {

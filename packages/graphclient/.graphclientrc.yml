@@ -2,7 +2,7 @@ sources:
   - name: ajna
     handler:
       graphql:
-        endpoint: "{context.url:https://api.thegraph.com/subgraphs/name/halaprix/gajna}"
+        endpoint: "{context.url:https://api.thegraph.com/subgraphs/name/halaprix/gajna5}"
     transforms:
       - autoPagination:
           validateSchema: true # Validates that the schema source actually contains the required input filters.
