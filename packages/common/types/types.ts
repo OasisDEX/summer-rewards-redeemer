@@ -165,8 +165,10 @@ export type PoolsTokenPairRequest = {
   pairs: TokenPairList;
 };
 
+export type TokenList = string[];
+
 export type PoolsCuratedTokensRequest = {
-  tokens: string[];
+  tokens: TokenList;
 };
 
 export type PoolsRequest = PoolsSingleTokenRequest | PoolsTokenPairRequest | PoolsCuratedTokensRequest;

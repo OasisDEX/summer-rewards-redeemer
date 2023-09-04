@@ -2,7 +2,13 @@ import yargs from "yargs";
 import fs from "fs";
 import { ethers } from "ethers";
 
-import { PoolsCuratedTokensRequest, PoolsSingleTokenRequest, PoolsTokenPairRequest, TokenPairList } from "common";
+import {
+  PoolsCuratedTokensRequest,
+  PoolsSingleTokenRequest,
+  PoolsTokenPairRequest,
+  TokenList,
+  TokenPairList,
+} from "common";
 
 import "common/bootstrap-env";
 
@@ -30,13 +36,14 @@ async function requestPoolsForSingleToken(argv: any) {
     throw new Error("Invalid token address format");
   }
 
-  const endpointUrl = `${EndpointBaseUrl}/pools/token}`;
+  const endpointUrl = `${EndpointBaseUrl}/pools/token`;
 
   const request: PoolsSingleTokenRequest = {
     token: argv.tokenAddress,
   };
 
   console.log(endpointUrl);
+  console.log(request);
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
@@ -50,7 +57,7 @@ async function requestPoolsForSingleToken(argv: any) {
     throw new Error(`Requesting the list of pools for a single token: ${await response.text()}`);
   }
 
-  writeOutputFile(argv.outputFile, response.json());
+  writeOutputFile(argv.outputFile, await response.json());
 }
 
 async function requestPoolsForTokenPairs(argv: any) {
@@ -62,10 +69,10 @@ async function requestPoolsForTokenPairs(argv: any) {
     throw new Error(`Invalid token pairs format: ${error}`);
   }
 
-  const endpointUrl = `${EndpointBaseUrl}/pools/token-pairs}`;
+  const endpointUrl = `${EndpointBaseUrl}/pools/token-pairs`;
 
   const request: PoolsTokenPairRequest = {
-    pairs: argv.tokenPairs,
+    pairs: tokenPairs,
   };
 
   const response = await fetch(endpointUrl, {
@@ -81,18 +88,22 @@ async function requestPoolsForTokenPairs(argv: any) {
     throw new Error(`Requesting the list of pools for a list of token pairs: ${await response.text()}`);
   }
 
-  writeOutputFile(argv.outputFile, response.json());
+  writeOutputFile(argv.outputFile, await response.json());
 }
 
 async function requestPoolsForCuratedTokens(argv: any) {
-  if (!argv.curatedTokens || !Array.isArray(argv.curatedTokens)) {
-    throw new Error("Invalid curated tokens format");
+  let curatedTokens: TokenList;
+
+  try {
+    curatedTokens = JSON.parse(argv.curatedTokens);
+  } catch (error) {
+    throw new Error(`Invalid curated tokens list format: ${error}`);
   }
 
-  const endpointUrl = `${EndpointBaseUrl}/pools/curated-tokens}`;
+  const endpointUrl = `${EndpointBaseUrl}/pools/curated-tokens`;
 
   const request: PoolsCuratedTokensRequest = {
-    tokens: argv.curatedTokens,
+    tokens: curatedTokens,
   };
 
   const response = await fetch(endpointUrl, {
@@ -108,7 +119,7 @@ async function requestPoolsForCuratedTokens(argv: any) {
     throw new Error(`Requesting the list of pools for a list of token pairs: ${await response.text()}`);
   }
 
-  writeOutputFile(argv.outputFile, response.json());
+  writeOutputFile(argv.outputFile, await response.json());
 }
 
 async function main() {
@@ -137,7 +148,7 @@ async function main() {
       "Requests all pools that include the specified token pairs (collateral, quote)",
       {
         tokenPairs: {
-          alias: "p",
+          alias: "t",
           description: "Token pairs list [[collateral1, quote1], ...]",
           type: "string",
           demandOption: true,
@@ -155,7 +166,7 @@ async function main() {
       "curated-tokens",
       "Requests all pools that include the specified tokens either as collateral or quote",
       {
-        tokens: {
+        curatedTokens: {
           alias: "t",
           description: "Tokens list [token1, ...]",
           type: "string",
@@ -173,7 +184,7 @@ async function main() {
     .help()
     .alias("help", "h").argv;
 
-  if (argv._.length === 0 || !["send", "balance"].includes(argv._[0] as string)) {
+  if (argv._.length === 0 || !["token", "token-pairs", "curated-tokens"].includes(argv._[0] as string)) {
     yargs.showHelp();
   }
 }

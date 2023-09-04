@@ -13,6 +13,9 @@ async function requestRewardsForUsers(
 ): Promise<PoolRewardsDistributionResponse> {
   const endpointUrl = `${endpointBaseUrl}/snapshot/${type}`;
 
+  console.log(endpointUrl);
+  console.log(poolRequest);
+
   const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
@@ -22,6 +25,7 @@ async function requestRewardsForUsers(
     body: JSON.stringify(poolRequest),
   });
 
+  console.log(await response.json());
   if (!response.ok) {
     throw new Error(`Requesting the Merkle Tree: ${await response.text()}`);
   }
