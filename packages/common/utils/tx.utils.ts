@@ -4,16 +4,19 @@ export type TxResult = {
   success: boolean;
   txHash?: string;
   error?: string;
+  receipt?: ethers.ContractReceipt;
 };
 
 export async function processTx(
   txPromise: Promise<ethers.ContractTransaction>,
+  iface?: ethers.utils.Interface,
   logErrors: boolean = false
 ): Promise<TxResult> {
   let tx: ethers.ContractTransaction;
+  let receipt: ethers.ContractReceipt;
   try {
     tx = await txPromise;
-    const receipt = await tx.wait();
+    receipt = await tx.wait();
 
     if (receipt.status === 0) {
       logErrors && console.error("TX failed");
@@ -22,16 +25,17 @@ export async function processTx(
         error: "TX failed",
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     logErrors && console.error("TX failed:", error);
     return {
       success: false,
-      error: error as string,
+      error: error,
     };
   }
 
   return {
     success: true,
     txHash: tx.hash,
+    receipt: receipt,
   };
 }
