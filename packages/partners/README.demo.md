@@ -79,7 +79,7 @@ yarn pools:request token -t 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -o pools-
 
 ## Demo Config
 
-Edit the previously created `pools-demo-config.ts` to add the `weekId` and the `totalWeeklyRewards`. This can be time consuming. For a quick demo just create a new `pools-demo-config.ts` containing the data below:
+Edit the previously created `pools-demo-config.json` to add the `weekId` and the `totalWeeklyRewards`. This can be time consuming. For a quick demo just create a new `pools-demo-config.json` containing the data below:
 
 ```
 {
