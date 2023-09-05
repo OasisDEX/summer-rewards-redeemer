@@ -130,7 +130,7 @@ PARTNER_WALLET_PRIVATE_KEY="59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4
 ```
 
 ```
-yarn rewards:manage add -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 -u users-data.json
+yarn rewards:manage add -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2799 -u users-data.json
 
 ```
 
