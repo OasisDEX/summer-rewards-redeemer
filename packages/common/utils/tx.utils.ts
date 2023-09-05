@@ -29,7 +29,7 @@ export async function processTx(
     logErrors && console.error("TX failed:", error);
     return {
       success: false,
-      error: error,
+      error: JSON.stringify(error),
     };
   }
 
