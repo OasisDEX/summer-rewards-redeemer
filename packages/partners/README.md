@@ -32,7 +32,7 @@ $ yarn install
 Then copy the `.env.example` file to `.env` and fill in the values in the `PARTNER REWARDS PROGRAM` section:
 
 - `JSON_RPC_URL` msut point to your RPC endpoint provided by Alchemy, Infura or any other, for the network that you intend to deploy the contract to. Please consult with us which networks are supported for the rewards program.
-- `PARTNER_REWARDS_ENDPOINT_URL` must point to the endpoint provided by us. This endpoint will be used to query the data about the pools usage.
+- `PARTNER_REWARDS_ENDPOINT_BASE_URL` must point to the endpoint provided by us. This endpoint will be used to query the data about the pools usage.
 - `PARTNER_REWARDS_ENDPOINT_API_KEY` must be the token provided by us to access the endpoint.
 - `REWARDS_REDEEMER_FACTORY_ADDRESS` must be the address of the Rewards Redeemer Factory contract. This address will be provided by us for the specific network that you want to use.
 - `PARTNER_WALLET_PRIVATE_KEY` must be the private key of the wallet that will be used to deploy the Rewards Redeemer contract and to publish the rewards in the Redeemer. This wallet must be whitelisted by us in order to access the functionality. The private key is only used to sign transactions and it is never sent to any server.
@@ -63,6 +63,103 @@ $ yarn partner:manage get -a <partner_wallet_address>
 
 Where `<partner_wallet_address>` is the address of the wallet that was used to create the Redeemer contract.
 
+# Query the list of pools to be rewarded
+
+A tool for querying pools of interest is provided. The tool will return the list of pools given certain criteria and the output of this tool can be used as input for the next step of the process. If the list of pools is already known, then this step can be skipped and you can jump onto the next section [Query data about pools usage](#query-data-about-pools-usage).
+
+The tool supports three types of queries:
+
+- Query by token: returns the list of pools that use a certain token as either collateral or as quote
+- Query by token pair: returns the list of pools that use one of the token pairs provided in a list of token pairs
+- Query by curated list of tokens: returns the list of pools that have both their collateral and quote in the list of tokens provided
+
+## Query by token
+
+To query by token you use the following command:
+
+```
+$ yarn pools:request token -t <token_address> -o <output_file>
+```
+
+Where `<token_address>` is the address of the token for which to query the pools, and `<output_file>` is the path to the file where the data will be written to.
+
+Example of call:
+
+```
+$ yarn pools:request token -t 0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e -o pools.json
+```
+
+## Query by token pair
+
+To query by token pair you use the following command:
+
+```
+$ yarn pools:request token-pairs -t <token_pairs> -o <output_file>
+```
+
+Where `<token_pairs>` is a list of token pairs, separated by commas, and `<output_file>` is the path to the file where the data will be written to.
+
+Example of call:
+
+```
+yarn pools:request token-pairs -t '[["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"], ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"]]' -o pools-token-pairs.json
+```
+
+## Query by curated list of tokens
+
+To query by curated list of tokens you use the following command:
+
+```
+$ yarn pools:request curated-tokens -t <tokens> -o <output_file>
+```
+
+Where `<tokens>` is a list of tokens, separated by commas, and `<output_file>` is the path to the file where the data will be written to.
+
+Example of call:
+
+```
+$ yarn pools:request curated-tokens -t '["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"]' -o pools-token-curated.json
+```
+
+## Output of the pools query command
+
+The output of all the pools query commands is a JSON file with the following format:
+
+```
+{
+  "distribution": [
+    {
+      "name": "USDC-WETH",
+      "address": "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6",
+      "share": "0.25",
+      "lendRatio": 0.6
+    },
+    {
+      "name": "USDC-WBTC",
+      "address": "0x1a9cea49daeb8c36ea707a9171ebdf4097796dd4",
+      "share": "0.25",
+      "lendRatio": 0.6
+    },
+    {
+      "name": "WETH-USDC",
+      "address": "0x1c50ce3550d1846134f3b7c09785e7005f6a1566",
+      "share": "0.25",
+      "lendRatio": 0.6
+    },
+    {
+      "name": "WBTC-USDC",
+      "address": "0x65374cd7db203e0c9ea8b7da28a25dc770becb9e",
+      "share": "0.25",
+      "lendRatio": 0.6
+    }
+  ]
+}
+```
+
+This format is compatible with the format used in the [Query data about pools usage](#query-data-about-pools-usage) section. The user needs to add the `weekId`, the `totalWeeklyRewards` and configure the shares and lend ratios for each pool before using it to query the data about pools usage.
+
+More information about the pools query endpoints can be found in the following [README.md](../lambdas/rewards/README.md).
+
 # Query data about pools usage
 
 First you need to provide a file with the pools that you want to query, and the week ID for which to query.
@@ -71,23 +168,23 @@ The file format is the following:
 
 ```
 {
-  "weekId": 2795,
-  "distribution": [
-    { "name": "RETH-DAI", "address": "0x42d3f9c4df0b98c3974fd539a7ea9d0847f37ef5", "share": 0.09 },
-    { "name": "WBTC-DAI", "address": "0xdb30a08ebc49af1baf87f57824f85056ced33d5f", "share": 0.07 },
-    { "name": "WSTETH-DAI", "address": "0x8519be08b8d83baeb11eba52a7889967dced9ae0", "share": 0.07 },
-    { "name": "ETH-USDC", "address": "0x1c50ce3550d1846134f3b7c09785e7005f6a1566", "share": 0.065 },
-    { "name": "WBTC-USDC", "address": "0x65374cd7db203e0c9ea8b7da28a25dc770becb9e", "share": 0.09 },
-    { "name": "WSTETH-USDC", "address": "0xe0ffabea66627a588efb6c870677baa23a53b948", "share": 0.09 },
-    { "name": "USDC-ETH", "address": "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6", "share": 0.05 },
-    { "name": "USDC-WBTC", "address": "0x1a9cea49daeb8c36ea707a9171ebdf4097796dd4", "share": 0.05 },
-    { "name": "CBETH-ETH", "address": "0xad24fc773e125edb223c38a39657cb64bc7c178e", "share": 0.1, "lendRatio": 0.95 },
-    { "name": "WSTETH-ETH", "address": "0x37d3a44c905663d7b77c9b574b941d4fbf713a91", "share": 0.1, "lendRatio": 0.95 },
-    { "name": "RETH-ETH", "address": "0xa2ffdc7efef98469d11370d91c0a17dc83ec2bda", "share": 0.1, "lendRatio": 0.95 },
-    { "name": "YFI-DAI", "address": "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78", "share": 0.025 },
-    { "name": "SDAI-USDC", "address": "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d", "share": 0.1, "lendRatio": 0.95 }
-  ],
-  "totalWeeklyRewards": "1000000000000000000000000"
+"weekId": 2795,
+"distribution": [
+{ "name": "RETH-DAI", "address": "0x42d3f9c4df0b98c3974fd539a7ea9d0847f37ef5", "share": 0.09 },
+{ "name": "WBTC-DAI", "address": "0xdb30a08ebc49af1baf87f57824f85056ced33d5f", "share": 0.07 },
+{ "name": "WSTETH-DAI", "address": "0x8519be08b8d83baeb11eba52a7889967dced9ae0", "share": 0.07 },
+{ "name": "ETH-USDC", "address": "0x1c50ce3550d1846134f3b7c09785e7005f6a1566", "share": 0.065 },
+{ "name": "WBTC-USDC", "address": "0x65374cd7db203e0c9ea8b7da28a25dc770becb9e", "share": 0.09 },
+{ "name": "WSTETH-USDC", "address": "0xe0ffabea66627a588efb6c870677baa23a53b948", "share": 0.09 },
+{ "name": "USDC-ETH", "address": "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6", "share": 0.05 },
+{ "name": "USDC-WBTC", "address": "0x1a9cea49daeb8c36ea707a9171ebdf4097796dd4", "share": 0.05 },
+{ "name": "CBETH-ETH", "address": "0xad24fc773e125edb223c38a39657cb64bc7c178e", "share": 0.1, "lendRatio": 0.95 },
+{ "name": "WSTETH-ETH", "address": "0x37d3a44c905663d7b77c9b574b941d4fbf713a91", "share": 0.1, "lendRatio": 0.95 },
+{ "name": "RETH-ETH", "address": "0xa2ffdc7efef98469d11370d91c0a17dc83ec2bda", "share": 0.1, "lendRatio": 0.95 },
+{ "name": "YFI-DAI", "address": "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78", "share": 0.025 },
+{ "name": "SDAI-USDC", "address": "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d", "share": 0.1, "lendRatio": 0.95 }
+],
+"totalWeeklyRewards": "1000000000000000000000000"
 }
 ```
 
@@ -113,24 +210,24 @@ The created file should contain something like:
 
 ```
 {
-  "root": "0x2044c78c44a548d3fd74e6c820ab9534718ec3cc5d3b04fc52620bcccbd20e21",
-  "parsedSnapshotWithProofs": [
-    {
-      "address": "0xaaf00613a099deae24eeb2c21ad2965cadeac244",
-      "amount": "1000000000000000000000",
-      "proof": [
-        "0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
-        "0xc571b19b805e20be07b2c74e201abbe3c14f7b47a76cb07542a5e8631f555dd9",
-        "0xb39d495fbf81c80b9341ff49fa92d9b379313a65f18c269163665ef82c83a234",
-        "0xa5d4a0d68111bd28edefead727e332873450d2ab7c1a9697936d5c33d2480f75",
-        "0xaa410a799a9289145818fdb8159b11cb4bd910fe056aa25a93cb9965581d289c",
-        "0x1e3c5b402918d25ce596809fe7d038397eb677e30fdbfb7534643b803c9aee1a",
-        "0x74c6f3a937230d9e61e2ab2c8a490c313f3bd0c8f12eba8d5eb66759ce44a4f5",
-        "0xaf62fed07e0e7cfceb9bd4f92a33810895fed4ce1599404bb04785bcef68b691"
-      ]
-    },
-    {
-      "address": ...,
+"root": "0x2044c78c44a548d3fd74e6c820ab9534718ec3cc5d3b04fc52620bcccbd20e21",
+"parsedSnapshotWithProofs": [
+{
+"address": "0xaaf00613a099deae24eeb2c21ad2965cadeac244",
+"amount": "1000000000000000000000",
+"proof": [
+"0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
+"0xc571b19b805e20be07b2c74e201abbe3c14f7b47a76cb07542a5e8631f555dd9",
+"0xb39d495fbf81c80b9341ff49fa92d9b379313a65f18c269163665ef82c83a234",
+"0xa5d4a0d68111bd28edefead727e332873450d2ab7c1a9697936d5c33d2480f75",
+"0xaa410a799a9289145818fdb8159b11cb4bd910fe056aa25a93cb9965581d289c",
+"0x1e3c5b402918d25ce596809fe7d038397eb677e30fdbfb7534643b803c9aee1a",
+"0x74c6f3a937230d9e61e2ab2c8a490c313f3bd0c8f12eba8d5eb66759ce44a4f5",
+"0xaf62fed07e0e7cfceb9bd4f92a33810895fed4ce1599404bb04785bcef68b691"
+]
+},
+{
+"address": ...,
 ```
 
 With the list of users and their proofs in the `parsedSnapshotWithProofs` field.

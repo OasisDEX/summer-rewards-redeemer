@@ -151,3 +151,28 @@ export type PoolRewardsDistributionResponse = {
   root: string; // Merkle root
   parsedSnapshotWithProofs: UserRewards[]; // List of users with their rewards and merkle proofs
 };
+
+export type RewardsType = "daily" | "weekly";
+
+export type PoolsSingleTokenRequest = {
+  token: string;
+};
+
+export type TokenPair = [string, string];
+export type TokenPairList = TokenPair[];
+
+export type PoolsTokenPairRequest = {
+  pairs: TokenPairList;
+};
+
+export type TokenList = string[];
+
+export type PoolsCuratedTokensRequest = {
+  tokens: TokenList;
+};
+
+export type PoolsRequest = PoolsSingleTokenRequest | PoolsTokenPairRequest | PoolsCuratedTokensRequest;
+
+export type PoolsRequestResponse = {
+  pools: string[];
+};

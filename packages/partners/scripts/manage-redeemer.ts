@@ -5,7 +5,6 @@ import { createRedeemer } from "contracts/utils";
 import { RewardsRedeemerFactory__factory } from "typechain-types";
 
 import "common/bootstrap-env";
-import { processTx } from "common/utils";
 
 // SETUP
 if (!process.env.JSON_RPC_URL) {

@@ -32,7 +32,7 @@ PRIVATE_KEY_DEPLOY="ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2
 
 # PARTNER REWARDS PROGRAM
 JSON_RPC_URL="http://127.0.0.1:8545/"
-PARTNER_REWARDS_ENDPOINT_URL="<Hidden on purpose>"
+PARTNER_REWARDS_ENDPOINT_BASE_URL="<Hidden on purpose>"
 PARTNER_REWARDS_ENDPOINT_API_KEY="<Hidden on purpose>"
 REWARDS_REDEEMER_FACTORY_ADDRESS="0xa85EffB2658CFd81e0B1AaD4f2364CdBCd89F3a1"
 PARTNER_WALLET_PRIVATE_KEY="59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
@@ -69,15 +69,21 @@ yarn redeemer:manage create -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6
 RewardsRedeemer = 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971
 ```
 
-# Query Users Data
+# Prepare Rewards
+
+## Query Pools
+
+```
+yarn pools:request token -t 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 -o pools-demo-config.json
+```
 
 ## Demo Config
 
-Create a `pools-demo-config.ts` containing the data below:
+Edit the previously created `pools-demo-config.json` to add the `weekId` and the `totalWeeklyRewards`. This can be time consuming. For a quick demo just create a new `pools-demo-config.json` containing the data below:
 
 ```
 {
-  "weekId": 2795,
+  "weekId": 2799,
   "distribution": [
     { "name": "RETH-DAI", "address": "0x42d3f9c4df0b98c3974fd539a7ea9d0847f37ef5", "share": 0.09 },
     { "name": "WBTC-DAI", "address": "0xdb30a08ebc49af1baf87f57824f85056ced33d5f", "share": 0.07 },

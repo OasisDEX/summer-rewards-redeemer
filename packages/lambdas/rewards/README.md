@@ -110,28 +110,25 @@ Example response body:
 
 ```json
 {
-  "statusCode": 200,
-  "body": {
-    "root": "0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38",
-    "parsedSnapshotWithProofs": [
-      {
-        "address": "0xf4f9e8cdae4b69ff3e0beca0dff65b9b718c3161",
-        "amount": "0x0431986b2ca8704156bb",
-        "proof": [
-          "0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
-          "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
-        ]
-      },
-      {
-        "address": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
-        "amount": "0x83568a4ead839275b3",
-        "proof": [
-          "0x358f41e4581ceaa0da1087ce1291cf962ebcf23b685cacbbd383bd4e755a4619",
-          "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
-        ]
-      }
-    ]
-  }
+  "root": "0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38",
+  "parsedSnapshotWithProofs": [
+    {
+      "address": "0xf4f9e8cdae4b69ff3e0beca0dff65b9b718c3161",
+      "amount": "0x0431986b2ca8704156bb",
+      "proof": [
+        "0x114111818f24ddeeb87c636a6e5746ed0c0e7119f72fa16b24a756dafe4b70fa",
+        "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
+      ]
+    },
+    {
+      "address": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
+      "amount": "0x83568a4ead839275b3",
+      "proof": [
+        "0x358f41e4581ceaa0da1087ce1291cf962ebcf23b685cacbbd383bd4e755a4619",
+        "0x2401d885723a686df608aef5a86557a6b4b5077a2cff9d628d65989ee412ca09"
+      ]
+    }
+  ]
 }
 ```
 
