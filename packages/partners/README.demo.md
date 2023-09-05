@@ -146,7 +146,7 @@ yarn token:manage balance -t 0x77AD263Cd578045105FBFC88A477CAd808d39Cf6 -u 0x3C4
 ## Claim
 
 ```
-yarn rewards:manage claim -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2795 -u users-data.json
+yarn rewards:manage claim -r 0x85057f85D70c55B434D7eA9B8bB34fF041eBC971 -w 2799 -u users-data.json
 
 ```
 
