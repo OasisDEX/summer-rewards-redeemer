@@ -118,6 +118,11 @@ describe("Run handler", () => {
       body: '{ "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" }',
     } as APIGatewayProxyEvent;
     const response = await handler(event);
+    const distribution = JSON.parse(response.body).distribution;
+    const sumOfShares = +distribution
+      .reduce((acc: number, val: { share: string }) => acc + (+val.share * 1000) / 1000, 0)
+      .toFixed(2);
+    expect(sumOfShares).toBe(1);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });

@@ -197,11 +197,13 @@ function prepareResponse(
   })[]
 ) {
   const poolCount = graphRes.length;
-  const pools = graphRes.map((pool) => {
+  const poolShare = (Math.floor((1 / poolCount) * 1000) / 1000).toFixed(3);
+  const remainder = (1 - (poolCount - 1) * +poolShare).toFixed(3);
+  const pools = graphRes.map((pool, index) => {
     return {
       name: `${pool.collateralToken.symbol}-${pool.quoteToken.symbol}`,
       address: pool.id,
-      share: (1 / poolCount).toFixed(2).toString(),
+      share: index == poolCount - 1 ? remainder : poolShare,
       lendRatio: 0.6,
     };
   });
