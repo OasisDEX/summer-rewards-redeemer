@@ -119,10 +119,8 @@ describe("Run handler", () => {
     } as APIGatewayProxyEvent;
     const response = await handler(event);
     const distribution = JSON.parse(response.body).distribution;
-    const sumOfShares = +distribution
-      .reduce((acc: number, val: { share: string }) => acc + (+val.share * 1000) / 1000, 0)
-      .toFixed(2);
-    expect(sumOfShares).toBe(1);
+    const sumOfShares = distribution.reduce((acc: number, val: { share: string }) => acc + +val.share, 0);
+    expect(sumOfShares).toBeCloseTo(1);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toHaveProperty("distribution");
   });
