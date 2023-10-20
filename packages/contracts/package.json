@@ -11,6 +11,8 @@
     "db:reset": "docker exec -it ajna_rewards psql -U postgres -c 'DROP DATABASE IF EXISTS ajna_rewards'",
     "db:migrate": "npx prisma migrate dev",
     "db:seed": "concurrently \"yarn start:local\" \"npx hardhat run --network localhost packages/snapshot/seed-contract-and-db-hardhat.ts\"",
+    "rewards:deploy": "npx hardhat run scripts/deployment/deploy.ts",
+    "dripper:deploy": "npx hardhat run scripts/deployment/deploy-dripper-only.ts",
     "test": "yarn db:start && npx hardhat test",
     "clean": "rm -rf artifacts cache typechain-types",
     "lint:fix": "solhint --fix -f table contracts/*.sol contracts/**/*.sol && eslint --fix test/**/*.ts packages/**/*.ts",
