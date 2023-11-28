@@ -380,7 +380,6 @@ export const getWeeklyRewardForNetwork = (weekNumber: number, network: Network) 
   for (const distribution of rewardDistributions) {
     totalShares += distribution.share;
   }
-  weekNumber = weekNumber - config.rewardStartWeek;
   const reward = getWeeklyReward(weekNumber);
   return BigNumber.from(totalShares * 1000)
     .mul(reward)

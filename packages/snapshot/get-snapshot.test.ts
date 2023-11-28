@@ -8,12 +8,13 @@ import {
   dailyRewardsSimpleSnapshot,
   dailyRewardsSimpleData,
   weeklyRewardData,
+  dailyRewardsSnapshotWithCustomRatiosPositions,
 } from "common/utils/data";
 import sinon from "sinon";
 import { BigNumber } from "ethers";
 import { Network, ParsedUserSnapshot, getRewardsDistributionsForNetworks } from "common";
 
-describe.skip("Process weekly snapshot", () => {
+describe("Process weekly snapshot", () => {
   beforeEach(async () => {
     setupGraphStub(weeklyRewardData, "weeklyPartner");
   });
@@ -31,7 +32,7 @@ describe.skip("Process weekly snapshot", () => {
   jest.setTimeout(100000); // 100 seconds
 });
 
-describe.skip("Process daily snapshot", () => {
+describe("Process daily snapshot - positions", () => {
   beforeEach(async () => {
     setupGraphStub(dailyRewardsDataWithCustomRatios, "dailyPartner");
   });
@@ -42,8 +43,9 @@ describe.skip("Process daily snapshot", () => {
     const dayId = 19587;
     const weekId = Math.floor(dayId / 7);
     const rewardDistributions = getRewardsDistributionsForNetworks(weekId, [Network.Mainnet]);
-    const { parsedUserSnapshot: parsedSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
-    expect(parsedSnapshot).toEqual(expectedDailySnapshot);
+    const { parsedUserSnapshot, parsedPositionSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
+    expect(parsedUserSnapshot).toEqual(expectedDailySnapshot);
+    expect(parsedPositionSnapshot).toEqual(dailyRewardsSnapshotWithCustomRatiosPositions);
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
   });
@@ -61,11 +63,10 @@ describe("Process daily snapshot - simple snapshot", () => {
   test("should verify the saved snapshot against calculation execution - custom earn/borrow ratio #2", async () => {
     const dayId = 19587;
     const weekId = Math.floor(dayId / 7);
-    console.log("weekId", weekId)
     const rewardDistributions = getRewardsDistributionsForNetworks(weekId, [Network.Mainnet]);
-    console.debug(rewardDistributions)
-    const { parsedUserSnapshot: parsedSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
-    expect(parsedSnapshot).toEqual(dailyRewardsSimpleSnapshot);
+    const { parsedUserSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
+    expect(parsedUserSnapshot).toEqual(dailyRewardsSimpleSnapshot);
+    expect(parsedUserSnapshot.length).toEqual(8);
 
     sinon.assert.calledOnce(graphStub);
 
@@ -78,11 +79,11 @@ describe("Process daily snapshot - simple snapshot", () => {
     const secondPoolMultiplier = secondPoolEarnRatio / secondPoolBorrowRatio;
 
     // users in first pool with high ratio
-    const borrowAmountHighRatio = getAmountByAddress("0x0000000000000000000000000000000000000003", parsedSnapshot);
-    const earnAmountHighRatio = getAmountByAddress("0x0000000000000000000000000000000000000007", parsedSnapshot);
+    const borrowAmountHighRatio = getAmountByAddress("0x0000000000000000000000000000000000000003", parsedUserSnapshot);
+    const earnAmountHighRatio = getAmountByAddress("0x0000000000000000000000000000000000000007", parsedUserSnapshot);
     // users in second pool with low ratio
-    const borrowAmountLowRatio = getAmountByAddress("0x0000000000000000000000000000000000000001", parsedSnapshot);
-    const earnAmountLowRatio = getAmountByAddress("0x0000000000000000000000000000000000000005", parsedSnapshot);
+    const borrowAmountLowRatio = getAmountByAddress("0x0000000000000000000000000000000000000001", parsedUserSnapshot);
+    const earnAmountLowRatio = getAmountByAddress("0x0000000000000000000000000000000000000005", parsedUserSnapshot);
 
     if (borrowAmountHighRatio !== undefined && earnAmountHighRatio !== undefined) {
       expect(borrowAmountHighRatio).toEqual(Math.round(earnAmountHighRatio / firstPoolMultiplier));

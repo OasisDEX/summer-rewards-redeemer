@@ -165,7 +165,6 @@ export function calculateDailySnapshot(
       lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
     };
   }
-
   const dailyRewards = calculateDailyRewards(day, totalWeeklyDistributionPerPool);
 
   const dailyUserRewardsSnapshot = Object.keys(dailyRewards.dailyUserRewards).map((userAddress) => ({
