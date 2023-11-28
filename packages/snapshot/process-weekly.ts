@@ -50,7 +50,7 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
 
     const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributionsForEligilbeNetworks);
     const snapshot: UserSnapshot = parsedSnapshot.map((entry) => ({
-      address: entry.address.toLowerCase(),
+      userAddress: entry.userAddress.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));
     const { tree, root } = createMerkleTree(snapshot);

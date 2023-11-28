@@ -429,6 +429,7 @@ export function validateRewardDistributions(distributions: Distribution[]): void
   for (const distribution of distributions) {
     totalShares += distribution.share;
   }
+  debug(totalShares.toString())
   if (totalShares !== 1) {
     throw new Error(chalk.red(`Invalid reward distribution: shares do not add up to 1.`));
   } else {

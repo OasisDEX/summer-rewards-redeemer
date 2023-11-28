@@ -11,8 +11,8 @@ import { createRedeemer } from "contracts/utils";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
-const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
-const dataForSecondUser = [dummyProcessedSnaphot[2].address, dummyProcessedSnaphot[2].amount];
+const dataForFirstUser = [dummyProcessedSnaphot[1].userAddress, dummyProcessedSnaphot[1].amount];
+const dataForSecondUser = [dummyProcessedSnaphot[2].userAddress, dummyProcessedSnaphot[2].amount];
 
 /* leaf and proof with index 1 -> address is the firstUser address from hardhat accounts 
  0 indexed user is saved for the owner */

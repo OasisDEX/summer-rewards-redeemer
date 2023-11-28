@@ -69,7 +69,7 @@ async function deployFixture() {
   };
 }
 
-describe("AjnaRedeemer e2e", () => {
+describe.only("AjnaRedeemer e2e", () => {
   afterEach(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
     await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
@@ -79,6 +79,7 @@ describe("AjnaRedeemer e2e", () => {
     it("should return true for verified leaf and unclaimed reward and correct week number", async () => {
       const { ajnaRedeemer } = await loadFixture(deployFixture);
       const currentWeek = CURRENT_WEEK.toNumber();
+      console.debug(chalk.dim(`Current week: ${currentWeek}`));
       const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
         where: {
           week_number: currentWeek,
