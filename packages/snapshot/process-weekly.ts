@@ -1,8 +1,15 @@
 import { BigNumber, ethers } from "ethers";
 
 import { prisma } from "database";
-import { getEpochWeekId, createMerkleTree, config, getRewardDistributions } from "common";
-import { ParsedSnapshot, Snapshot } from "common";
+import {
+  getEpochWeekId,
+  createMerkleTree,
+  config,
+  EligibleNetwork,
+  Network,
+  getRewardsDistributionsForNetworks,
+} from "common";
+import { ParsedUserSnapshot, UserSnapshot } from "common";
 import { getWeeklySnapshot } from "./get-snapshot";
 import { processWeeklySnapshotInDb } from "./process-snapshot-in-db";
 import { processTransaction } from "./process-tx";
@@ -19,27 +26,30 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
 
   for (const weekId of weekIds) {
     if (weekId >= currentWeek) {
-      console.error(`Week ID ${weekId} - cant process current or future week. Chain ID: ${config.chainId}`);
+      console.error(`Week ID ${weekId} - cant process current or future week.`);
       continue;
     }
     if (weekId < config.rewardStartWeek) {
-      console.error(`Week ID ${weekId} - cant process week before reward start week. Chain ID: ${config.chainId}`);
+      console.error(`Week ID ${weekId} - cant process week before reward start week.`);
       continue;
     }
     const existingWeek = await prisma.ajnaRewardsMerkleTree.findFirst({
-      where: { week_number: weekId, tx_processed: true, chain_id: config.chainId },
+      where: { week_number: weekId, tx_processed: true, chain_id: 1 },
     });
 
     if (existingWeek) {
-      console.info(`Week ${weekId} has already been processed. Chain ID: ${config.chainId}`);
+      console.info(`Week ${weekId} has already been processed.`);
       continue;
     }
 
-    console.info(`Processing weekly claims for week ${weekId}. Chain ID: ${config.chainId}`);
+    console.info(`Processing weekly claims for week ${weekId}.`);
 
-    const rewardDistributions = getRewardDistributions(weekId);
-    const parsedSnapshot: ParsedSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
-    const snapshot: Snapshot = parsedSnapshot.map((entry) => ({
+    const rewardDistributionsForEligilbeNetworks = getRewardsDistributionsForNetworks(weekId, [
+      ...Object.values(EligibleNetwork),
+    ] as unknown as Network[]);
+
+    const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributionsForEligilbeNetworks);
+    const snapshot: UserSnapshot = parsedSnapshot.map((entry) => ({
       address: entry.address.toLowerCase(),
       amount: BigNumber.from(entry.amount),
     }));

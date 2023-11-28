@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { describe, test } from "@jest/globals";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { weeklyRewardData } from "common/utils/data";
-import { ParsedSnapshotWithProofs } from "common";
+import { ParsedUserSnapshotWithProofs } from "common";
 import testEvent from "../../events/unit-test-event.json";
 import { handler } from "./index";
 
@@ -46,7 +46,7 @@ describe("Run handler", () => {
       totalWeeklyRewards: "1000000000000000000000000",
     });
     const response = await handler(inputEvent);
-    const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedSnapshotWithProofs } = JSON.parse(
+    const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs } = JSON.parse(
       response.body
     );
     expect(response.statusCode).toEqual(200);

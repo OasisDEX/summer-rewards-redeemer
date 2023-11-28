@@ -6,7 +6,7 @@ import {
   TokenRequestBody,
   WeeklySnapshotRequestBody,
 } from "../types/requests";
-import { Distribution, createMerkleTree, ParsedSnapshotWithProofs } from "common";
+import { Distribution, createMerkleTree, ParsedUserSnapshotWithProofs } from "common";
 import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph.utils";
 import { BigNumber } from "ethers";
 import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
@@ -50,7 +50,7 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
         amount: BigNumber.from(entry.amount),
       }))
     );
-    const parsedSnapshotWithProofs: ParsedSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
+    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
       ...entry,
       proof: tree.getHexProof(leaves[index]),
     }));
@@ -98,7 +98,7 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
         amount: BigNumber.from(entry.amount),
       }))
     );
-    const parsedSnapshotWithProofs: ParsedSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
+    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
       ...entry,
       proof: tree.getHexProof(leaves[index]),
     }));

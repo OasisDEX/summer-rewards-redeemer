@@ -7,7 +7,7 @@ import { config, getRewardDistributions } from "common/config/config";
 import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
-import { EthersError, Snapshot } from "common/types/types";
+import { EthersError, UserSnapshot } from "common/types/types";
 import { prisma, Prisma } from "database";
 import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 
@@ -45,9 +45,9 @@ async function main() {
   // add the weekly roots and weekly claims for all the users from the list
   for (let i = 0; i < files.length; i++) {
     console.log(chalk.dim(`Processing week ${weekIds[i]}`));
-    const rewardDistributions = getRewardDistributions(weekIds[i]);
+    const rewardDistributions = getRewardDistributions(weekIds[i], config.network);
     const result = calculateWeeklySnapshot(data[i], weekIds[i], rewardDistributions);
-    const snapshot: Snapshot = result.map((user) => ({
+    const snapshot: UserSnapshot = result.map((user) => ({
       address: user.address,
       amount: BigNumber.from(user.amount),
     }));

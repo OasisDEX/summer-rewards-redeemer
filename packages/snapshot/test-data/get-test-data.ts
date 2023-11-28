@@ -3,17 +3,17 @@ import fs from "fs";
 import { calculateDailySnapshot, calculateWeeklySnapshot } from "../get-snapshot";
 import { fetchWeeklyData, fetchDailyData } from "common/utils/graph.utils";
 import { get } from "http";
-import { getRewardDistributions } from "common";
+import { Network, getRewardDistributions, getRewardsDistributionsForNetworks } from "common";
 async function getTestData() {
   // Define the weeks and days to generate snapshots for
-  const weeks = [2791, 2790, 2789, 2788, 2787, 2786, 2785];
+  const weeks = [2798];
 
   // Generate snapshots for each week and day
   for (const week of weeks) {
-    const rewardDistributions = getRewardDistributions(week);
+    const rewardDistributions = getRewardsDistributionsForNetworks(week, [Network.Mainnet]);
     const data = await fetchWeeklyData(
       week,
-      rewardDistributions.map((pool) => pool.address)
+      rewardDistributions
     );
     const weeklySnapshot = calculateWeeklySnapshot(data, week, rewardDistributions);
 
@@ -26,7 +26,7 @@ async function getTestData() {
       const day = +d.id;
       const dailyData = await fetchDailyData(
         day,
-        rewardDistributions.map((pool) => pool.address)
+        rewardDistributions
       );
       console.log(`processing day ${day} from week : ${week}`);
       const dailySnapshot = calculateDailySnapshot(dailyData, day, rewardDistributions);
