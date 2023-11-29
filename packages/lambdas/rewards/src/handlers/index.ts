@@ -6,7 +6,7 @@ import {
   TokenRequestBody,
   WeeklySnapshotRequestBody,
 } from "../types/requests";
-import { Distribution, createMerkleTree, ParsedUserSnapshotWithProofs } from "common";
+import { Distribution, createMerkleTree, ParsedUserSnapshotWithProofs, validateRewardDistributions } from "common";
 import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph.utils";
 import { BigNumber } from "ethers";
 import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
@@ -26,6 +26,7 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     if (!validatedBody) {
       return createErrorResponse("Invalid body provided");
     }
+    validateRewardDistributions(validatedBody.distribution);
     const graphRes = await fetchWeeklyData(validatedBody.weekId, validatedBody.distribution);
     let parsedSnapshot = calculateWeeklySnapshot(
       graphRes,
@@ -71,6 +72,7 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
     if (!validatedBody) {
       return createErrorResponse("Invalid body provided");
     }
+    validateRewardDistributions(validatedBody.distribution);
     const graphRes = await fetchDailyData(validatedBody.dayId, validatedBody.distribution);
     let parsedSnapshot = calculateDailySnapshot(
       graphRes,

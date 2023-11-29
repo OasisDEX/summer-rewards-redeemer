@@ -53,7 +53,7 @@ describe("Run handler", () => {
     expect(JSON.parse(response.body)).toHaveProperty("root");
     expect(JSON.parse(response.body)).toHaveProperty("parsedSnapshotWithProofs");
     expect(parsedResponse.root).toEqual("0x1ae6ad4a4516c1e1d35048f35cba5814b40cd8eb8d1952ae37c6692bc479cb97");
-
+    console.log("parsedResponse", parsedResponse);
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
   });
