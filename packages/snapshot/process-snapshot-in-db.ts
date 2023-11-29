@@ -1,5 +1,4 @@
 import {
-  AjnaRewardsPositionType,
   AjnaRewardsSource,
   AjnaRewardsWeeklyClaim,
   Prisma,
@@ -13,6 +12,15 @@ import MerkleTree from "merkletreejs";
 import { config } from "common/config";
 import { UserSnapshot, PositionSnapshot } from "common/types";
 
+/**
+ * Processes a weekly snapshot in the database.
+ * 
+ * @param snapshot - The user snapshot to process.
+ * @param currentWeek - The current week number.
+ * @param root - The root of the Merkle tree.
+ * @param tree - The Merkle tree.
+ * @returns A promise that resolves when the snapshot is processed in the database.
+ */
 export async function processWeeklySnapshotInDb(
   snapshot: UserSnapshot,
   currentWeek: number,
@@ -68,6 +76,13 @@ export async function processWeeklySnapshotInDb(
   });
 }
 
+/**
+ * Processes the daily snapshot in the database.
+ * 
+ * @param snapshot - The position snapshot.
+ * @param currentDay - The current day number.
+ * @returns A promise that resolves when the processing is complete.
+ */
 export async function processDailySnapshotInDb(snapshot: PositionSnapshot, currentDay: number): Promise<void> {
   const currentWeek = Math.floor(currentDay / 7);
   const weeklyClaimEntriesTx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];

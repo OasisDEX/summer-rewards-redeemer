@@ -1,17 +1,17 @@
 import { impersonateAccount, loadFixture, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { expect } from "chai";
 import chalk from "chalk";
-import { ethers } from "hardhat";
-
-import { prisma } from "database";
 import { config } from "common/config/config";
-import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
-import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
-import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
-import { BigNumber, Signer } from "ethers";
 import { BASE_WEEKLY_AMOUNT, mockedDistributions, weeklyRewardData, weeklyRewardDataBase } from "common/utils/data";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
+import { prisma } from "database";
+import { BigNumber, Signer } from "ethers";
+import { ethers } from "hardhat";
 import sinon from "sinon";
+import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
+
+import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 
 export async function getAddresses() {
   const [owner, admin, randomUser] = await ethers.getSigners();

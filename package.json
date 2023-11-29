@@ -9,7 +9,9 @@
     "upgrade": "turbo upgrade",
     "build": "turbo build",
     "test": "turbo test",
-    "generate:lambda:daily": "turbo generate:lambda:daily"
+    "lint": "turbo lint",
+    "generate:lambda:daily": "turbo generate:lambda:daily",
+    "generate:rewards": "turbo generate:rewards"
   },
   "devDependencies": {
     "@ethersproject/abstract-signer": "^5.5.0",

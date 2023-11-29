@@ -27,11 +27,13 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
 
     // this will validate the reward distributions for all eligible networks
     getRewardsDistributionsForNetworks(weekId, [...Object.values(EligibleNetwork)] as unknown as Network[]);
-
+    // get reward distributions for the network we are processing
     const rewardDistributions = getRewardsDistributionsForNetworks(weekId, [
       config.usedNetwork,
     ] as unknown as Network[]);
+    // get the daily snapshot for the network we are processing
     const { parsedPositionSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
+    // convert the daily snapshot to the format we need for the DB
     const snapshot: PositionSnapshot = parsedPositionSnapshot.map((entry) => ({
       userAddress: entry.userAddress.toLowerCase(),
       accountAddress: entry.accountAddress.toLowerCase(),
@@ -39,7 +41,7 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
       poolAddress: entry.poolAddress.toLowerCase(),
       positionType: entry.positionType,
     }));
-
+    // add the daily snapshot to the DB
     await processDailySnapshotInDb(snapshot, dayId);
   }
 }

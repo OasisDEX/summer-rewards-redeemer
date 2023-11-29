@@ -1,8 +1,8 @@
 import chalk from "chalk";
-import hre, { network } from "hardhat";
-
-import { AjnaDripper, AjnaRedeemer } from "typechain-types";
 import { config } from "common/config";
+import hre, { network } from "hardhat";
+import { AjnaDripper, AjnaRedeemer } from "typechain-types";
+
 import { getOrDeployContract } from "../utils/hardhat.utils";
 
 async function main() {

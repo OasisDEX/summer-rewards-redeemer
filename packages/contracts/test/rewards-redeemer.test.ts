@@ -1,13 +1,13 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
-
-import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { dummyProcessedSnaphot } from "common/utils/data";
-import { RewardsRedeemerFactory, AjnaToken } from "typechain-types";
 import { createRedeemer } from "contracts/utils";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+import { AjnaToken, RewardsRedeemerFactory } from "typechain-types";
+
+import { deployContract } from "../scripts/utils/hardhat.utils";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
