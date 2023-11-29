@@ -133,6 +133,7 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
       )
     );
     const poolsRes = graphRes.reduce((acc, val) => acc.concat(val), []);
+    // @ts-ignore
     const responseBody = prepareResponse(poolsRes);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -158,6 +159,7 @@ export async function handleToken(event: APIGatewayProxyEvent): Promise<APIGatew
     const graphRes = await graphClient.Token({
       token: validatedBody.token.toLowerCase(),
     });
+    // @ts-ignore
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -181,6 +183,7 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
     const graphRes = await graphClient.CuratedTokens({
       tokens: validatedBody.tokens.map((token) => token.toLowerCase()),
     });
+    // @ts-ignore
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
