@@ -24,9 +24,8 @@ async function main() {
   }
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+  throw new Error();
+});

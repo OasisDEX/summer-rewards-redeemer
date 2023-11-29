@@ -1,9 +1,10 @@
-import sinon from "sinon";
-import { APIGatewayProxyEvent } from "aws-lambda";
 import { describe, test } from "@jest/globals";
-import { graphStub, setupGraphStub } from "common/utils/test.utils";
-import { weeklyRewardData } from "common/utils/data";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { ParsedUserSnapshotWithProofs } from "common";
+import { weeklyRewardData } from "common/utils/data";
+import { graphStub, setupGraphStub } from "common/utils/test.utils";
+import sinon from "sinon";
+
 import testEvent from "../../events/unit-test-event.json";
 import { handler } from "./index";
 

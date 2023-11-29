@@ -39,7 +39,9 @@ contract RewardsRedeemerFactory is IRewardsRedeemerFactory, AccessControl {
     }
 
     /* @inheritdoc IRewardsRedeemerFactory */
-    function createRewardsRedeemer(address rewardsToken) external onlyRole(PARTNER_ROLE) returns (IRewardsRedeemer) {
+    function createRewardsRedeemer(
+        address rewardsToken
+    ) external onlyRole(PARTNER_ROLE) returns (IRewardsRedeemer) {
         RewardsRedeemer rewardsRedeemer = RewardsRedeemer(Clones.clone(RewardsRedeemerTemplate));
 
         rewardsRedeemer.initialize(_msgSender(), rewardsToken);

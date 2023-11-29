@@ -1,20 +1,13 @@
-import {
-  AjnaRewardsSource,
-  AjnaRewardsWeeklyClaim,
-  Prisma,
-  PrismaPromise,
-  prisma,
-} from "database";
 import chalk from "chalk";
+import { config } from "common/config";
+import { PositionSnapshot, UserSnapshot } from "common/types";
+import { AjnaRewardsSource, AjnaRewardsWeeklyClaim, Prisma, prisma, PrismaPromise } from "database";
 import { ethers } from "ethers";
 import MerkleTree from "merkletreejs";
 
-import { config } from "common/config";
-import { UserSnapshot, PositionSnapshot } from "common/types";
-
 /**
  * Processes a weekly snapshot in the database.
- * 
+ *
  * @param snapshot - The user snapshot to process.
  * @param currentWeek - The current week number.
  * @param root - The root of the Merkle tree.
@@ -78,7 +71,7 @@ export async function processWeeklySnapshotInDb(
 
 /**
  * Processes the daily snapshot in the database.
- * 
+ *
  * @param snapshot - The position snapshot.
  * @param currentDay - The current day number.
  * @returns A promise that resolves when the processing is complete.
@@ -112,7 +105,7 @@ export async function processDailySnapshotInDb(snapshot: PositionSnapshot, curre
   ]);
 
   console.info(
-    //@ts-ignore
+    // @ts-expect-error -- todo
     chalk.gray(`Added ${res[res.length - 1].count} daily claim entries to the database. Chain ID: ${config.chainId}`)
   );
 }

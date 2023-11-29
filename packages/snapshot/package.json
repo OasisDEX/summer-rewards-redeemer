@@ -11,7 +11,9 @@
   },
   "scripts": {
     "test": "DOTENV_CONFIG_PATH=../../.env jest  --setupFiles dotenv/config",
-    "process:daily": "ts-node process-daily.ts"
+    "process:daily": "ts-node process-daily.ts",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --ext .ts . --fix"
   },
   "devDependencies": {
     "jest": "^29.5.0",

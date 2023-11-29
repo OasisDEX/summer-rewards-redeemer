@@ -1,19 +1,20 @@
 // eslint-disable-next-line node/no-extraneous-import
 import { describe, expect } from "@jest/globals";
+import {
+  config,
+  createMerkleTree,
+  ParsedPositionSnapshotEntry,
+  ParsedUserSnapshotEntry,
+  PositionSnapshot,
+  UserSnapshot,
+} from "common";
+import { AjnaRewardsSource, prisma } from "database";
 import { BigNumber } from "ethers";
 import fs from "fs";
 import MerkleTree from "merkletreejs";
 import path from "path";
 
-import {
-  createMerkleTree,
-  config,
-  PositionSnapshot,
-  ParsedPositionSnapshotEntry,
-} from "common";
-import { ParsedUserSnapshotEntry, UserSnapshot } from "common";
 import { processDailySnapshotInDb, processWeeklySnapshotInDb } from "../snapshot/process-snapshot-in-db";
-import { AjnaRewardsSource, prisma } from "database";
 
 describe("processDailySnapshotInDb", () => {
   beforeEach(async () => {

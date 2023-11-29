@@ -1,4 +1,10 @@
+import { calculateDailySnapshot, calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { createMerkleTree, Distribution, ParsedUserSnapshotWithProofs, validateRewardDistributions } from "common";
+import { fetchDailyData, fetchWeeklyData, graphClient } from "common/utils/graph.utils";
+import { BigNumber } from "ethers";
+import { Maybe, Pool, Token } from "graphclient";
+
 import {
   CuratedTokensRequestBody,
   DailySnapshotRequestBody,
@@ -6,12 +12,7 @@ import {
   TokenRequestBody,
   WeeklySnapshotRequestBody,
 } from "../types/requests";
-import { Distribution, createMerkleTree, ParsedUserSnapshotWithProofs, validateRewardDistributions } from "common";
-import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph.utils";
-import { BigNumber } from "ethers";
-import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
-import { calculateWeeklySnapshot, calculateDailySnapshot } from "ajna-rewards-snapshot/get-snapshot";
-import { Maybe, Pool, Token } from "graphclient";
+import { createErrorResponse, createSuccessResponse, validateRequestBody } from "../utils";
 
 export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
@@ -28,7 +29,7 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     }
     validateRewardDistributions(validatedBody.distribution);
     const graphRes = await fetchWeeklyData(validatedBody.weekId, validatedBody.distribution);
-    let parsedSnapshot = calculateWeeklySnapshot(
+    const parsedSnapshot = calculateWeeklySnapshot(
       graphRes,
       validatedBody.weekId,
       validatedBody.distribution.map((distribution: Distribution) => ({
@@ -74,7 +75,7 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
     }
     validateRewardDistributions(validatedBody.distribution);
     const graphRes = await fetchDailyData(validatedBody.dayId, validatedBody.distribution);
-    let parsedSnapshot = calculateDailySnapshot(
+    const parsedSnapshot = calculateDailySnapshot(
       graphRes,
       validatedBody.dayId,
       validatedBody.distribution.map((distribution: Distribution) => ({

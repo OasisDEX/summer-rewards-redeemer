@@ -1,6 +1,3 @@
-import { BigNumber } from "ethers";
-
-import { DailyRewardsQuery, WeeklyRewardsQuery } from "graphclient";
 import { config, debug, getWeeklyRewardForNetwork, validateRewardDistributions } from "common/config";
 import { ZERO, ZERO_ADDRESS } from "common/constants";
 import {
@@ -10,17 +7,19 @@ import {
   DistributionAmount,
   DistributionWithNetwork,
   EarnDailyRewards,
-  ParsedUserSnapshot,
   ParsedPositionSnapshot,
+  ParsedUserSnapshot,
   PositionRewardDetails,
-  UserSnapshot,
   UserRewardDetails,
+  UserSnapshot,
   WeekDay,
   WeeklyRewards,
 } from "common/types";
+import { fetchDailyData, fetchWeeklyData } from "common/utils/graph.utils";
 import { roundToNearest } from "common/utils/time.utils";
-import { fetchWeeklyData, fetchDailyData } from "common/utils/graph.utils";
 import { AjnaRewardsPositionType } from "database";
+import { BigNumber } from "ethers";
+import { DailyRewardsQuery, WeeklyRewardsQuery } from "graphclient";
 /**
  * Retrieves and returns a parsed weekly snapshot of user rewards for a specified week.
  *
@@ -82,9 +81,7 @@ export function calculateWeeklySnapshot(
   }
 
   const days = data.week.days;
-  totalWeeklyDistribution = totalWeeklyDistribution
-    ? totalWeeklyDistribution
-    : getWeeklyRewardForNetwork(weekId, rewardDistributions);
+  totalWeeklyDistribution = totalWeeklyDistribution || getWeeklyRewardForNetwork(weekId, rewardDistributions);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
 
   for (const pool of rewardDistributions) {
@@ -116,7 +113,7 @@ export function calculateWeeklySnapshot(
     }
   }
   const weeklyRewardsSnapshot = Object.keys(weeklyUserRewards).map((userAddress) => ({
-    userAddress: userAddress,
+    userAddress,
     amount: weeklyUserRewards[userAddress].amount,
   }));
   validateTotalAmount(weeklyRewardsSnapshot, totalWeeklyDistribution);
@@ -145,9 +142,8 @@ export function calculateDailySnapshot(
 
   const day = data.day;
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
-  totalWeeklyDistribution = totalWeeklyDistribution
-    ? totalWeeklyDistribution
-    : getWeeklyRewardForNetwork(+data.day.week.id, rewardDistributions);
+  totalWeeklyDistribution =
+    totalWeeklyDistribution || getWeeklyRewardForNetwork(+data.day.week.id, rewardDistributions);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
 
   for (const pool of rewardDistributions) {
@@ -165,7 +161,7 @@ export function calculateDailySnapshot(
   const dailyRewards = calculateDailyRewards(day, totalWeeklyDistributionPerPool);
 
   const dailyUserRewardsSnapshot = Object.keys(dailyRewards.dailyUserRewards).map((userAddress) => ({
-    userAddress: userAddress,
+    userAddress,
     amount: dailyRewards.dailyUserRewards[userAddress].amount,
   }));
   const dailyPositionRewardsSnapshot = dailyRewards.dailyPositionRewards.map((position) => ({
@@ -230,8 +226,8 @@ function calculateDailyRewards(day: WeekDay, totalWeeklyDistributionPerPool: Dis
   const totalDailyRewards = Object.values(dailyUserRewards).reduce((a, b) => a.add(b.amount), ZERO);
   const dailyRewards: DailyRewards = {
     id: day.id,
-    dailyUserRewards: dailyUserRewards,
-    dailyPositionRewards: dailyPositionRewards,
+    dailyUserRewards,
+    dailyPositionRewards,
     totalDailyRewards,
   };
   return dailyRewards;

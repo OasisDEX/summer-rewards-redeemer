@@ -1,8 +1,8 @@
+import { getRewardsDistributionsForNetworks, Network } from "common";
+import { fetchDailyData, fetchWeeklyData } from "common/utils/graph.utils";
 import fs from "fs";
 
 import { calculateDailySnapshot, calculateWeeklySnapshot } from "../get-snapshot";
-import { fetchWeeklyData, fetchDailyData } from "common/utils/graph.utils";
-import { Network, getRewardsDistributionsForNetworks } from "common";
 async function getTestData() {
   // Define the weeks and days to generate snapshots for
   const weeks = [2798, 2799];

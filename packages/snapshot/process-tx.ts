@@ -1,10 +1,10 @@
 import { ContractReceipt } from "@ethersproject/contracts";
-
-import { AjnaRewardsSource, prisma } from "database";
-import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "typechain-types";
 import { config } from "common/config/config";
 import { TX_STATUS } from "common/types/types";
+import { AjnaRewardsSource, prisma } from "database";
 import { ethers } from "ethers";
+// eslint-disable-next-line camelcase
+import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "typechain-types";
 
 export async function processTransaction(weekId: number, root: string, signer?: ethers.Signer) {
   const contracts = await getContracts(signer);

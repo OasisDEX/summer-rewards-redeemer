@@ -75,6 +75,7 @@ describe("Rewards Redeemer Implementation", () => {
     it("Should allow partner to change owner", async () => {
       const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
 
+      // eslint-disable-next-line no-unused-expressions
       expect(await ajnaRedeemer.connect(partner).transferOwnership(randomUser.address)).to.be.not.reverted;
       expect(await ajnaRedeemer.owner()).to.be.equal(randomUser.address);
     });

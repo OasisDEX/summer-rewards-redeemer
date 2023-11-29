@@ -1,18 +1,19 @@
 import { describe, expect, jest, test } from "@jest/globals";
-import { getDailySnapshot, getWeeklySnapshot } from "./get-snapshot";
-import { graphStub, setupGraphStub } from "common/utils/test.utils";
+import { Network, ParsedUserSnapshot } from "common";
 import {
   dailyRewardsDataWithCustomRatios,
-  weeklyRewardSnapshot as expectedWeeklySnapshot,
-  dailyRewardsSnapshotWithCustomRatios as expectedDailySnapshot,
-  dailyRewardsSimpleSnapshot,
   dailyRewardsSimpleData,
-  weeklyRewardData,
+  dailyRewardsSimpleSnapshot,
+  dailyRewardsSnapshotWithCustomRatios as expectedDailySnapshot,
   dailyRewardsSnapshotWithCustomRatiosPositions,
+  weeklyRewardData,
+  weeklyRewardSnapshot as expectedWeeklySnapshot,
 } from "common/utils/data";
-import sinon from "sinon";
+import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import { BigNumber } from "ethers";
-import { Network, ParsedUserSnapshot } from "common";
+import sinon from "sinon";
+
+import { getDailySnapshot, getWeeklySnapshot } from "./get-snapshot";
 
 describe("Process weekly snapshot", () => {
   beforeEach(async () => {
@@ -194,7 +195,7 @@ describe("Process daily snapshot - positions - mainnet only", () => {
 
 describe("Process daily snapshot - simple snapshot - mainnet only", () => {
   beforeEach(async () => {
-    setupGraphStub( "dailyPartner", [dailyRewardsSimpleData]);
+    setupGraphStub("dailyPartner", [dailyRewardsSimpleData]);
   });
   afterEach(async () => {
     sinon.restore();

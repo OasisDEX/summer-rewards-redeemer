@@ -1,7 +1,8 @@
 import chalk from "chalk";
-import { getEpochDayId } from "../common/utils/time.utils";
-import { Network, config } from "common";
+import { config, Network } from "common";
 import { getBuiltGraphSDK } from "graphclient";
+
+import { getEpochDayId } from "../common/utils/time.utils";
 
 export async function fetchDailyData(dayId: number, url: string) {
   try {
@@ -59,8 +60,8 @@ export async function verify(dayId: number, reverseOrder = false) {
   } else {
     console.log(`Match for id: ${baseData.day?.id} === ${newData.day?.id}`);
   }
-  const countBase = baseData.day?.borrowDailyRewards?.length! + baseData.day?.earnDailyRewards?.length!;
-  const countNew = newData.day?.borrowDailyRewards?.length! + newData.day?.earnDailyRewards?.length!;
+  const countBase = (baseData.day?.borrowDailyRewards?.length ?? 0) + (baseData.day?.earnDailyRewards?.length ?? 0);
+  const countNew = (newData.day?.borrowDailyRewards?.length ?? 0) + (newData.day?.earnDailyRewards?.length ?? 0);
   if (countBase !== countNew) {
     console.log(chalk.red(`Mismatch for count: ${countBase} !== ${countNew}`));
   } else {
@@ -69,14 +70,14 @@ export async function verify(dayId: number, reverseOrder = false) {
   console.log(
     chalk.dim(
       `Found ${
-        baseData.day?.borrowDailyRewards?.length! + baseData.day?.earnDailyRewards?.length!
+        (baseData.day?.borrowDailyRewards?.length ?? 0) + (baseData.day?.earnDailyRewards?.length ?? 0)
       } rewards in the base subgraph ${baseUrl}`
     )
   );
   console.log(
     chalk.dim(
       `Found ${
-        newData.day?.borrowDailyRewards?.length! + newData.day?.earnDailyRewards?.length!
+        (newData.day?.borrowDailyRewards?.length ?? 0) + (newData.day?.earnDailyRewards?.length ?? 0)
       } rewards in the new subgraph ${newUrl}`
     )
   );

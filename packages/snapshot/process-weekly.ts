@@ -1,14 +1,16 @@
-import { BigNumber, ethers } from "ethers";
-import { prisma } from "database";
 import {
-  getEpochWeekId,
-  createMerkleTree,
   config,
+  createMerkleTree,
   EligibleNetwork,
-  Network,
+  getEpochWeekId,
   getRewardsDistributionsForNetworks,
+  Network,
+  ParsedUserSnapshot,
+  UserSnapshot,
 } from "common";
-import { ParsedUserSnapshot, UserSnapshot } from "common";
+import { prisma } from "database";
+import { BigNumber, ethers } from "ethers";
+
 import { getWeeklySnapshot } from "./get-snapshot";
 import { processWeeklySnapshotInDb } from "./process-snapshot-in-db";
 import { processTransaction } from "./process-tx";

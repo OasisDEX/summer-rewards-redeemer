@@ -1,10 +1,10 @@
-import { BigNumber } from "ethers";
-
+import { config, getRewardsDistributionsForNetworks } from "common/config";
 import { EligibleNetwork, Network, PositionSnapshot } from "common/types";
 import { getEpochDayId } from "common/utils/time.utils";
+import { BigNumber } from "ethers";
+
 import { getDailySnapshot } from "./get-snapshot";
 import { processDailySnapshotInDb } from "./process-snapshot-in-db";
-import { config, getRewardsDistributionsForNetworks } from "common/config";
 
 /**
  * Processes daily claims for a given array of day IDs.
