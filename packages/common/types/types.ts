@@ -108,6 +108,7 @@ export interface Config {
   signer: Promise<ethers.Signer>;
   provider: Promise<ethers.providers.JsonRpcProvider>;
   debug: boolean;
+  getRewardDistributions:  (weekId: number, network: Network) => Distribution[]
 }
 
 export type EthersError = {

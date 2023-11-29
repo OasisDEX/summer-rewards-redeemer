@@ -1,5 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-
 import { prisma } from "database";
 import {
   getEpochWeekId,
@@ -43,19 +42,32 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
     }
 
     console.info(`Processing weekly claims for week ${weekId}.`);
+    // this will validate the reward distributions for all eligible networks
+    getRewardsDistributionsForNetworks(weekId, [...Object.values(EligibleNetwork)] as unknown as Network[]);
 
-    const rewardDistributionsForEligilbeNetworks = getRewardsDistributionsForNetworks(weekId, [
-      ...Object.values(EligibleNetwork),
-    ] as unknown as Network[]);
+    const userSnapshotMultipleNetworks: ParsedUserSnapshot = [];
+    const promises = [...Object.values(EligibleNetwork)].map(async (network) => {
+      console.info(`Processing weekly claims for week ${weekId} on ${network}.`);
+      config.usedNetwork = network;
+      const rewardDistributions = config.getRewardDistributions(weekId, network as unknown as Network);
+      const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
+      userSnapshotMultipleNetworks.push(...parsedSnapshot);
+    });
 
-    const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributionsForEligilbeNetworks);
-    const snapshot: UserSnapshot = parsedSnapshot.map((entry) => ({
-      userAddress: entry.userAddress.toLowerCase(),
-      amount: BigNumber.from(entry.amount),
-    }));
-    const { tree, root } = createMerkleTree(snapshot);
+    await Promise.all(promises);
 
-    await processWeeklySnapshotInDb(snapshot, weekId, root, tree);
+    const summedUserSnapshots: UserSnapshot = userSnapshotMultipleNetworks.reduce((acc, curr) => {
+      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
+      if (existingEntry) {
+        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
+      } else {
+        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
+      }
+      return acc;
+    }, [] as UserSnapshot);
+    const { tree, root } = createMerkleTree(summedUserSnapshots);
+    config.usedNetwork = Network.Mainnet;
+    await processWeeklySnapshotInDb(summedUserSnapshots, weekId, root, tree);
     await processTransaction(weekId, root, signer);
   }
 }

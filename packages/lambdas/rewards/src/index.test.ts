@@ -29,7 +29,7 @@ describe("Run handler", () => {
     inputEvent = testEvent;
   });
   beforeAll(async () => {
-    setupGraphStub(weeklyRewardData, "weeklyPartner");
+    setupGraphStub("weeklyPartner", [weeklyRewardData]);
   });
   afterAll(async () => {
     sinon.restore();
@@ -52,7 +52,7 @@ describe("Run handler", () => {
     expect(response.statusCode).toEqual(200);
     expect(JSON.parse(response.body)).toHaveProperty("root");
     expect(JSON.parse(response.body)).toHaveProperty("parsedSnapshotWithProofs");
-    expect(parsedResponse.root).toEqual("0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38");
+    expect(parsedResponse.root).toEqual("0x1ae6ad4a4516c1e1d35048f35cba5814b40cd8eb8d1952ae37c6692bc479cb97");
 
     sinon.assert.calledOnce(graphStub);
     sinon.restore();

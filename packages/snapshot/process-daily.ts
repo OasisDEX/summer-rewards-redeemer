@@ -1,17 +1,10 @@
 import { BigNumber } from "ethers";
 
-import {
-  EligibleNetwork,
-  Network,
-  ParsedUserSnapshot,
-  ParsedPositionSnapshot,
-  UserSnapshot,
-  PositionSnapshot,
-} from "common/types";
+import { EligibleNetwork, Network, PositionSnapshot } from "common/types";
 import { getEpochDayId } from "common/utils/time.utils";
 import { getDailySnapshot } from "./get-snapshot";
 import { processDailySnapshotInDb } from "./process-snapshot-in-db";
-import { config, getRewardDistributions, getRewardsDistributionsForNetworks } from "common/config";
+import { config, getRewardsDistributionsForNetworks } from "common/config";
 
 /**
  * Processes daily claims for a given array of day IDs.
@@ -32,11 +25,13 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
     console.info(`Processing daily claims for day ${dayId}`);
     const weekId = Math.floor(dayId / 7);
 
-    const rewardDistributionsForEligilbeNetworks = getRewardsDistributionsForNetworks(weekId, [
-      ...Object.values(EligibleNetwork),
-    ] as unknown as Network[]);
+    // this will validate the reward distributions for all eligible networks
+    getRewardsDistributionsForNetworks(weekId, [...Object.values(EligibleNetwork)] as unknown as Network[]);
 
-    const { parsedPositionSnapshot } = await getDailySnapshot(dayId, rewardDistributionsForEligilbeNetworks);
+    const rewardDistributions = getRewardsDistributionsForNetworks(weekId, [
+      config.usedNetwork,
+    ] as unknown as Network[]);
+    const { parsedPositionSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
     const snapshot: PositionSnapshot = parsedPositionSnapshot.map((entry) => ({
       userAddress: entry.userAddress.toLowerCase(),
       accountAddress: entry.accountAddress.toLowerCase(),

@@ -9,7 +9,7 @@ import { deployContract, impersonate } from "../scripts/utils/hardhat.utils";
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
 import { BigNumber, Signer } from "ethers";
-import { BASE_WEEKLY_AMOUNT, weeklyRewardData } from "common/utils/data";
+import { BASE_WEEKLY_AMOUNT, mockedDistributions, weeklyRewardData, weeklyRewardDataBase } from "common/utils/data";
 import { graphStub, setupGraphStub } from "common/utils/test.utils";
 import sinon from "sinon";
 
@@ -22,6 +22,7 @@ export async function getAddresses() {
 
 let owner: Signer;
 let admin: Signer;
+let configStub: sinon.SinonStub;
 let ADMIN_ADDRESS: string;
 let OPERATOR_ADDRESS: string;
 let CURRENT_WEEK: BigNumber = BigNumber.from(0);
@@ -37,7 +38,15 @@ async function deployFixture() {
     },
   ]);
 
-  setupGraphStub(weeklyRewardData, "weeklyPartner");
+  setupGraphStub("weeklyPartner", [weeklyRewardData, weeklyRewardDataBase]);
+
+  configStub = sinon.stub(config, "getRewardDistributions");
+
+  configStub.onCall(0).returns(mockedDistributions[0]);
+  configStub.onCall(1).returns(mockedDistributions[1]);
+  configStub.onCall(2).returns(mockedDistributions[0]);
+  configStub.onCall(3).returns(mockedDistributions[1]);
+
   ({ ADMIN_ADDRESS, OPERATOR_ADDRESS, owner, admin } = await getAddresses());
 
   const ajnaToken = await deployContract<AjnaToken>("AjnaToken", []);
@@ -61,7 +70,7 @@ async function deployFixture() {
   console.table(config.addresses);
 
   await processWeeklyClaims([CURRENT_WEEK.toNumber()], owner);
-  sinon.assert.calledOnce(graphStub);
+  sinon.assert.calledTwice(graphStub);
   return {
     ajnaToken,
     ajnaRedeemer,
@@ -69,15 +78,16 @@ async function deployFixture() {
   };
 }
 
-describe.only("AjnaRedeemer e2e", () => {
+describe("AjnaRedeemer e2e", () => {
   afterEach(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
     await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
     graphStub.reset();
+    configStub.reset();
   });
   describe("canClaim", () => {
-    it("should return true for verified leaf and unclaimed reward and correct week number", async () => {
-      const { ajnaRedeemer } = await loadFixture(deployFixture);
+    it("should return true for verified leaf and unclaimed reward and correct week number, claim reward and confirm balance", async () => {
+      const { ajnaRedeemer, ajnaToken } = await loadFixture(deployFixture);
       const currentWeek = CURRENT_WEEK.toNumber();
       console.debug(chalk.dim(`Current week: ${currentWeek}`));
       const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
@@ -90,27 +100,18 @@ describe.only("AjnaRedeemer e2e", () => {
       for (const randomClaim of randomClaims) {
         console.log(chalk.dim(`Checking claim for ${randomClaim.user_address}`));
         const testUser = await impersonate(randomClaim.user_address);
-        expect(
-          await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount)
-        ).to.equal(true);
+        const res = await ajnaRedeemer.connect(testUser).canClaim(randomClaim!.proof, currentWeek, randomClaim!.amount);
+        console.log(chalk.dim(`canClaim for ${randomClaim.user_address} is ${res}`));
+        expect(res).to.equal(true);
       }
-    });
-    it("should claim the reward for a random claim", async () => {
-      const { ajnaRedeemer, ajnaToken } = await loadFixture(deployFixture);
-      const currentWeek = CURRENT_WEEK.toNumber();
-      const randomClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
-        where: {
-          week_number: currentWeek,
-          chain_id: config.chainId,
-        },
-        take: 30,
-      });
+      expect(randomClaims.length).to.be.greaterThan(0);
       for (const randomClaim of randomClaims) {
         console.log(chalk.dim(`Claiming for ${randomClaim.user_address}`));
         const testUserAddress = randomClaim.user_address;
         await impersonateAccount(testUserAddress);
         const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
         await setBalance(testUserAddress, BigNumber.from(ethers.utils.parseEther("1000")));
+        console.log(chalk.dim(`Claiming for ${randomClaim.user_address} with amount ${randomClaim.amount} `));
         await expect(
           ajnaRedeemer.connect(testUser).claimMultiple([currentWeek], [randomClaim!.amount], [randomClaim!.proof])
         ).to.not.be.reverted;

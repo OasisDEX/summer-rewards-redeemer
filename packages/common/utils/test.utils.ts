@@ -2,7 +2,7 @@ import sinon from "sinon";
 import { graphClient } from "./graph.utils";
 export let graphStub: any;
 
-export function setupGraphStub(rewards: any, queryType: "daily" | "weekly" | "weeklyPartner" | "dailyPartner") {
+export function setupGraphStub(queryType: "daily" | "weekly" | "weeklyPartner" | "dailyPartner", rewards: any[]) {
   switch (queryType) {
     case "daily":
       graphStub = sinon.stub(graphClient, "DailyRewards");
@@ -19,6 +19,7 @@ export function setupGraphStub(rewards: any, queryType: "daily" | "weekly" | "we
     default:
       throw new Error(`Invalid query type: ${queryType}`);
   }
-  graphStub.onCall(0).resolves(rewards);
+  graphStub.onCall(0).resolves(rewards[0]);
+  graphStub.onCall(1).resolves(rewards[1]);
   return graphStub;
 }

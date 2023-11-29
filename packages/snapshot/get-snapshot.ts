@@ -1,7 +1,7 @@
 import { BigNumber } from "ethers";
 
 import { DailyRewardsQuery, WeeklyRewardsQuery } from "graphclient";
-import { config, debug, getWeeklyReward, getWeeklyRewardForNetwork, validateRewardDistributions } from "common/config";
+import { config, debug, getWeeklyRewardForNetwork, validateRewardDistributions } from "common/config";
 import { ZERO, ZERO_ADDRESS } from "common/constants";
 import {
   BorrowDailyRewards,
@@ -31,10 +31,9 @@ import { AjnaRewardsPositionType } from "database";
  */
 export const getWeeklySnapshot = async (
   weekId: number,
-  rewardDistributions: DistributionWithNetwork[]
+  rewardDistributions: Distribution[]
 ): Promise<ParsedUserSnapshot> => {
   debug(`Fetching weekly data for week ${weekId}`);
-  validateRewardDistributions(rewardDistributions);
   const data = await fetchWeeklyData(weekId, rewardDistributions);
   debug(`Fetched weekly data for week ${weekId}`);
   if (!data.week) {
@@ -42,9 +41,11 @@ export const getWeeklySnapshot = async (
   }
   return calculateWeeklySnapshot(data, weekId, rewardDistributions);
 };
+
 /**
  * Retrieves and returns a parsed daily snapshot of user rewards for a specified day.
- *
+ * @dev assume the rewardDistributions are validated before passing into this method,
+ * thats becasue we validate the sum of shares for mutliple networks and this method handles only one network so the sum of shares is !=1
  * @async
  * @param {number} dayId - The id of the day for which to retrieve the daily snapshot.
  *
@@ -52,9 +53,8 @@ export const getWeeklySnapshot = async (
  */
 export const getDailySnapshot = async (
   dayId: number,
-  rewardDistributions: DistributionWithNetwork[]
+  rewardDistributions: Distribution[]
 ): Promise<{ parsedUserSnapshot: ParsedUserSnapshot; parsedPositionSnapshot: ParsedPositionSnapshot }> => {
-  validateRewardDistributions(rewardDistributions);
   console.info(`Fetching daily data for day ${dayId}`);
   const data = await fetchDailyData(dayId, rewardDistributions);
   if (!data.day) {
@@ -77,8 +77,6 @@ export function calculateWeeklySnapshot(
   rewardDistributions: Distribution[],
   totalWeeklyDistribution?: BigNumber
 ): ParsedUserSnapshot {
-  validateRewardDistributions(rewardDistributions);
-
   if (!data.week) {
     throw new Error(`No weekly rewards found for week ${weekId}`);
   }
@@ -86,7 +84,7 @@ export function calculateWeeklySnapshot(
   const days = data.week.days;
   totalWeeklyDistribution = totalWeeklyDistribution
     ? totalWeeklyDistribution
-    : getWeeklyRewardForNetwork(weekId, config.network);
+    : getWeeklyRewardForNetwork(weekId, rewardDistributions);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
 
   for (const pool of rewardDistributions) {
@@ -141,7 +139,6 @@ export function calculateDailySnapshot(
   rewardDistributions: Distribution[],
   totalWeeklyDistribution?: BigNumber
 ): { parsedUserSnapshot: ParsedUserSnapshot; parsedPositionSnapshot: ParsedPositionSnapshot } {
-  validateRewardDistributions(rewardDistributions);
   if (!data.day) {
     throw new Error(`No weekly rewards found for day ${dayId}`);
   }
@@ -150,7 +147,7 @@ export function calculateDailySnapshot(
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
   totalWeeklyDistribution = totalWeeklyDistribution
     ? totalWeeklyDistribution
-    : getWeeklyRewardForNetwork(+data.day.week.id, config.network);
+    : getWeeklyRewardForNetwork(+data.day.week.id, rewardDistributions);
   const totalDailyDistribution = totalWeeklyDistribution.div(7);
 
   for (const pool of rewardDistributions) {
@@ -254,9 +251,8 @@ function calculatePositionDailyRewards(
   isEarn: boolean
 ): void {
   for (const reward of rewardsArray) {
-    const poolAddress = reward.pool.id;
+    const poolAddress = reward.pool.id.toLowerCase();
     let poolWeeklyRewards: BigNumber;
-
     try {
       let ratio: number;
       if (isEarn) {

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { getEpochDayId } from "../common/utils/time.utils";
-import { Network, getRewardDistributions } from "common";
+import { Network, config } from "common";
 import { getBuiltGraphSDK } from "graphclient";
 
 export async function fetchDailyData(dayId: number, url: string) {
@@ -41,7 +41,7 @@ const url2 = "https://graph.staging.summer.fi/subgraphs/id/QmXz5sZSUt7EdQKCjFnbq
 
 export async function verify(dayId: number, reverseOrder = false) {
   const weekId = Math.floor(dayId / 7);
-  const rewardDistributions = getRewardDistributions(weekId, Network.Mainnet);
+  const rewardDistributions = config.getRewardDistributions(weekId, Network.Mainnet);
 
   let earnMatched = 0;
   let earnMismatched = 0;
