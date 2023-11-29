@@ -2,6 +2,9 @@
   "name": "ajna-rewards-snapshot",
   "version": "1.0.0",
   "license": "MIT",
+  "engine": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "common": "*",
     "database": "*",

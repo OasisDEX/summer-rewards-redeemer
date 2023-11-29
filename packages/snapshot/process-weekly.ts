@@ -46,8 +46,9 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
     console.info(`Processing weekly claims for week ${weekId}.`);
     // this will validate the reward distributions for all eligible networks
     getRewardsDistributionsForNetworks(weekId, [...Object.values(EligibleNetwork)] as unknown as Network[]);
-
+    // initialize an empty array to hold the snapshot for each network
     const userSnapshotMultipleNetworks: ParsedUserSnapshot = [];
+    // for each eligible network, get the reward distributions and generate the snapshot
     const promises = [...Object.values(EligibleNetwork)].map(async (network) => {
       console.info(`Processing weekly claims for week ${weekId} on ${network}.`);
       config.usedNetwork = network;
@@ -55,9 +56,10 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
       const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
       userSnapshotMultipleNetworks.push(...parsedSnapshot);
     });
-
+    // wait for all snapshots to be generated
     await Promise.all(promises);
-
+    // convert the daily snapshot to the format we need for the DB
+    // iterate through all snapshots and sum up the amounts for each user
     const summedUserSnapshots: UserSnapshot = userSnapshotMultipleNetworks.reduce((acc, curr) => {
       const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
       if (existingEntry) {
@@ -67,9 +69,13 @@ export async function processWeeklyClaims(weekIds = [getEpochWeekId() - 1], sign
       }
       return acc;
     }, [] as UserSnapshot);
+    // create the merkle tree and process the snapshot in the DB
     const { tree, root } = createMerkleTree(summedUserSnapshots);
+    // set the network to mainnet as we are adding the root to the contract only on mainnet
     config.usedNetwork = Network.Mainnet;
+    // process the snapshot in the DB
     await processWeeklySnapshotInDb(summedUserSnapshots, weekId, root, tree);
+    // process the snapshot on the blockchain
     await processTransaction(weekId, root, signer);
   }
 }

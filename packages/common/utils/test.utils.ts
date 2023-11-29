@@ -1,4 +1,5 @@
 import sinon from "sinon";
+
 import { graphClient } from "./graph.utils";
 export let graphStub: any;
 

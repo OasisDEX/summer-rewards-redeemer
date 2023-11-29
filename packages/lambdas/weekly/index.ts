@@ -4,5 +4,23 @@ type EventWeekList = {
   weekIds?: number[];
 };
 export const handler = async (event: any) => {
-  throw new Error("Not implemented");
+  const eventData = event.body as EventWeekList;
+
+  try {
+    await processWeeklyClaims(eventData.weekIds);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "Success",
+      }),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Error",
+      }),
+    };
+  }
 };
