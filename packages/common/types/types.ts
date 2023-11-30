@@ -1,8 +1,13 @@
+import { AjnaRewardsPositionType } from "database";
 import { BigNumber, ethers } from "ethers";
+import { Account, BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
-import { Account, BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
-import { AjnaRewardsPositionType } from "database";
+export enum Network {
+  Mainnet = "mainnet",
+  Goerli = "goerli",
+  Base = "base",
+}
 
 export interface UserSnapshotEntry {
   userAddress: string;
@@ -62,12 +67,6 @@ export interface PositionRewardDetails {
   amount: BigNumber;
 }
 
-export enum Network {
-  Mainnet = "mainnet",
-  Goerli = "goerli",
-  Base = "base",
-}
-
 /**
  * Enum representing networks eligible for Ajan rewards.
  */
@@ -108,7 +107,7 @@ export interface Config {
   signer: Promise<ethers.Signer>;
   provider: Promise<ethers.providers.JsonRpcProvider>;
   debug: boolean;
-  getRewardDistributions:  (weekId: number, network: Network) => Distribution[]
+  getRewardDistributions: (weekId: number, network: Network) => Distribution[];
 }
 
 export type EthersError = {

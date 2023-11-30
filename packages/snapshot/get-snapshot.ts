@@ -1,11 +1,10 @@
-import { config, debug, getWeeklyRewardForNetwork, validateRewardDistributions } from "common/config";
+import { config, debug, getWeeklyReward, getWeeklyRewardForNetwork } from "common/config";
 import { ZERO, ZERO_ADDRESS } from "common/constants";
 import {
   BorrowDailyRewards,
   DailyRewards,
   Distribution,
   DistributionAmount,
-  DistributionWithNetwork,
   EarnDailyRewards,
   ParsedPositionSnapshot,
   ParsedUserSnapshot,
@@ -81,7 +80,7 @@ export function calculateWeeklySnapshot(
   }
 
   const days = data.week.days;
-  totalWeeklyDistribution = totalWeeklyDistribution || getWeeklyRewardForNetwork(weekId, rewardDistributions);
+  totalWeeklyDistribution = totalWeeklyDistribution || getWeeklyReward(weekId);
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
 
   for (const pool of rewardDistributions) {
@@ -116,7 +115,12 @@ export function calculateWeeklySnapshot(
     userAddress,
     amount: weeklyUserRewards[userAddress].amount,
   }));
-  validateTotalAmount(weeklyRewardsSnapshot, totalWeeklyDistribution);
+
+  // validate if the total amount of rewards distributed in the weekly snapshot does not exceed the total weekly rewards available.
+  // it's processd network by netowrk so we need to validate the total amount for the network we are processing
+  const totalWeeklyDistributionForProcessedNetwork = getWeeklyRewardForNetwork(weekId, rewardDistributions);
+  validateTotalAmount(weeklyRewardsSnapshot, totalWeeklyDistributionForProcessedNetwork);
+
   return weeklyRewardsSnapshot.map((entry) => ({
     userAddress: entry.userAddress.toLowerCase(),
     amount: entry.amount.toHexString(),
@@ -142,9 +146,12 @@ export function calculateDailySnapshot(
 
   const day = data.day;
   const totalWeeklyDistributionPerPool: { [poolAddress: string]: { total: BigNumber; lendRatio?: number } } = {};
-  totalWeeklyDistribution =
-    totalWeeklyDistribution || getWeeklyRewardForNetwork(+data.day.week.id, rewardDistributions);
-  const totalDailyDistribution = totalWeeklyDistribution.div(7);
+  totalWeeklyDistribution = totalWeeklyDistribution || getWeeklyReward(+data.day.week.id);
+
+  const totalDailyDistributionForProcessedNetwork = getWeeklyRewardForNetwork(
+    +data.day.week.id,
+    rewardDistributions
+  ).div(7);
 
   for (const pool of rewardDistributions) {
     if (pool.address === ZERO_ADDRESS) {
@@ -158,6 +165,7 @@ export function calculateDailySnapshot(
       lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
     };
   }
+
   const dailyRewards = calculateDailyRewards(day, totalWeeklyDistributionPerPool);
 
   const dailyUserRewardsSnapshot = Object.keys(dailyRewards.dailyUserRewards).map((userAddress) => ({
@@ -171,8 +179,8 @@ export function calculateDailySnapshot(
     positionType: position.positionType,
     amount: position.amount,
   }));
-  validateTotalAmount(dailyUserRewardsSnapshot, totalDailyDistribution);
-  validateTotalAmount(dailyPositionRewardsSnapshot, totalDailyDistribution);
+  validateTotalAmount(dailyUserRewardsSnapshot, totalDailyDistributionForProcessedNetwork);
+  validateTotalAmount(dailyPositionRewardsSnapshot, totalDailyDistributionForProcessedNetwork);
   return {
     parsedUserSnapshot: dailyUserRewardsSnapshot.map((entry) => ({
       userAddress: entry.userAddress.toLowerCase(),
@@ -290,8 +298,6 @@ function calculatePositionDailyRewards(
 function validateTotalAmount(weeklyRewardsSnapshot: UserSnapshot, totalWeeklyDistribution: BigNumber) {
   const weeklyRewardsSnapshotTotal = weeklyRewardsSnapshot.reduce((a, b) => a.add(b.amount), ZERO);
   if (weeklyRewardsSnapshotTotal.gt(totalWeeklyDistribution)) {
-    console.info("weeklyRewardsSnapshotTotal", weeklyRewardsSnapshotTotal.toString());
-    console.info("totalWeeklyDistribution", totalWeeklyDistribution.toString());
     throw new Error("Weekly rewards snapshot total is greater than total weekly rewards");
   }
 }

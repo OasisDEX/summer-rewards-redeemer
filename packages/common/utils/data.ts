@@ -1,6 +1,5 @@
-import { BigNumber } from "ethers";
-
 import { HUNDRED_THOUSAND, MILLION } from "common/constants/constants";
+import { BigNumber } from "ethers";
 
 export const BASE_WEEKLY_AMOUNT = MILLION.add(HUNDRED_THOUSAND);
 
@@ -16763,6 +16762,87 @@ export const weeklyRewardData = {
     ],
   },
 };
+
+export const weeklyRewardDataMainnet = {
+  week: {
+    id: "2795",
+    days: [
+      {
+        id: "19565",
+        borrowDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA" },
+            user: { id: "0x0000000000000000000000000000000000000007" },
+            account: { id: "0x00000000000000000000000000000000000000a7" },
+            reward: "1",
+          },
+        ],
+        earnDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+            user: { id: "0x0000000000000000000000000000000000000008" },
+            account: { id: "0x00000000000000000000000000000000000000a8" },
+            reward: "1",
+          },
+        ],
+        week: { id: "2795" },
+      },
+      {
+        id: "19566",
+        borrowDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+            user: { id: "0x0000000000000000000000000000000000000009" },
+            account: { id: "0x00000000000000000000000000000000000000a9" },
+            reward: "0.3",
+          },
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+            user: { id: "0x0000000000000000000000000000000000000012" },
+            account: { id: "0x0000000000000000000000000000000000000a13" },
+            reward: "0.7",
+          },
+        ],
+        earnDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+            user: { id: "0x0000000000000000000000000000000000000009" },
+            account: { id: "0x0000000000000000000000000000000000000a10" },
+            reward: "1",
+          },
+        ],
+        week: { id: "2795" },
+      },
+      {
+        id: "19567",
+        borrowDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA" },
+            user: { id: "0x0000000000000000000000000000000000000010" },
+            account: { id: "0x0000000000000000000000000000000000000a11" },
+            reward: "1",
+          },
+        ],
+        earnDailyRewards: [
+          {
+            id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
+            pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+            user: { id: "0x0000000000000000000000000000000000000011" },
+            account: { id: "0x0000000000000000000000000000000000000a12" },
+            reward: "1",
+          },
+        ],
+        week: { id: "2795" },
+      },
+    ],
+  },
+};
 export const weeklyRewardDataBase = {
   week: {
     id: "2795",
@@ -16773,7 +16853,7 @@ export const weeklyRewardDataBase = {
           {
             id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
             pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
-            user: { id: "0xf4f9e8cdae4b69ff3e0beca0dff65b9b718c3161" },
+            user: { id: "0x0000000000000000000000000000000000000002" },
             account: { id: "0x00000000000000000000000000000000000000a1" },
             reward: "1",
           },
@@ -16816,7 +16896,7 @@ export const weeklyRewardDataBase = {
         borrowDailyRewards: [
           {
             id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
-            pool: { id: "0x37d3a44C905663d7B77C9b574b941D4FbF713A97" },
+            pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
             user: { id: "0x0000000000000000000000000000000000000005" },
             account: { id: "0x00000000000000000000000000000000000000a5" },
             reward: "1",
@@ -16825,7 +16905,7 @@ export const weeklyRewardDataBase = {
         earnDailyRewards: [
           {
             id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x07ea5532ab74322c954aad2ecddeb4c82505a2ff-19565",
-            pool: { id: "0x37d3a44C905663d7B77C9b574b941D4FbF713A97" },
+            pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
             user: { id: "0x0000000000000000000000000000000000000006" },
             account: { id: "0x00000000000000000000000000000000000000a6" },
             reward: "1",
@@ -22992,6 +23072,205 @@ export const dailyRewardsSimpleData = {
   },
 };
 
+export const dailyRewardsSimpleDataBase = {
+  day: {
+    id: "19587",
+    borrowDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000001" },
+        account: { id: "0x00000000000000000000000000000000000000b1" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000002" },
+        account: { id: "0x00000000000000000000000000000000000000b2" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000003" },
+        account: { id: "0x00000000000000000000000000000000000000b3" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000004" },
+        account: { id: "0x00000000000000000000000000000000000000b4" },
+        reward: "0.5",
+      },
+    ],
+    earnDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000005" },
+        account: { id: "0x00000000000000000000000000000000000000b5" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000006" },
+        account: { id: "0x00000000000000000000000000000000000000b6" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000007" },
+        account: { id: "0x00000000000000000000000000000000000000b7" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000008" },
+        account: { id: "0x00000000000000000000000000000000000000b8" },
+        reward: "0.5",
+      },
+    ],
+    week: { id: "2798" },
+  },
+};
+export const dailyRewardsSimpleData2 = {
+  day: {
+    id: "19587",
+    borrowDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+        user: { id: "0x0000000000000000000000000000000000000001" },
+        account: { id: "0x00000000000000000000000000000000000000a1" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+        user: { id: "0x0000000000000000000000000000000000000002" },
+        account: { id: "0x00000000000000000000000000000000000000a2" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+        user: { id: "0x0000000000000000000000000000000000000003" },
+        account: { id: "0x00000000000000000000000000000000000000a3" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+        user: { id: "0x0000000000000000000000000000000000000004" },
+        account: { id: "0x00000000000000000000000000000000000000a4" },
+        reward: "0.5",
+      },
+    ],
+    earnDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+        user: { id: "0x0000000000000000000000000000000000000005" },
+        account: { id: "0x00000000000000000000000000000000000000a5" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78" },
+        user: { id: "0x0000000000000000000000000000000000000006" },
+        account: { id: "0x00000000000000000000000000000000000000a6" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+        user: { id: "0x0000000000000000000000000000000000000007" },
+        account: { id: "0x00000000000000000000000000000000000000a7" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d" },
+        user: { id: "0x0000000000000000000000000000000000000008" },
+        account: { id: "0x00000000000000000000000000000000000000a8" },
+        reward: "0.5",
+      },
+    ],
+    week: { id: "2798" },
+  },
+};
+
+export const dailyRewardsSimpleDataBase2 = {
+  day: {
+    id: "19587",
+    borrowDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000001" },
+        account: { id: "0x00000000000000000000000000000000000000b1" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000002" },
+        account: { id: "0x00000000000000000000000000000000000000b2" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000002" },
+        account: { id: "0x00000000000000000000000000000000000000b3" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000004" },
+        account: { id: "0x00000000000000000000000000000000000000b4" },
+        reward: "0.5",
+      },
+    ],
+    earnDailyRewards: [
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000005" },
+        account: { id: "0x00000000000000000000000000000000000000b5" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567" },
+        user: { id: "0x0000000000000000000000000000000000000006" },
+        account: { id: "0x00000000000000000000000000000000000000b6" },
+        reward: "0.5",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000002" },
+        account: { id: "0x00000000000000000000000000000000000000b3" },
+        reward: "0.7",
+      },
+      {
+        id: "0x0bc54b36d4fa082ede775dd45f69fbbe360ddeb6-0x12c260e672bd8321f6ab246b81a0b7185f3a6d80-19587",
+        pool: { id: "0xad24FC773e125Edb223C38a39657cB64bc7C1787" },
+        user: { id: "0x0000000000000000000000000000000000000008" },
+        account: { id: "0x00000000000000000000000000000000000000b8" },
+        reward: "0.3",
+      },
+    ],
+    week: { id: "2798" },
+  },
+};
 export const dailyRewardsSimpleSnapshot = [
   {
     userAddress: "0x0000000000000000000000000000000000000001",
@@ -23029,27 +23308,26 @@ export const dailyRewardsSimpleSnapshot = [
 
 export const mockedDistributions = [
   [
-            { name: "RETH-DAI", address: "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", share: 0.08 },
-            { name: "WBTC-DAI", address: "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", share: 0.06 },
-            { name: "WSTETH-DAI", address: "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", share: 0.06 },
-            { name: "ETH-USDC", address: "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", share: 0.065 },
-            { name: "WBTC-USDC", address: "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", share: 0.09 },
-            { name: "WSTETH-USDC", address: "0xE0FFABEa66627a588EFB6C870677Baa23a53b948", share: 0.09 },
-            { name: "USDC-ETH", address: "0x0Bc54b36d4Fa082eDe775Dd45f69FBbe360DDeb6", share: 0.05 },
-            { name: "USDC-WBTC", address: "0x1a9Cea49DaEB8c36EA707A9171EbDF4097796dD4", share: 0.05 },
-            { name: "CBETH-ETH", address: "0xad24FC773e125Edb223C38a39657cB64bc7C178e", share: 0.1, lendRatio: 0.95 },
-            { name: "WSTETH-ETH", address: "0x37d3a44C905663d7B77C9b574b941D4FbF713A91", share: 0.1, lendRatio: 0.95 },
-            { name: "RETH-ETH", address: "0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA", share: 0.1, lendRatio: 0.95 },
-            { name: "YFI-DAI", address: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78", share: 0.025 },
-            { name: "SDAI-USDC", address: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d", share: 0.1, lendRatio: 0.95 },
+    { name: "RETH-DAI", address: "0x42d3f9C4dF0b98c3974Fd539A7EA9d0847F37Ef5", share: 0.08 },
+    { name: "WBTC-DAI", address: "0xdB30a08Ebc49af1BaF87f57824f85056cEd33d5F", share: 0.06 },
+    { name: "WSTETH-DAI", address: "0x8519bE08b8d83baEb11eBa52A7889967dCeD9Ae0", share: 0.06 },
+    { name: "ETH-USDC", address: "0x1C50ce3550D1846134F3B7c09785e7005F6A1566", share: 0.065 },
+    { name: "WBTC-USDC", address: "0x65374cD7db203e0c9EA8B7DA28A25dC770bEcB9e", share: 0.09 },
+    { name: "WSTETH-USDC", address: "0xE0FFABEa66627a588EFB6C870677Baa23a53b948", share: 0.09 },
+    { name: "USDC-ETH", address: "0x0Bc54b36d4Fa082eDe775Dd45f69FBbe360DDeb6", share: 0.05 },
+    { name: "USDC-WBTC", address: "0x1a9Cea49DaEB8c36EA707A9171EbDF4097796dD4", share: 0.05 },
+    { name: "CBETH-ETH", address: "0xad24FC773e125Edb223C38a39657cB64bc7C178e", share: 0.1, lendRatio: 0.95 },
+    { name: "WSTETH-ETH", address: "0x37d3a44C905663d7B77C9b574b941D4FbF713A91", share: 0.1, lendRatio: 0.95 },
+    { name: "RETH-ETH", address: "0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA", share: 0.1, lendRatio: 0.95 },
+    { name: "YFI-DAI", address: "0x5b14144da6fd5e3b158d6df7b6ed8345829aab78", share: 0.025 },
+    { name: "SDAI-USDC", address: "0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d", share: 0.1, lendRatio: 0.95 },
   ].map((distribution) => ({
     ...distribution,
     address: distribution.address.toLowerCase(),
   })),
   [
-    { name: "ETH-USDC", address: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567", share: 0.01 },
-    { name: "CBETH-ETH", address: "0xad24FC773e125Edb223C38a39657cB64bc7C1787", share: 0.01, lendRatio: 0.95 },
-    { name: "WSTETH-ETH", address: "0x37d3a44C905663d7B77C9b574b941D4FbF713A97", share: 0.01, lendRatio: 0.95 },
+    { name: "ETH-USDC", address: "0x1C50ce3550D1846134F3B7c09785e7005F6A1567", share: 0.015 },
+    { name: "CBETH-ETH", address: "0xad24FC773e125Edb223C38a39657cB64bc7C1787", share: 0.015, lendRatio: 0.95 },
   ].map((distribution) => ({
     ...distribution,
     address: distribution.address.toLowerCase(),

@@ -4,5 +4,11 @@
   "license": "MIT",
   "dependencies": {
     "graphclient": "*"
+  },
+  "scripts": {
+    "format:fix": "prettier --write  *.ts",
+    "format": "prettier --check  *.ts",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --ext .ts . --fix"
   }
 }
