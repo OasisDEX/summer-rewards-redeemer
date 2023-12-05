@@ -409,9 +409,8 @@ describe("Process daily snapshot - simple snapshot - base and mainnet", () => {
     const expectedTotal = expected1.add(expected2).add(expected3).add(expected4);
 
     const userAddress = "0x0000000000000000000000000000000000000002";
-    const allUserClaims = parsedPositionSnapshotMainnet
-      .concat(parsedPositionSnapshotBase)
-      .filter((x) => x.userAddress === userAddress);
+    const allClaims = parsedPositionSnapshotMainnet.concat(parsedPositionSnapshotBase);
+    const allUserClaims = allClaims.filter((x) => x.userAddress === userAddress);
 
     const totalUserClaims = allUserClaims.reduce((acc, x) => acc.add(BigNumber.from(x.amount)), BigNumber.from(0));
 
@@ -434,6 +433,9 @@ describe("Process daily snapshot - simple snapshot - base and mainnet", () => {
     expect(+position4[0].amount.toString()).toBeCloseTo(+expected4.toString(), 10);
     expect(+totalUserClaims.toString()).toBeCloseTo(+expectedTotal.toString(), 10);
 
+    const addedClaims = await prisma.ajnaRewardsDailyClaim.findMany({});
+
+    expect(addedClaims.length).toEqual(allClaims.length);
     sinon.restore();
   });
 

@@ -85,6 +85,7 @@ export async function processDailySnapshotInDb(snapshot: PositionSnapshot, curre
   const dailyClaimEntries = snapshot.map((entry) => ({
     user_address: entry.userAddress.toLowerCase(),
     account_address: entry.accountAddress.toLowerCase(),
+    pool_address: entry.poolAddress.toLowerCase(),
     amount: entry.amount.toString(),
     day_number: currentDay,
     week_number: currentWeek,
