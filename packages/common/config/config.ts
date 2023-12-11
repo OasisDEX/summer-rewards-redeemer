@@ -11,10 +11,10 @@ console.info = (message: any, ...optionalParams: any[]) => {
 };
 export const addresses: Addresses = {
   goerli: {
-    ajnaToken: "0xaadebCF61AA7Da0573b524DE57c67aDa797D46c5",
-    ajnaRedeemer: "0x6f867970f24C95b0B47659aB617Fbc7cdf6fc935",
-    ajnaDripper: "0x5646Af7Dd65B5B582E8B652Be6c0E9E7283dab7b",
-    admin: "0x0B5a3C04D1199283938fbe887A2C82C808aa89Fb",
+    ajnaToken: "0x601a8F7EA34168D912fB3C214a377CB544F18c0d",
+    ajnaRedeemer: "0xE15b6d0e371F393FcDeba19F84aaE70e7807fB6A",
+    ajnaDripper: "0x6eF7900b174D705D69DD33CE574Decfc7f12C88a",
+    admin: "0xAb1a4Ae0F851700CC42442c588f458B553cB2620",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
   mainnet: {
