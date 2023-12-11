@@ -1,3 +1,4 @@
+/* eslint-disable no-process-exit */
 import { ethers } from "hardhat";
 
 import { deployContract } from "../utils/hardhat.utils";
@@ -18,7 +19,9 @@ async function main() {
   });
 }
 
-main().catch((error) => {
-  console.error(error);
-  throw new Error();
-});
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
