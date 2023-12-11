@@ -2,6 +2,7 @@ import { impersonateAccount, loadFixture, setBalance } from "@nomicfoundation/ha
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { expect } from "chai";
 import chalk from "chalk";
+import { EligibleNetwork, Network } from "common";
 import { config } from "common/config/config";
 import {
   BASE_WEEKLY_AMOUNT,
@@ -65,7 +66,7 @@ async function deployFixture() {
   CURRENT_WEEK = await ajnaRedeemer.getCurrentWeek();
   await ajnaToken.mint(ajnaDripper.address, BASE_WEEKLY_AMOUNT.mul(100));
   await ajnaDripper.connect(admin).setup(ajnaRedeemer.address, BASE_WEEKLY_AMOUNT);
-
+  config.currentlyConfiguredNetwork = Network.Goerli;
   config.addresses.ajnaDripper = ajnaDripper.address;
   config.addresses.ajnaToken = ajnaToken.address;
   config.addresses.ajnaRedeemer = ajnaRedeemer.address;
@@ -74,7 +75,12 @@ async function deployFixture() {
   config.rewardStartWeek = CURRENT_WEEK.toNumber();
   console.table(config.addresses);
 
-  await processWeeklyClaims([CURRENT_WEEK.toNumber()], owner);
+  await processWeeklyClaims(
+    [CURRENT_WEEK.toNumber()],
+    Network.Goerli, // network to porcess the tx on
+    [...Object.values(EligibleNetwork)] as unknown as Network[], // networks to calcaulate the cliams for
+    owner
+  );
   sinon.assert.callCount(configStub, 4);
   sinon.assert.calledTwice(graphStub);
   return {

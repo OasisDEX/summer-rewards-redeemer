@@ -57,10 +57,10 @@ export const config: Config = {
   multiplier: 100000000000,
   dryRun: true,
   weeksCount: 50,
-  usedNetwork: process.env.NETWORK_USED,
+  currentlyConfiguredNetwork: process.env.NETWORK_USED,
   get network() {
-    if (this.usedNetwork) {
-      return this.usedNetwork as Network;
+    if (this.currentlyConfiguredNetwork) {
+      return this.currentlyConfiguredNetwork as Network;
     } else {
       throw new Error("ajna-worker/config: No network found");
     }

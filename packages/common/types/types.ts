@@ -96,7 +96,7 @@ export interface Config {
   rewardStartWeek: number;
   multiplier: number;
   dryRun: boolean;
-  usedNetwork: string | undefined;
+  currentlyConfiguredNetwork: string | undefined;
   network: Network;
   weeksCount: number;
   merkleTreeOptions: Options;
