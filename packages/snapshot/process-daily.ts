@@ -1,5 +1,12 @@
 import { config, getRewardsDistributionsForNetworks } from "common/config";
-import { EligibleNetwork, Network, ParsedPositionSnapshot, ParsedUserSnapshot, PositionSnapshot } from "common/types";
+import {
+  EligibleNetwork,
+  Network,
+  ParsedPositionSnapshot,
+  ParsedUserSnapshot,
+  PositionSnapshot,
+  TestNetwork,
+} from "common/types";
 import { getEpochDayId } from "common/utils/time.utils";
 import { BigNumber } from "ethers";
 
@@ -53,18 +60,20 @@ export async function processDailyClaims(dayIds = [getEpochDayId() - 1]): Promis
 
 /**
  * Processes daily claims for all networks for a given array of day IDs.
- * @param dayIds An array of day IDs to process claims for. Defaults to the previous epoch day ID.
- * @returns A Promise that resolves when the claims have been processed.
+ *
+ * @param dayIds - An array of day IDs to process. Defaults to the previous day ID.
+ * @returns A Promise that resolves when all daily claims have been processed.
  */
 export async function processAllNetworksDailyClaims(dayIds = [getEpochDayId() - 1]): Promise<void> {
-  for (const network of Object.values(Network)) {
+  for (const network of Object.values(TestNetwork)) {
     config.usedNetwork = network;
     await processDailyClaims(dayIds);
   }
+  await processEligibleNetworksDailyClaims(dayIds);
 }
 
 /**
- * Processes daily claims for eligible networks.
+ * Processes daily claims for eligible networks ( non testnets).
  *
  * @param dayIds - An array of day IDs to process. Defaults to the previous day ID.
  * @returns A promise that resolves to an array of parsed user and position snapshots for each network and multiple days.

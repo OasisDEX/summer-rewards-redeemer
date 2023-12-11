@@ -286,7 +286,7 @@ export const tokens = {
 };
 
 /**
- * Validates the reward distributions for each network.
+ * Validates the reward distributions for each network - checks if sum of all shares is equal 1.
  * @param distributions The reward distributions to validate.
  * @throws An error if the total shares for a network do not add up to 1.
  * @dev rounds the result to 5 decimal places
