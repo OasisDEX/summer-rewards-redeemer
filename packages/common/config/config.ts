@@ -11,16 +11,20 @@ console.info = (message: any, ...optionalParams: any[]) => {
 };
 export const addresses: Addresses = {
   goerli: {
-    ajnaToken: "0xaadebCF61AA7Da0573b524DE57c67aDa797D46c5",
-    ajnaRedeemer: "0x6f867970f24C95b0B47659aB617Fbc7cdf6fc935",
-    ajnaDripper: "0x5646Af7Dd65B5B582E8B652Be6c0E9E7283dab7b",
-    admin: "0x0B5a3C04D1199283938fbe887A2C82C808aa89Fb",
+    ajnaToken: "0x601a8F7EA34168D912fB3C214a377CB544F18c0d",
+    ajnaRedeemer: "0xE15b6d0e371F393FcDeba19F84aaE70e7807fB6A",
+    ajnaDripper: "0x6eF7900b174D705D69DD33CE574Decfc7f12C88a",
+    rewardsRedeemerFactory: "0x35Ae11606ff6DF0b4EDD0Dd32d7F72b22206F398",
+    bonusRedeemer: "0x481E7Ac213DBEe2cCdb6eebFbb6B96de14B54b53",
+    admin: "0xAb1a4Ae0F851700CC42442c588f458B553cB2620",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
   mainnet: {
     ajnaToken: "0x9a96ec9b57fb64fbc60b423d1f4da7691bd35079",
     ajnaRedeemer: "0x0000000000000000000000000000000000000000",
     ajnaDripper: "0x0000000000000000000000000000000000000000",
+    rewardsRedeemerFactory: "0x0000000000000000000000000000000000000000",
+    bonusRedeemer: "0x0000000000000000000000000000000000000000",
     admin: "0x85f9b7408afE6CEb5E46223451f5d4b832B522dc",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
@@ -28,6 +32,8 @@ export const addresses: Addresses = {
     ajnaToken: "0x0000000000000000000000000000000000000000",
     ajnaRedeemer: "0x0000000000000000000000000000000000000000",
     ajnaDripper: "0x0000000000000000000000000000000000000000",
+    rewardsRedeemerFactory: "0x0000000000000000000000000000000000000000",
+    bonusRedeemer: "0x0000000000000000000000000000000000000000",
     admin: "0x0000000000000000000000000000000000000000",
     operator: "0x0000000000000000000000000000000000000000",
   },
@@ -57,10 +63,10 @@ export const config: Config = {
   multiplier: 100000000000,
   dryRun: true,
   weeksCount: 50,
-  usedNetwork: process.env.NETWORK_USED,
+  currentlyConfiguredNetwork: process.env.NETWORK_USED,
   get network() {
-    if (this.usedNetwork) {
-      return this.usedNetwork as Network;
+    if (this.currentlyConfiguredNetwork) {
+      return this.currentlyConfiguredNetwork as Network;
     } else {
       throw new Error("ajna-worker/config: No network found");
     }
@@ -286,7 +292,7 @@ export const tokens = {
 };
 
 /**
- * Validates the reward distributions for each network.
+ * Validates the reward distributions for each network - checks if sum of all shares is equal 1.
  * @param distributions The reward distributions to validate.
  * @throws An error if the total shares for a network do not add up to 1.
  * @dev rounds the result to 5 decimal places

@@ -40,6 +40,7 @@ export async function fetchDailyDataPartners(dayId: number, url: string, rewardD
 const url1 = "https://api.thegraph.com/subgraphs/name/halaprix/gajna5";
 const url2 = "https://graph.staging.summer.fi/subgraphs/id/QmXz5sZSUt7EdQKCjFnbqkqVGdF53NwuE6xA1dj2ADe25j";
 
+// TDO : fix this
 export async function verify(dayId: number, reverseOrder = false) {
   const weekId = Math.floor(dayId / 7);
   const rewardDistributions = config.getRewardDistributions(weekId, Network.Mainnet);
