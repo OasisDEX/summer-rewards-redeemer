@@ -31,6 +31,8 @@ yarn install
 
 The following scripts are available in this project:
 
+### packages/contracts
+
 - `start:local`: Starts a local development environment with a forked Ethereum node and a local database.
 - `db:start`: Starts a local PostgreSQL database using Docker.
 - `db:stop`: Stops the local PostgreSQL database using Docker.
@@ -39,7 +41,6 @@ The following scripts are available in this project:
 - `db:migrate`: Runs database migrations.
 - `db:seed`: Seeds the database and redeemer contract with data - concurrently starts local hardhat node.
 - `test`: Runs the tests.
-- `test:ts`: Runs the scripts tests.
 - `build`: Compiles the SC code and generates the contract typechain.
 - `clean`: Deletes the generated artifacts, cache, and typechain.
 - `lint:fix`: Lints the code and fixes any issues.
@@ -50,6 +51,13 @@ The following scripts are available in this project:
 - `format`: Formats the code.
 - `partner:manage`: Add or remove partner from the whitelist.
 - `redeemer:manage`: Get redeemer address for partner's EOA or create new redeemer.
+
+### global
+
+- `generate:lambdas:daily`: Generates the daily lambdas.
+- `test`: Runs the tests.
+- `lint`: Lints the code and fixes any issues.
+- `build`: Compiles the SC code, generates the contract typechain, builds prisma client and graph client.
 
 # Configuration
 

@@ -2,6 +2,9 @@
   "name": "ajna-rewards-snapshot",
   "version": "1.0.0",
   "license": "MIT",
+  "engine": {
+    "node": ">=16.0.0"
+  },
   "dependencies": {
     "common": "*",
     "database": "*",
@@ -11,7 +14,11 @@
   },
   "scripts": {
     "test": "DOTENV_CONFIG_PATH=../../.env jest  --setupFiles dotenv/config",
-    "process:daily": "ts-node process-daily.ts"
+    "process:daily": "ts-node process-daily.ts",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --ext .ts . --fix",
+    "format:fix": "prettier --write  *.ts",
+    "format": "prettier --check  *.ts"
   },
   "devDependencies": {
     "jest": "^29.5.0",

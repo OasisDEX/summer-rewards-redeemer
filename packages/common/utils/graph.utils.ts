@@ -1,11 +1,14 @@
 import { getBuiltGraphSDK } from "graphclient";
+
 import { config } from "../config/config";
+import { Distribution } from "../types";
 
 export const graphClient = getBuiltGraphSDK({
   url: config.subgraphUrl,
 });
-export async function fetchDailyData(dayId: number, pools: string[]) {
+export async function fetchDailyData(dayId: number, distribution: Distribution[]) {
   try {
+    const pools = distribution.map((pool) => pool.address.toLowerCase());
     const res = await graphClient.DailyPartnerRewards(
       { day: dayId.toString(), pools },
       {
@@ -18,8 +21,11 @@ export async function fetchDailyData(dayId: number, pools: string[]) {
   }
 }
 
-export async function fetchWeeklyData(weekId: number, pools: string[]) {
+export async function fetchWeeklyData(weekId: number, distribution: Distribution[]) {
   try {
+    // filter out pools that are not on the network we are processing
+    console.debug(`Fetching weekly data for week ${weekId} using ${config.subgraphUrl}`);
+    const pools = distribution.map((pool) => pool.address.toLowerCase());
     const res = await graphClient.WeeklyPartnerRewards(
       { week: weekId.toString(), pools },
       {

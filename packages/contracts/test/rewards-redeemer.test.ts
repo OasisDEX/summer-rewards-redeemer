@@ -1,18 +1,18 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
-
-import { deployContract } from "../scripts/utils/hardhat.utils";
 import { createMerkleTree } from "common";
 import { dummyProcessedSnaphot } from "common/utils/data";
-import { RewardsRedeemerFactory, AjnaToken } from "typechain-types";
 import { createRedeemer } from "contracts/utils";
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
+import { AjnaToken, RewardsRedeemerFactory } from "typechain-types";
+
+import { deployContract } from "../scripts/utils/hardhat.utils";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
-const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
-const dataForSecondUser = [dummyProcessedSnaphot[2].address, dummyProcessedSnaphot[2].amount];
+const dataForFirstUser = [dummyProcessedSnaphot[1].userAddress, dummyProcessedSnaphot[1].amount];
+const dataForSecondUser = [dummyProcessedSnaphot[2].userAddress, dummyProcessedSnaphot[2].amount];
 
 /* leaf and proof with index 1 -> address is the firstUser address from hardhat accounts 
  0 indexed user is saved for the owner */
@@ -75,6 +75,7 @@ describe("Rewards Redeemer Implementation", () => {
     it("Should allow partner to change owner", async () => {
       const { ajnaRedeemer, partner, randomUser } = await loadFixture(deployBaseFixture);
 
+      // eslint-disable-next-line no-unused-expressions
       expect(await ajnaRedeemer.connect(partner).transferOwnership(randomUser.address)).to.be.not.reverted;
       expect(await ajnaRedeemer.owner()).to.be.equal(randomUser.address);
     });

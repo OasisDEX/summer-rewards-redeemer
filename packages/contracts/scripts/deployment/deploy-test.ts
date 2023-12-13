@@ -1,3 +1,4 @@
+/* eslint-disable no-process-exit */
 import { ethers } from "hardhat";
 
 import { deployContract } from "../utils/hardhat.utils";
