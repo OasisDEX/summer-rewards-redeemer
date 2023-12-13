@@ -52,6 +52,11 @@ async function main() {
     await new Promise((resolve) => setTimeout(resolve, 60000));
 
     await hre.run("verify:verify", {
+      address: redeemerFactory.address,
+      constructorArguments: [],
+    });
+
+    await hre.run("verify:verify", {
       address: rewardsRedeemer,
       constructorArguments: [config.addresses.ajnaToken],
     });
