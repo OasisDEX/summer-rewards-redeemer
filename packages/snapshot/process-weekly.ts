@@ -93,7 +93,7 @@ export async function processWeeklyClaims(
     }, [] as UserSnapshot);
     // create the merkle tree and process the snapshot in the DB
     const { tree, root } = createMerkleTree(summedCoreUserSnapshots);
-    const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedCoreUserSnapshots);
+    const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
     // set the network to mainnet as we are adding the root to the contract only on mainnet
     config.currentlyConfiguredNetwork = transactionNetwork;
     // process the snapshot in the DB
