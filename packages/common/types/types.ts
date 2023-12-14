@@ -54,7 +54,9 @@ export interface DistributionWithNetwork extends Distribution {
 export interface DistributionAmount {
   [poolAddress: string]: { total: BigNumber; lendRatio?: number };
 }
-
+export interface DistributionAmountWithLendRatio extends DistributionAmount {
+  [poolAddress: string]: { total: BigNumber; lendRatio: number };
+}
 export interface UserRewardDetails {
   [userAddress: string]: { amount: BigNumber };
 }
@@ -93,7 +95,9 @@ export interface Config {
   loggingEnabled: boolean;
   earnRewardsRatio: number;
   borrowRewardsRatio: number;
+  bonusRewardsDuration: number;
   rewardStartWeek: number;
+  bonusRewardsEndWeek: number;
   multiplier: number;
   dryRun: boolean;
   currentlyConfiguredNetwork: string | undefined;
@@ -151,6 +155,15 @@ export interface DailyRewards {
   dailyUserRewards: UserRewardDetails;
   dailyPositionRewards: PositionRewardDetails[];
   totalDailyRewards: BigNumber;
+  dailyUserBonusRewards: UserRewardDetails;
+  dailyPositionBonusRewards: PositionRewardDetails[];
+  totalDailyBonusRewards: BigNumber;
+}
+export interface DailyBonusRewards {
+  id: string;
+  dailyUserBonusRewards: UserRewardDetails;
+  dailyPositionBonusRewards: PositionRewardDetails[];
+  totalDailyBonusRewards: BigNumber;
 }
 
 export type WeeklyRewards = DailyRewards[];

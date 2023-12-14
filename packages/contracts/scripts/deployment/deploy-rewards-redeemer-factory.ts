@@ -12,7 +12,9 @@ async function main() {
 
   const redeemerFactory = await getOrDeployContract<RewardsRedeemerFactory>("RewardsRedeemerFactory", []);
 
-  console.log(`RedeemerFactory deployed to : ${chalk.green(redeemerFactory.address)} on ${chalk.green(config.network)}`);
+  console.log(
+    `RedeemerFactory deployed to : ${chalk.green(redeemerFactory.address)} on ${chalk.green(config.network)}`
+  );
 
   if (network.name === Network.Mainnet || network.name === Network.Goerli) {
     console.log(`Waiting for 60 seconds...`);
@@ -22,7 +24,6 @@ async function main() {
       address: redeemerFactory.address,
       constructorArguments: [],
     });
-
   }
 }
 

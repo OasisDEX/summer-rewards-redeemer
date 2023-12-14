@@ -87,7 +87,10 @@ describe("Process weekly snapshot", () => {
       },
     ].map((x) => ({ ...x, address: x.address.toLowerCase() }));
     const parsedSnapshot = await getWeeklySnapshot(1, rewardDistributions);
-    expect(parsedSnapshot).toEqual(expectedWeeklySnapshot);
+    expect(parsedSnapshot.weeklyCoreRewardsSnaphot).toEqual(expectedWeeklySnapshot);
+    // this is due to all users from v1 being on in the v1 snapshot
+    expect(parsedSnapshot.weeklyCoreRewardsSnaphot.length).toEqual(parsedSnapshot.weeklyBonusRewardsSnaphot.length);
+
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
   });

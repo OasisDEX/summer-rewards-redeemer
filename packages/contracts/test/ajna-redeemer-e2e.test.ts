@@ -2,7 +2,7 @@ import { impersonateAccount, loadFixture, setBalance } from "@nomicfoundation/ha
 import { processWeeklyClaims } from "ajna-rewards-snapshot/process-weekly";
 import { expect } from "chai";
 import chalk from "chalk";
-import { EligibleNetwork, Network } from "common";
+import { EligibleNetwork, Network, ONE } from "common";
 import { config } from "common/config/config";
 import {
   BASE_WEEKLY_AMOUNT,
@@ -114,6 +114,13 @@ async function deployFixture() {
 // 0x0000000000000000000000000000000000000009 gets 100% of earn allocation in pool 0x5b14144da6fd5e3b158d6df7b6ed8345829aab78
 // 0.025 * 157142 * 0.6 = 2357.13
 
+// BONUS:  is on the list of bonus claims
+// 0x0000000000000000000000000000000000000012 gets 31.8%  (1099.99 / (1099.99+2357.13)) of the bonus allocation in pool 0x5b14144da6fd5e3b158d6df7b6ed8345829aab78 = 1249
+// total 0x12 bonus = 1249
+// 0x0000000000000000000000000000000000000009 gets 100% of the bonus allocation in pool 0xf4ab415e00ff0ed4f25d31d7e9140f3c75b69e7d = 15714
+// and 68.2% of the bonus allocation in pool 0x5b14144da6fd5e3b158d6df7b6ed8345829aab78 = 2679
+// total 0x9 bonus = 18393,2
+
 // day 3:
 // 0x0000000000000000000000000000000000000010 gets 100% of borrow allocation in pool 0xa2fFdC7EFeF98469d11370d91c0A17DC83EC2BDA
 // 0.1 * 157142 * 0.05 = 785.7
@@ -148,7 +155,7 @@ async function deployFixture() {
 // 0x0000000000000000000000000000000000000005 gets 117.85 ✅
 // 0x0000000000000000000000000000000000000006 gets 1414.278 ✅
 
-describe("AjnaRedeemer e2e", () => {
+describe.only("AjnaRedeemer e2e", () => {
   afterEach(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
     await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
@@ -164,9 +171,28 @@ describe("AjnaRedeemer e2e", () => {
         where: {
           week_number: currentWeek,
           chain_id: config.chainId,
+          source: "core",
         },
         take: 30,
       });
+      const bonusClaims = await prisma.ajnaRewardsWeeklyClaim.findMany({
+        where: {
+          week_number: currentWeek,
+          chain_id: config.chainId,
+          source: "bonus",
+        },
+        take: 30,
+      });
+      console.log(
+        `${BigNumber.from(bonusClaims[0].amount).div(ONE)} is the amount of the ${
+          bonusClaims[0].user_address
+        } bonus claim`
+      );
+      console.log(
+        `${BigNumber.from(bonusClaims[1].amount).div(ONE)} is the amount of the ${
+          bonusClaims[1].user_address
+        } bonus claim`
+      );
       for (const randomClaim of randomClaims) {
         console.log(chalk.dim(`Checking claim for ${randomClaim.user_address}`));
         const testUser = await impersonate(randomClaim.user_address);
@@ -181,7 +207,11 @@ describe("AjnaRedeemer e2e", () => {
         await impersonateAccount(testUserAddress);
         const testUser = ethers.provider.getSigner(randomClaim?.user_address as string);
         await setBalance(testUserAddress, BigNumber.from(ethers.utils.parseEther("1000")));
-        console.log(chalk.dim(`Claiming for ${randomClaim.user_address} with amount ${randomClaim.amount} `));
+        console.log(
+          chalk.dim(
+            `Claiming for ${randomClaim.user_address} with amount ${BigNumber.from(randomClaim.amount).div(ONE)} `
+          )
+        );
         await expect(
           ajnaRedeemer.connect(testUser).claimMultiple([currentWeek], [randomClaim!.amount], [randomClaim!.proof])
         ).to.not.be.reverted;
