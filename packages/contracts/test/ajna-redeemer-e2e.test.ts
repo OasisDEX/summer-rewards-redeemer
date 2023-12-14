@@ -155,7 +155,7 @@ async function deployFixture() {
 // 0x0000000000000000000000000000000000000005 gets 117.85 ✅
 // 0x0000000000000000000000000000000000000006 gets 1414.278 ✅
 
-describe.only("AjnaRedeemer e2e", () => {
+describe("AjnaRedeemer e2e", () => {
   afterEach(async () => {
     await prisma.ajnaRewardsMerkleTree.deleteMany({});
     await prisma.ajnaRewardsWeeklyClaim.deleteMany({});
