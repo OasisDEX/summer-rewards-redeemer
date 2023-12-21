@@ -25,7 +25,7 @@ export const addresses: Addresses = {
     ajnaDripper: "0x198c29380124D017D6b204152c2e3C266885EEa0",
     rewardsRedeemerFactory: "0x35Ae11606ff6DF0b4EDD0Dd32d7F72b22206F398",
     bonusRedeemer: "0x481E7Ac213DBEe2cCdb6eebFbb6B96de14B54b53",
-    admin: "0xAb1a4Ae0F851700CC42442c588f458B553cB2620",
+    admin: "0x85f9b7408afE6CEb5E46223451f5d4b832B522dc",
     operator: "0xdF8234900a194D787AdF4E448502CbeD56557FbA",
   },
   base: {
