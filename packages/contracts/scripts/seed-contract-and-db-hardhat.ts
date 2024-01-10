@@ -1,15 +1,15 @@
+import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 import chalk from "chalk";
+import { createMerkleTree } from "common";
+import { config } from "common/config/config";
+import { EthersError, UserSnapshot } from "common/types/types";
+import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
+import { AjnaRewardsSource, Prisma, prisma } from "database";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
-
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
-import { config } from "common/config/config";
+
 import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
-import { createMerkleTree } from "common";
-import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
-import { EthersError, UserSnapshot } from "common/types/types";
-import { AjnaRewardsSource, prisma, Prisma } from "database";
-import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 
 const dataDir = "../../snapshot/test/test-data";
 
@@ -47,7 +47,7 @@ async function main() {
     console.log(chalk.dim(`Processing week ${weekIds[i]}`));
     const rewardDistributions = config.getRewardDistributions(weekIds[i], config.network);
     const result = calculateWeeklySnapshot(data[i], weekIds[i], rewardDistributions);
-    const snapshot: UserSnapshot = result.map((user) => ({
+    const snapshot: UserSnapshot = result.weeklyCoreRewardsSnaphot.map((user) => ({
       userAddress: user.userAddress,
       amount: BigNumber.from(user.amount),
     }));
@@ -101,9 +101,8 @@ async function main() {
       };
     });
 
-    config.loggingEnabled
-      ? console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`))
-      : null;
+    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`));
+
     await prisma.ajnaRewardsWeeklyClaim.createMany({
       data: snapshotEntries,
       skipDuplicates: true,

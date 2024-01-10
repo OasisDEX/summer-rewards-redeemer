@@ -69,9 +69,15 @@ The `config.ts` file contains the configuration for the project. It exports a `c
 - `multiplier`: The multiplier used to calculate rewards.
 - `dryRun`: Whether to run the script in dry run mode.
 - `network`: The network name used to get addresses and distributions.
+- `chainId`: The chain ID for the current network.
+- `subgraphUrl`: The URL for the Ajna subgraph.
+- `rpcUrl`: The RPC URL for the current network.
 - `merkleTreeOptions`: The options for the Merkle tree.
 - `addresses`: The addresses for the contracts on the current network.
 - `rewardDistributions`: The reward distribution ratios per pool for the current network.
+- `bonusRewardsEndWeek`: The week number when bonus rewards end.
+
+- `ajnaV1usersSnapshot`: The snapshot of Ajna V1 users.Used for bonus rewards calcualtion
 
 The `addresses` and `rewardDistributions` properties are getters that return the addresses and reward distributions for the current network based on the `network` property.
 
@@ -104,6 +110,7 @@ lambda docker requires these env variables:
 DATABASE_URL=<borrow db connection string>
 AJNA_GRAPHQL_ENDPOINT_GOERLI=
 AJNA_GRAPHQL_ENDPOINT_MAINNET=
+AJNA_GRAPHQL_ENDPOINT_BASE=
 NETWORK_USED=<network used to submit weekly root>
 ```
 

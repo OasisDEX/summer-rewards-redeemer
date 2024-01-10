@@ -9,7 +9,7 @@ import {
   TestNetwork,
   UserSnapshot,
 } from "common";
-import { prisma } from "database";
+import { AjnaRewardsSource, prisma } from "database";
 import { BigNumber, ethers } from "ethers";
 
 import { getWeeklySnapshot } from "./get-snapshot";
@@ -57,21 +57,32 @@ export async function processWeeklyClaims(
     // this will validate the reward distributions for all eligible networks
     getRewardsDistributionsForNetworks(weekId, [...networksToProcess]);
     // initialize an empty array to hold the snapshot for each network
-    const userSnapshotMultipleNetworks: ParsedUserSnapshot = [];
+    const userCoreSnapshotMultipleNetworks: ParsedUserSnapshot = [];
+    const userBonusSnapshotMultipleRewards: ParsedUserSnapshot = [];
     // for each eligible network, get the reward distributions and generate the snapshot
     const promises = [...networksToProcess].map(async (network) => {
       console.info(`Processing weekly claims for week ${weekId} on ${network}.`);
       // set the network to the network we are processing the snapshot for
       config.currentlyConfiguredNetwork = network;
       const rewardDistributions = config.getRewardDistributions(weekId, network as unknown as Network);
-      const parsedSnapshot: ParsedUserSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
-      userSnapshotMultipleNetworks.push(...parsedSnapshot);
+      const parsedSnapshot = await getWeeklySnapshot(weekId, rewardDistributions);
+      userCoreSnapshotMultipleNetworks.push(...parsedSnapshot.weeklyCoreRewardsSnaphot);
+      userBonusSnapshotMultipleRewards.push(...parsedSnapshot.weeklyBonusRewardsSnaphot);
     });
     // wait for all snapshots to be generated
     await Promise.all(promises);
     // convert the daily snapshot to the format we need for the DB
     // iterate through all snapshots and sum up the amounts for each user
-    const summedUserSnapshots: UserSnapshot = userSnapshotMultipleNetworks.reduce((acc, curr) => {
+    const summedCoreUserSnapshots: UserSnapshot = userCoreSnapshotMultipleNetworks.reduce((acc, curr) => {
+      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
+      if (existingEntry) {
+        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
+      } else {
+        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
+      }
+      return acc;
+    }, [] as UserSnapshot);
+    const summedBonusUserSnapshots: UserSnapshot = userBonusSnapshotMultipleRewards.reduce((acc, curr) => {
       const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
       if (existingEntry) {
         existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
@@ -81,12 +92,14 @@ export async function processWeeklyClaims(
       return acc;
     }, [] as UserSnapshot);
     // create the merkle tree and process the snapshot in the DB
-    const { tree, root } = createMerkleTree(summedUserSnapshots);
+    const { tree, root } = createMerkleTree(summedCoreUserSnapshots);
+    const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
     // set the network to mainnet as we are adding the root to the contract only on mainnet
     config.currentlyConfiguredNetwork = transactionNetwork;
     // process the snapshot in the DB
-    await processWeeklySnapshotInDb(summedUserSnapshots, weekId, root, tree);
-    // process the snapshot on the blockchain
+    await processWeeklySnapshotInDb(summedCoreUserSnapshots, weekId, root, tree);
+    await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
+    // process the snapshot on the blockchain - only core rewards are processed on the blockchain -bonus has to be processed by mutlisig
     await processTransaction(weekId, root, signer);
   }
 }

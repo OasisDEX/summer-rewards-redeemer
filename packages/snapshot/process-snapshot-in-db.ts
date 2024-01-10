@@ -12,13 +12,15 @@ import MerkleTree from "merkletreejs";
  * @param currentWeek - The current week number.
  * @param root - The root of the Merkle tree.
  * @param tree - The Merkle tree.
+ * @param rewardsSource - The source of the rewards.
  * @returns A promise that resolves when the snapshot is processed in the database.
  */
 export async function processWeeklySnapshotInDb(
   snapshot: UserSnapshot,
   currentWeek: number,
   root: string,
-  tree: MerkleTree
+  tree: MerkleTree,
+  rewardsSource: AjnaRewardsSource = AjnaRewardsSource.core
 ) {
   await prisma.$transaction(async () => {
     try {
@@ -28,13 +30,15 @@ export async function processWeeklySnapshotInDb(
           tree_root: root,
           week_number: Number(currentWeek),
           chain_id: config.chainId,
-          source: AjnaRewardsSource.core,
+          source: rewardsSource,
         },
       });
     } catch (error: unknown) {
       const prismaError = error as Prisma.PrismaClientKnownRequestError;
       if (prismaError?.code === "P2002") {
-        console.error(`Root already added for week ${currentWeek}. Chain ID: ${config.chainId}`);
+        console.error(
+          `Root already added for week ${currentWeek}. Chain ID: ${config.chainId}. Rewards source ${rewardsSource}`
+        );
         return;
       } else {
         throw error;
@@ -52,13 +56,15 @@ export async function processWeeklySnapshotInDb(
           amount: entry.amount.toString(),
           week_number: currentWeek,
           chain_id: config.chainId,
-          source: AjnaRewardsSource.core,
+          source: rewardsSource,
           proof,
         },
       });
     });
     console.info(
-      chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}`)
+      chalk.gray(
+        `Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}. Source ${rewardsSource}`
+      )
     );
     try {
       await prisma.$transaction(snapshotEntries);
@@ -74,9 +80,14 @@ export async function processWeeklySnapshotInDb(
  *
  * @param snapshot - The position snapshot.
  * @param currentDay - The current day number.
+ * @param rewardsSource - The source of the rewards.
  * @returns A promise that resolves when the processing is complete.
  */
-export async function processDailySnapshotInDb(snapshot: PositionSnapshot, currentDay: number): Promise<void> {
+export async function processDailySnapshotInDb(
+  snapshot: PositionSnapshot,
+  currentDay: number,
+  rewardsSource: AjnaRewardsSource = AjnaRewardsSource.core
+): Promise<void> {
   const currentWeek = Math.floor(currentDay / 7);
   const weeklyClaimEntriesTx: PrismaPromise<AjnaRewardsWeeklyClaim>[] = [];
   console.info(chalk.gray(`Adding day #${currentDay} to the db`));
@@ -90,7 +101,7 @@ export async function processDailySnapshotInDb(snapshot: PositionSnapshot, curre
     day_number: currentDay,
     week_number: currentWeek,
     chain_id: config.chainId,
-    source: AjnaRewardsSource.core,
+    source: rewardsSource,
     type: entry.positionType,
   }));
   console.info(

@@ -8,6 +8,7 @@ import {
   TestNetwork,
 } from "common/types";
 import { getEpochDayId } from "common/utils/time.utils";
+import { AjnaRewardsSource } from "database";
 import { BigNumber } from "ethers";
 
 import { getDailySnapshot } from "./get-snapshot";
@@ -28,6 +29,8 @@ export async function processDailyClaims(
   {
     parsedUserSnapshot: ParsedUserSnapshot;
     parsedPositionSnapshot: ParsedPositionSnapshot;
+    parsedUserBonusSnapshot: ParsedUserSnapshot;
+    parsedPositionBonusSnapshot: ParsedPositionSnapshot;
   }[]
 > {
   const currentDay = getEpochDayId();
@@ -48,9 +51,17 @@ export async function processDailyClaims(
     // get reward distributions for the network we are processing
     const rewardDistributions = config.getRewardDistributions(weekId, config.network);
     // get the daily snapshot for the network we are processing
-    const { parsedPositionSnapshot, parsedUserSnapshot } = await getDailySnapshot(dayId, rewardDistributions);
+    const { parsedPositionSnapshot, parsedUserSnapshot, parsedPositionBonusSnapshot, parsedUserBonusSnapshot } =
+      await getDailySnapshot(dayId, rewardDistributions);
     // convert the daily snapshot to the format we need for the DB
-    const snapshot: PositionSnapshot = parsedPositionSnapshot.map((entry) => ({
+    const coreSnapshot: PositionSnapshot = parsedPositionSnapshot.map((entry) => ({
+      userAddress: entry.userAddress.toLowerCase(),
+      accountAddress: entry.accountAddress.toLowerCase(),
+      amount: BigNumber.from(entry.amount),
+      poolAddress: entry.poolAddress.toLowerCase(),
+      positionType: entry.positionType,
+    }));
+    const bonusSnapshot: PositionSnapshot = parsedPositionBonusSnapshot.map((entry) => ({
       userAddress: entry.userAddress.toLowerCase(),
       accountAddress: entry.accountAddress.toLowerCase(),
       amount: BigNumber.from(entry.amount),
@@ -58,8 +69,14 @@ export async function processDailyClaims(
       positionType: entry.positionType,
     }));
     // add the daily snapshot to the DB
-    await processDailySnapshotInDb(snapshot, dayId);
-    snapshotsByDay.push({ parsedPositionSnapshot, parsedUserSnapshot });
+    await processDailySnapshotInDb(coreSnapshot, dayId);
+    await processDailySnapshotInDb(bonusSnapshot, dayId, AjnaRewardsSource.bonus);
+    snapshotsByDay.push({
+      parsedPositionSnapshot,
+      parsedUserSnapshot,
+      parsedPositionBonusSnapshot,
+      parsedUserBonusSnapshot,
+    });
   }
   return snapshotsByDay;
 }
