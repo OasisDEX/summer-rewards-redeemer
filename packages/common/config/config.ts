@@ -89,7 +89,7 @@ export const config: Config = {
       case Network.Goerli:
         return 5;
       case Network.Base:
-        return 31337;
+        return 8453;
       default:
         throw new Error("ajna-worker/config: No chain id found");
     }
@@ -228,20 +228,16 @@ export const getWeeklyReward = (weekNumber: number) => {
   weekNumber = weekNumber - config.rewardStartWeek;
   let reward = 0;
   if (weekNumber < 4) {
-    reward = 1100000;
-  } else if (weekNumber < 8) {
-    reward = 1000000;
-  } else if (weekNumber < 12) {
     reward = 900000;
-  } else if (weekNumber < 16) {
+  } else if (weekNumber < 8) {
     reward = 810000;
-  } else if (weekNumber < 20) {
+  } else if (weekNumber < 12) {
     reward = 729000;
-  } else if (weekNumber < 26) {
+  } else if (weekNumber < 16) {
     reward = 656100;
-  } else if (weekNumber < 36) {
+  } else if (weekNumber < 20) {
     reward = 600000;
-  } else if (weekNumber < 40) {
+  } else if (weekNumber < 26) {
     reward = 550000;
   } else {
     reward = 500000;
