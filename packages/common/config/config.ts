@@ -89,7 +89,7 @@ export const config: Config = {
       case Network.Goerli:
         return 5;
       case Network.Base:
-        return 31337;
+        return 8453;
       default:
         throw new Error("ajna-worker/config: No chain id found");
     }
