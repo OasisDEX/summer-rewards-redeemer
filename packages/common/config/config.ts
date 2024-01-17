@@ -145,36 +145,73 @@ export const config: Config = {
     const firstWeekDayId = weekId * 7;
     let rewardDistributions: Distribution[] = [];
     console.debug(chalk.yellow(`First day of week ${weekId} is ${firstWeekDayId}`));
-    switch (network) {
-      case Network.Mainnet:
-        rewardDistributions = [
-          { name: "RETH-DAI", address: "0x9cdB48FcBd8241Bb75887AF04d3b1302c410F671", share: 0.1 },
-          { name: "WBTC-DAI", address: "0x50f1C63f3AEfD60C665eF45aA74f274dABf93405", share: 0.07 },
-          { name: "WSTETH-DAI", address: "0xcD261cd365389A58e6467bb8a83A9E437864e8E5", share: 0.07 },
-          { name: "ETH-USDC", address: "0xE4BfB9b344A0Ae89702184281F13A295F3D49e15", share: 0.07 },
-          { name: "WBTC-USDC", address: "0x3BB7C1E268A51b2D933C0490e282e20b906f8652", share: 0.08 },
-          { name: "WSTETH-USDC", address: "0xF5B1AD7F82549c2BBf08AAa79c9eFC70C6E46b06", share: 0.08 },
-          { name: "USDC-ETH", address: "0x2Ceb74Bb7a92D652C850C16F48547aa49F8bca31", share: 0.04 },
-          { name: "USDC-WBTC", address: "0xE92Cd0ACF334D1133551bC4c87eA73BbC49Ce711", share: 0.04 },
-          { name: "WSTETH-ETH", address: "0x3BA6A019eD5541b5F5555d8593080042Cf3ae5f4", share: 0.1, lendRatio: 0.95 },
-          { name: "RETH-ETH", address: "0xE300B3A6b24cB3c5c87034155F7ffF7F77C862a0", share: 0.1, lendRatio: 0.95 },
-          { name: "SDAI-USDC", address: "0x90Ac6604aE71B5D978f3fC6074078987249119Ea", share: 0.1, lendRatio: 0.95 },
-        ];
-        break;
-      case Network.Base:
-        rewardDistributions = [
-          { name: "CBETH-ETH", address: "0xc7c05420F3d9e5bd0d8268F487EE6990d0Ab1E0E", share: 0.05, lendRatio: 0.95 },
-          { name: "ETH-USDC", address: "0x38C5721979C057C99393076cB85F089263FAD51f", share: 0.06 },
-          { name: "WSTETH-ETH", address: "0xa0277F33C9f5286b0d804cf872D4b1C56F29Ab01", share: 0.04, lendRatio: 0.95 },
-        ];
-        break;
-      case Network.Goerli:
-        rewardDistributions = [
-          { name: "WBTC-USDC", address: "0xE938A854f843E143936A7c4d2c43Cb5c15c65a48", share: 0.6 },
-          { name: "WETH-USDC", address: "0xcDF3047503923b1E1fDF2190aaFe3254A7F1A632", share: 0.4 },
-        ];
+    // we temporarily disable base rewards for the week 2820 so on the first days of the week no rewards are distributed
+    // address is 0xdead as it's done on purpose, we don't want to distribute rewards (onif zero address is used the script will throw)
+    // after we deploy new pools we will enable base rewards
+    if (weekId >= config.rewardStartWeek + 1) {
+      switch (network) {
+        case Network.Mainnet:
+          rewardDistributions = [
+            { name: "RETH-DAI", address: "0x9cdB48FcBd8241Bb75887AF04d3b1302c410F671", share: 0.1 },
+            { name: "WBTC-DAI", address: "0x50f1C63f3AEfD60C665eF45aA74f274dABf93405", share: 0.07 },
+            { name: "WSTETH-DAI", address: "0xcD261cd365389A58e6467bb8a83A9E437864e8E5", share: 0.07 },
+            { name: "ETH-USDC", address: "0xE4BfB9b344A0Ae89702184281F13A295F3D49e15", share: 0.07 },
+            { name: "WBTC-USDC", address: "0x3BB7C1E268A51b2D933C0490e282e20b906f8652", share: 0.08 },
+            { name: "WSTETH-USDC", address: "0xF5B1AD7F82549c2BBf08AAa79c9eFC70C6E46b06", share: 0.08 },
+            { name: "USDC-ETH", address: "0x2Ceb74Bb7a92D652C850C16F48547aa49F8bca31", share: 0.04 },
+            { name: "USDC-WBTC", address: "0xE92Cd0ACF334D1133551bC4c87eA73BbC49Ce711", share: 0.04 },
+            { name: "WSTETH-ETH", address: "0x3BA6A019eD5541b5F5555d8593080042Cf3ae5f4", share: 0.1, lendRatio: 0.95 },
+            { name: "RETH-ETH", address: "0xE300B3A6b24cB3c5c87034155F7ffF7F77C862a0", share: 0.1, lendRatio: 0.95 },
+            { name: "SDAI-USDC", address: "0x90Ac6604aE71B5D978f3fC6074078987249119Ea", share: 0.1, lendRatio: 0.95 },
+          ];
+          break;
+        case Network.Base:
+          rewardDistributions = [
+            { name: "CBETH-ETH", address: "0x000000000000000000000000000000000000dead", share: 0.05, lendRatio: 0.95 },
+            { name: "ETH-USDC", address: "0x000000000000000000000000000000000000dead", share: 0.06 },
+            { name: "WSTETH-ETH", address: "0x000000000000000000000000000000000000dead", share: 0.04, lendRatio: 0.95 },
+          ];
+          break;
+        case Network.Goerli:
+          rewardDistributions = [
+            { name: "WBTC-USDC", address: "0xE938A854f843E143936A7c4d2c43Cb5c15c65a48", share: 0.6 },
+            { name: "WETH-USDC", address: "0xcDF3047503923b1E1fDF2190aaFe3254A7F1A632", share: 0.4 },
+          ];
 
-        break;
+          break;
+      }
+    } else {
+      switch (network) {
+        case Network.Mainnet:
+          rewardDistributions = [
+            { name: "RETH-DAI", address: "0x9cdB48FcBd8241Bb75887AF04d3b1302c410F671", share: 0.1 },
+            { name: "WBTC-DAI", address: "0x50f1C63f3AEfD60C665eF45aA74f274dABf93405", share: 0.07 },
+            { name: "WSTETH-DAI", address: "0xcD261cd365389A58e6467bb8a83A9E437864e8E5", share: 0.07 },
+            { name: "ETH-USDC", address: "0xE4BfB9b344A0Ae89702184281F13A295F3D49e15", share: 0.07 },
+            { name: "WBTC-USDC", address: "0x3BB7C1E268A51b2D933C0490e282e20b906f8652", share: 0.08 },
+            { name: "WSTETH-USDC", address: "0xF5B1AD7F82549c2BBf08AAa79c9eFC70C6E46b06", share: 0.08 },
+            { name: "USDC-ETH", address: "0x2Ceb74Bb7a92D652C850C16F48547aa49F8bca31", share: 0.04 },
+            { name: "USDC-WBTC", address: "0xE92Cd0ACF334D1133551bC4c87eA73BbC49Ce711", share: 0.04 },
+            { name: "WSTETH-ETH", address: "0x3BA6A019eD5541b5F5555d8593080042Cf3ae5f4", share: 0.1, lendRatio: 0.95 },
+            { name: "RETH-ETH", address: "0xE300B3A6b24cB3c5c87034155F7ffF7F77C862a0", share: 0.1, lendRatio: 0.95 },
+            { name: "SDAI-USDC", address: "0x90Ac6604aE71B5D978f3fC6074078987249119Ea", share: 0.1, lendRatio: 0.95 },
+          ];
+          break;
+        case Network.Base:
+          rewardDistributions = [
+            { name: "CBETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.05, lendRatio: 0.95 },
+            { name: "ETH-USDC", address: "0x0000000000000000000000000000000000000000", share: 0.06 },
+            { name: "WSTETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.04, lendRatio: 0.95 },
+          ];
+          break;
+        case Network.Goerli:
+          rewardDistributions = [
+            { name: "WBTC-USDC", address: "0xE938A854f843E143936A7c4d2c43Cb5c15c65a48", share: 0.6 },
+            { name: "WETH-USDC", address: "0xcDF3047503923b1E1fDF2190aaFe3254A7F1A632", share: 0.4 },
+          ];
+
+          break;
+      }
     }
     return rewardDistributions.map((distribution) => ({
       ...distribution,
