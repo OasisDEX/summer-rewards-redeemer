@@ -145,9 +145,6 @@ export const config: Config = {
     const firstWeekDayId = weekId * 7;
     let rewardDistributions: Distribution[] = [];
     console.debug(chalk.yellow(`First day of week ${weekId} is ${firstWeekDayId}`));
-    // we temporarily disable base rewards for the week 2820 so on the first days of the week no rewards are distributed
-    // address is 0xdead as it's done on purpose, we don't want to distribute rewards (onif zero address is used the script will throw)
-    // after we deploy new pools we will enable base rewards
     if (weekId >= config.rewardStartWeek + 1) {
       switch (network) {
         case Network.Mainnet:
@@ -167,9 +164,9 @@ export const config: Config = {
           break;
         case Network.Base:
           rewardDistributions = [
-            { name: "CBETH-ETH", address: "0x000000000000000000000000000000000000dead", share: 0.05, lendRatio: 0.95 },
-            { name: "ETH-USDC", address: "0x000000000000000000000000000000000000dead", share: 0.06 },
-            { name: "WSTETH-ETH", address: "0x000000000000000000000000000000000000dead", share: 0.04, lendRatio: 0.95 },
+            { name: "CBETH-ETH", address: "0xCB1953EE28f89731C0ec088dA0720FC282fCFa9c", share: 0.05, lendRatio: 0.95 },
+            { name: "ETH-USDC", address: "0x0B17159F2486f669a1F930926638008E2ccB4287", share: 0.06 },
+            { name: "WSTETH-ETH", address: "0x63A366fc5976FF72999C89f69366F388b7D233e8", share: 0.04, lendRatio: 0.95 },
           ];
           break;
         case Network.Goerli:
