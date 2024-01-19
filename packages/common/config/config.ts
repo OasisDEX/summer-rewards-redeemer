@@ -196,9 +196,9 @@ export const config: Config = {
           break;
         case Network.Base:
           rewardDistributions = [
-            { name: "CBETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.05, lendRatio: 0.95 },
-            { name: "ETH-USDC", address: "0x0000000000000000000000000000000000000000", share: 0.06 },
-            { name: "WSTETH-ETH", address: "0x0000000000000000000000000000000000000000", share: 0.04, lendRatio: 0.95 },
+            { name: "CBETH-ETH", address: "0xc7c05420F3d9e5bd0d8268F487EE6990d0Ab1E0E", share: 0.05, lendRatio: 0.95 },
+            { name: "ETH-USDC", address: "0x38C5721979C057C99393076cB85F089263FAD51f", share: 0.06 },
+            { name: "WSTETH-ETH", address: "0xa0277F33C9f5286b0d804cf872D4b1C56F29Ab01", share: 0.04, lendRatio: 0.95 },
           ];
           break;
         case Network.Goerli:
