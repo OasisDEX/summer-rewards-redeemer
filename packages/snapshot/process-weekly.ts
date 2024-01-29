@@ -104,10 +104,10 @@ export async function processWeeklyClaims(
     await processWeeklySnapshotInDb(summedCoreUserSnapshots, weekId, root, tree);
     await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
     // process the snapshot on the blockchain - only core rewards are processed on the blockchain -bonus has to be processed by mutlisig
-    await processTransaction(weekId, root, signer);
+    await processTransaction(weekId, root, await config.signer);
   }
 }
 export async function processAllNetworksWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
-  // await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
+  await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
   await processWeeklyClaims(weekIds, Network.Mainnet, [...Object.values(EligibleNetwork)] as unknown as Network[]);
 }
