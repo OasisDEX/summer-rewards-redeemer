@@ -73,24 +73,8 @@ export async function processWeeklyClaims(
     await Promise.all(promises);
     // convert the daily snapshot to the format we need for the DB
     // iterate through all snapshots and sum up the amounts for each user
-    const summedCoreUserSnapshots: UserSnapshot = userCoreSnapshotMultipleNetworks.reduce((acc, curr) => {
-      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
-      if (existingEntry) {
-        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
-      } else {
-        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
-      }
-      return acc;
-    }, [] as UserSnapshot);
-    const summedBonusUserSnapshots: UserSnapshot = userBonusSnapshotMultipleRewards.reduce((acc, curr) => {
-      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
-      if (existingEntry) {
-        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
-      } else {
-        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
-      }
-      return acc;
-    }, [] as UserSnapshot);
+    const summedCoreUserSnapshots = sumUserSnapshot(userCoreSnapshotMultipleNetworks);
+    const summedBonusUserSnapshots = sumUserSnapshot(userBonusSnapshotMultipleRewards);
     // create the merkle tree and process the snapshot in the DB
     const { tree, root } = createMerkleTree(summedCoreUserSnapshots);
     const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
@@ -100,9 +84,29 @@ export async function processWeeklyClaims(
     await processWeeklySnapshotInDb(summedCoreUserSnapshots, weekId, root, tree);
     await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
     // process the snapshot on the blockchain - only core rewards are processed on the blockchain -bonus has to be processed by mutlisig
-    await processTransaction(weekId, root, signer);
+    await processTransaction(weekId, root, await config.signer);
   }
 }
+
+/**
+ * Sums up the user snapshots and returns the aggregated user snapshot.
+ * @param userSnapshot - The array of user snapshots to be summed up.
+ * @returns The aggregated user snapshot.
+ */
+function sumUserSnapshot(userSnapshot: ParsedUserSnapshot): UserSnapshot {
+  return userSnapshot
+    .reduce((acc, curr) => {
+      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
+      if (existingEntry) {
+        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
+      } else {
+        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
+      }
+      return acc;
+    }, [] as UserSnapshot)
+    .sort((a, b) => (a.userAddress.toLowerCase() > b.userAddress.toLowerCase() ? 1 : -1));
+}
+
 export async function processAllNetworksWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
   await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
   await processWeeklyClaims(weekIds, Network.Mainnet, [...Object.values(EligibleNetwork)] as unknown as Network[]);
