@@ -73,24 +73,28 @@ export async function processWeeklyClaims(
     await Promise.all(promises);
     // convert the daily snapshot to the format we need for the DB
     // iterate through all snapshots and sum up the amounts for each user
-    const summedCoreUserSnapshots: UserSnapshot = userCoreSnapshotMultipleNetworks.reduce((acc, curr) => {
-      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
-      if (existingEntry) {
-        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
-      } else {
-        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
-      }
-      return acc;
-    }, [] as UserSnapshot);
-    const summedBonusUserSnapshots: UserSnapshot = userBonusSnapshotMultipleRewards.reduce((acc, curr) => {
-      const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
-      if (existingEntry) {
-        existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
-      } else {
-        acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
-      }
-      return acc;
-    }, [] as UserSnapshot);
+    const summedCoreUserSnapshots: UserSnapshot = userCoreSnapshotMultipleNetworks
+      .reduce((acc, curr) => {
+        const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
+        if (existingEntry) {
+          existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
+        } else {
+          acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
+        }
+        return acc;
+      }, [] as UserSnapshot)
+      .sort((a, b) => (a.userAddress.toLowerCase() > b.userAddress.toLowerCase() ? 1 : -1));
+    const summedBonusUserSnapshots: UserSnapshot = userBonusSnapshotMultipleRewards
+      .reduce((acc, curr) => {
+        const existingEntry = acc.find((entry) => entry.userAddress === curr.userAddress);
+        if (existingEntry) {
+          existingEntry.amount = existingEntry.amount.add(BigNumber.from(curr.amount));
+        } else {
+          acc.push({ ...curr, amount: BigNumber.from(curr.amount) });
+        }
+        return acc;
+      }, [] as UserSnapshot)
+      .sort((a, b) => (a.userAddress.toLowerCase() > b.userAddress.toLowerCase() ? 1 : -1));
     // create the merkle tree and process the snapshot in the DB
     const { tree, root } = createMerkleTree(summedCoreUserSnapshots);
     const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
@@ -104,6 +108,6 @@ export async function processWeeklyClaims(
   }
 }
 export async function processAllNetworksWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
-  await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
+  // await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
   await processWeeklyClaims(weekIds, Network.Mainnet, [...Object.values(EligibleNetwork)] as unknown as Network[]);
 }
