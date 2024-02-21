@@ -82,7 +82,8 @@ export async function processWeeklyClaims(
     config.currentlyConfiguredNetwork = transactionNetwork;
     // process the snapshot in the DB
     await processWeeklySnapshotInDb(summedCoreUserSnapshots, weekId, root, tree);
-    await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
+    // TODO: cleanup the bonus rewards
+    // await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
     // process the snapshot on the blockchain - only core rewards are processed on the blockchain -bonus has to be processed by mutlisig
     await processTransaction(weekId, root, await config.signer);
   }
