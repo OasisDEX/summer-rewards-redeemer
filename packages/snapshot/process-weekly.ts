@@ -74,18 +74,22 @@ export async function processWeeklyClaims(
     // convert the daily snapshot to the format we need for the DB
     // iterate through all snapshots and sum up the amounts for each user
     const summedCoreUserSnapshots = sumUserSnapshot(userCoreSnapshotMultipleNetworks);
-    const summedBonusUserSnapshots = sumUserSnapshot(userBonusSnapshotMultipleRewards);
     // create the merkle tree and process the snapshot in the DB
     const { tree, root } = createMerkleTree(summedCoreUserSnapshots);
-    const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
+
     // set the network to mainnet as we are adding the root to the contract only on mainnet
     config.currentlyConfiguredNetwork = transactionNetwork;
     // process the snapshot in the DB
     await processWeeklySnapshotInDb(summedCoreUserSnapshots, weekId, root, tree);
-    // TODO: cleanup the bonus rewards
-    // await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
     // process the snapshot on the blockchain - only core rewards are processed on the blockchain -bonus has to be processed by mutlisig
     await processTransaction(weekId, root, await config.signer);
+
+    // TODO: cleanup the bonus rewards
+    /* 
+    const summedBonusUserSnapshots = sumUserSnapshot(userBonusSnapshotMultipleRewards);
+    const { tree: treeBonus, root: rootBonus } = createMerkleTree(summedBonusUserSnapshots);
+    await processWeeklySnapshotInDb(summedBonusUserSnapshots, weekId, rootBonus, treeBonus, AjnaRewardsSource.bonus);
+    */
   }
 }
 
