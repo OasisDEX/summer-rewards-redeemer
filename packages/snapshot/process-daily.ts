@@ -70,7 +70,8 @@ export async function processDailyClaims(
     }));
     // add the daily snapshot to the DB
     await processDailySnapshotInDb(coreSnapshot, dayId);
-    await processDailySnapshotInDb(bonusSnapshot, dayId, AjnaRewardsSource.bonus);
+    // TODO: cleanup bonus distributions
+    // await processDailySnapshotInDb(bonusSnapshot, dayId, AjnaRewardsSource.bonus);
     snapshotsByDay.push({
       parsedPositionSnapshot,
       parsedUserSnapshot,

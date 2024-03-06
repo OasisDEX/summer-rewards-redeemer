@@ -22,57 +22,60 @@ export async function processWeeklySnapshotInDb(
   tree: MerkleTree,
   rewardsSource: AjnaRewardsSource = AjnaRewardsSource.core
 ) {
-  await prisma.$transaction(async () => {
-    try {
-      console.info(chalk.gray(`Adding week #${currentWeek} to the db. Chain ID: ${config.chainId}`));
-      await prisma.ajnaRewardsMerkleTree.create({
-        data: {
-          tree_root: root,
-          week_number: Number(currentWeek),
-          chain_id: config.chainId,
-          source: rewardsSource,
-        },
-      });
-    } catch (error: unknown) {
-      const prismaError = error as Prisma.PrismaClientKnownRequestError;
-      if (prismaError?.code === "P2002") {
-        console.error(
-          `Root already added for week ${currentWeek}. Chain ID: ${config.chainId}. Rewards source ${rewardsSource}`
-        );
-        return;
-      } else {
-        throw error;
+  await prisma.$transaction(
+    async (tx) => {
+      try {
+        console.info(chalk.gray(`Adding week #${currentWeek} to the db. Chain ID: ${config.chainId}`));
+        await tx.ajnaRewardsMerkleTree.create({
+          data: {
+            tree_root: root,
+            week_number: Number(currentWeek),
+            chain_id: config.chainId,
+            source: rewardsSource,
+          },
+        });
+      } catch (error: unknown) {
+        const prismaError = error as Prisma.PrismaClientKnownRequestError;
+        if (prismaError?.code === "P2002") {
+          console.error(
+            `Root already added for week ${currentWeek}. Chain ID: ${config.chainId}. Rewards source ${rewardsSource}`
+          );
+          return;
+        } else {
+          throw error;
+        }
       }
-    }
-    const snapshotEntries: PrismaPromise<AjnaRewardsWeeklyClaim>[] = snapshot.map((entry) => {
-      const leaf = ethers.utils.solidityKeccak256(
-        ["address", "uint256"],
-        [entry.userAddress.toLowerCase(), entry.amount]
-      );
-      const proof = tree.getHexProof(leaf);
-      return prisma.ajnaRewardsWeeklyClaim.create({
-        data: {
-          user_address: entry.userAddress.toLowerCase(),
-          amount: entry.amount.toString(),
-          week_number: currentWeek,
-          chain_id: config.chainId,
-          source: rewardsSource,
-          proof,
-        },
+      const snapshotEntries = snapshot.map((entry) => {
+        const leaf = ethers.utils.solidityKeccak256(
+          ["address", "uint256"],
+          [entry.userAddress.toLowerCase(), entry.amount]
+        );
+        const proof = tree.getHexProof(leaf);
+        return tx.ajnaRewardsWeeklyClaim.create({
+          data: {
+            user_address: entry.userAddress.toLowerCase(),
+            amount: entry.amount.toString(),
+            week_number: currentWeek,
+            chain_id: config.chainId,
+            source: rewardsSource,
+            proof,
+          },
+        });
       });
-    });
-    console.info(
-      chalk.gray(
-        `Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}. Source ${rewardsSource}`
-      )
-    );
-    try {
-      await prisma.$transaction(snapshotEntries);
-    } catch (error) {
-      console.error(error);
-      throw new Error("Error adding snapshot entries to the db");
-    }
-  });
+      console.info(
+        chalk.gray(
+          `Adding ${snapshotEntries.length} snapshot entries to the db. Chain ID: ${config.chainId}. Source ${rewardsSource}`
+        )
+      );
+      try {
+        await prisma.$transaction(snapshotEntries);
+      } catch (error) {
+        console.error(error);
+        throw new Error("Error adding snapshot entries to the db");
+      }
+    },
+    { timeout: 50000 }
+  );
 }
 
 /**
