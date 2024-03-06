@@ -10,5 +10,5 @@
     "resolveJsonModule": true
   },
 
-  "files": ["./rewards/src/*.ts"]
+  "include": ["./daily/**.ts"]
 }

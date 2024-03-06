@@ -28,4 +28,4 @@ export const getEpochWeekId = (): number => {
  */
 export const roundToNearest = (value: number, nearest: number): number => {
   return Math.round(value / nearest) * nearest;
-}
+};

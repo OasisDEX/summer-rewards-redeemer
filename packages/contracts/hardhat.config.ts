@@ -6,7 +6,6 @@ import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-tracer";
-
 import "common/bootstrap-env";
 
 import { HardhatUserConfig, task } from "hardhat/config";
@@ -41,19 +40,25 @@ const config: HardhatUserConfig = {
   networks: {
     mainnet: {
       url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
-      gas: 1300000,
+      accounts:
+        process.env.PRIVATE_KEY_DEPLOY !== undefined && process.env.PRIVATE_KEY_OPERATOR !== undefined
+          ? [process.env.PRIVATE_KEY_DEPLOY, process.env.PRIVATE_KEY_OPERATOR]
+          : [],
+      gas: "auto",
     },
     goerli: {
       url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY_DEPLOY !== undefined ? [process.env.PRIVATE_KEY_DEPLOY] : [],
+      accounts:
+        process.env.PRIVATE_KEY_DEPLOY !== undefined && process.env.PRIVATE_KEY_OPERATOR !== undefined
+          ? [process.env.PRIVATE_KEY_DEPLOY, process.env.PRIVATE_KEY_OPERATOR]
+          : [],
       gas: "auto",
     },
     hardhat: {
       chainId: 2137,
       forking: {
-        url: process.env.ALCHEMY_MAINNET_RPC_URL || "",
-        blockNumber: 17950835,
+        url: process.env.ALCHEMY_GOERLI_RPC_URL || "",
+        blockNumber: 10211102,
       },
       mining: {
         auto: true,

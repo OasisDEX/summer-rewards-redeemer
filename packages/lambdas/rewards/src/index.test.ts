@@ -1,9 +1,10 @@
-import sinon from "sinon";
+import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { describe, test } from "@jest/globals";
-import { graphStub, setupGraphStub } from "common/utils/test.utils";
+import { ParsedUserSnapshotWithProofs } from "common";
 import { weeklyRewardData } from "common/utils/data";
-import { ParsedSnapshotWithProofs } from "common";
+import { graphStub, setupGraphStub } from "common/utils/test.utils";
+import sinon from "sinon";
+
 import testEvent from "../../events/unit-test-event.json";
 import { handler } from "./index";
 
@@ -29,7 +30,7 @@ describe("Run handler", () => {
     inputEvent = testEvent;
   });
   beforeAll(async () => {
-    setupGraphStub(weeklyRewardData, "weeklyPartner");
+    setupGraphStub("weeklyPartner", [weeklyRewardData]);
   });
   afterAll(async () => {
     sinon.restore();
@@ -46,14 +47,13 @@ describe("Run handler", () => {
       totalWeeklyRewards: "1000000000000000000000000",
     });
     const response = await handler(inputEvent);
-    const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedSnapshotWithProofs } = JSON.parse(
+    const parsedResponse: { root: string; parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs } = JSON.parse(
       response.body
     );
     expect(response.statusCode).toEqual(200);
     expect(JSON.parse(response.body)).toHaveProperty("root");
     expect(JSON.parse(response.body)).toHaveProperty("parsedSnapshotWithProofs");
-    expect(parsedResponse.root).toEqual("0x6fc461f80dfd08cb6fcd7cf2d7c7e066ec27c1a8e4b58248e338f0c22119cf38");
-
+    expect(parsedResponse.root).toEqual("0x1ae6ad4a4516c1e1d35048f35cba5814b40cd8eb8d1952ae37c6692bc479cb97");
     sinon.assert.calledOnce(graphStub);
     sinon.restore();
   });

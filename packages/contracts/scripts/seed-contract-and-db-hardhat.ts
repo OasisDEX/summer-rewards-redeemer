@@ -1,15 +1,15 @@
+import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 import chalk from "chalk";
+import { createMerkleTree } from "common";
+import { config } from "common/config/config";
+import { EthersError, UserSnapshot } from "common/types/types";
+import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
+import { AjnaRewardsSource, Prisma, prisma } from "database";
 import { BigNumber, ethers } from "ethers";
 import * as fs from "fs";
-
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
-import { config, getRewardDistributions } from "common/config/config";
+
 import { getOrDeployContract, impersonate, setTokenBalance } from "./utils/hardhat.utils";
-import { createMerkleTree } from "common";
-import { BASE_WEEKLY_AMOUNT } from "common/utils/data";
-import { EthersError, Snapshot } from "common/types/types";
-import { prisma, Prisma } from "database";
-import { calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 
 const dataDir = "../../snapshot/test/test-data";
 
@@ -45,10 +45,10 @@ async function main() {
   // add the weekly roots and weekly claims for all the users from the list
   for (let i = 0; i < files.length; i++) {
     console.log(chalk.dim(`Processing week ${weekIds[i]}`));
-    const rewardDistributions = getRewardDistributions(weekIds[i]);
+    const rewardDistributions = config.getRewardDistributions(weekIds[i], config.network);
     const result = calculateWeeklySnapshot(data[i], weekIds[i], rewardDistributions);
-    const snapshot: Snapshot = result.map((user) => ({
-      address: user.address,
+    const snapshot: UserSnapshot = result.weeklyCoreRewardsSnaphot.map((user) => ({
+      userAddress: user.userAddress,
       amount: BigNumber.from(user.amount),
     }));
     if (snapshot.length === 0) {
@@ -71,7 +71,12 @@ async function main() {
     try {
       console.log(chalk.gray(`Adding week #${weekIds[i]} to the db. Chain id: {${config.chainId}}}`));
       await prisma.ajnaRewardsMerkleTree.create({
-        data: { tree_root: root, week_number: Number(weekIds[i]), chain_id: config.chainId },
+        data: {
+          tree_root: root,
+          week_number: Number(weekIds[i]),
+          chain_id: config.chainId,
+          source: AjnaRewardsSource.core,
+        },
       });
     } catch (error: unknown) {
       const prismaError = error as Prisma.PrismaClientKnownRequestError;
@@ -83,21 +88,21 @@ async function main() {
     }
 
     const snapshotEntries: Prisma.AjnaRewardsWeeklyClaimCreateManyInput[] = snapshot.map((entry) => {
-      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [entry.address, entry.amount]);
+      const leaf = ethers.utils.solidityKeccak256(["address", "uint256"], [entry.userAddress, entry.amount]);
       const proof = tree.getHexProof(leaf);
 
       return {
-        user_address: entry.address,
+        user_address: entry.userAddress,
         amount: entry.amount.toString(),
         week_number: weekIds[i],
         chain_id: config.chainId,
         proof,
+        source: AjnaRewardsSource.core,
       };
     });
 
-    config.loggingEnabled
-      ? console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`))
-      : null;
+    console.log(chalk.gray(`Adding ${snapshotEntries.length} snapshot entries to the db`));
+
     await prisma.ajnaRewardsWeeklyClaim.createMany({
       data: snapshotEntries,
       skipDuplicates: true,

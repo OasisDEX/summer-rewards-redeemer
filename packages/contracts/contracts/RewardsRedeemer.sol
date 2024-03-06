@@ -7,7 +7,9 @@ import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 import { BitMaps } from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-import { OwnableUpgradeable as Ownable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {
+    OwnableUpgradeable as Ownable
+} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /** See IRewardsRedeemer.sol */
@@ -72,13 +74,9 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
     }
 
     /* @inheritdoc IRewardsRedeemer */
-    function claim(
-        uint256 index,
-        uint256 amount,
-        bytes32[] calldata proof
-    ) external {
+    function claim(uint256 index, uint256 amount, bytes32[] calldata proof) external {
         BitMaps.BitMap storage userClaimedRoots = claimedRoots[_msgSender()];
-        
+
         _processClaim(index, amount, proof, userClaimedRoots);
         _sendRewards(_msgSender(), amount);
     }
@@ -117,11 +115,11 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
 
     /**
      * @notice Verifies that the user could claim the given amount for the given index
-     * 
+     *
      * @param proof Merkle tree proof for the given index and amount
      * @param index Index of the root to claim
      * @param amount Amount to claim
-     * 
+     *
      * @dev This function does not take into account whether the user has already claimed the given index
      */
     function _couldClaim(
@@ -135,18 +133,14 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
 
     /**
      * @notice Verifies that the user can claim the given amount for the given index
-     * 
+     *
      * @param index Index of the root to claim
      * @param amount Amount to claim
      * @param proof Merkle tree proof for the given index and amount
-     * 
+     *
      * @dev Reverts if the user cannot claim the given amount for the given index
      */
-    function _verifyClaim(
-        uint256 index,
-        uint256 amount,
-        bytes32[] memory proof
-    ) internal view {
+    function _verifyClaim(uint256 index, uint256 amount, bytes32[] memory proof) internal view {
         if (!_couldClaim(index, amount, proof)) {
             revert UserCannotClaim(_msgSender(), index, amount, proof);
         }
@@ -158,12 +152,12 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
 
     /**
      * @notice Processes the claim for the given index and amount, and stores the claim in local storage
-     * 
+     *
      * @param index Index of the root to claim
      * @param amount Amount to claim
      * @param proof Merkle tree proof for the given index and amount
      * @param userClaimedRoots Local storage with the already claimed roots for the user
-     * 
+     *
      * @dev Reverts if the user cannot claim the given amount for the given index, otherwise stores the claim in local storage
      *      and emits a Claimed event. No tokens are transferred.
      */
@@ -182,7 +176,7 @@ contract RewardsRedeemer is IRewardsRedeemer, Ownable {
 
     /**
      * @notice Sends the given amount of the given token to the given address
-     * 
+     *
      * @param to Address to send the tokens to
      * @param amount Amount of tokens to send
      */

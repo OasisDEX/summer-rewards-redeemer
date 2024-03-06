@@ -1,9 +1,9 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { RewardsRedeemer, RewardsRedeemerFactory } from "typechain-types";
 
 import { deployContract } from "../scripts/utils/hardhat.utils";
-import { RewardsRedeemerFactory, RewardsRedeemer } from "typechain-types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Rewards Redeemer Factory", () => {
   let rewardsFactory: RewardsRedeemerFactory;
@@ -11,7 +11,7 @@ describe("Rewards Redeemer Factory", () => {
   let deployer: SignerWithAddress;
   let partner1: SignerWithAddress;
   let partner2: SignerWithAddress;
-  let dummyTokenAddress: string = "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29";
+  const dummyTokenAddress = "0x7EA2be2df7BA6E54B1A9C70676f668455E329d29";
 
   const ADMIN_ROLE: string = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("ADMIN_ROLE"));
   const PARTNER_ROLE: string = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("PARTNER_ROLE"));

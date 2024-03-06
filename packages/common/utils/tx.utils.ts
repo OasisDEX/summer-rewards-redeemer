@@ -10,7 +10,7 @@ export type TxResult = {
 export async function processTx(
   txPromise: Promise<ethers.ContractTransaction>,
   iface?: ethers.utils.Interface,
-  logErrors: boolean = false
+  logErrors = false
 ): Promise<TxResult> {
   let tx: ethers.ContractTransaction;
   let receipt: ethers.ContractReceipt;
@@ -36,6 +36,6 @@ export async function processTx(
   return {
     success: true,
     txHash: tx.hash,
-    receipt: receipt,
+    receipt,
   };
 }

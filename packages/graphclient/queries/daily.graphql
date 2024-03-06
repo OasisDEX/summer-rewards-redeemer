@@ -9,6 +9,9 @@ query DailyRewards($day: ID!) {
       user {
         id
       }
+      account{
+        id
+      }
       reward
     }
     earnDailyRewards(first: 1000) {
@@ -19,6 +22,9 @@ query DailyRewards($day: ID!) {
       user {
         id
       }
+      account{
+        id
+      }      
       reward
     }
     week {

@@ -14,11 +14,6 @@
     }
   },
   "include": [
-    "packages/contracts/packages/contracts/tests/**.ts",
-    "./test",
-    "./typechain",
-    "packages/prisma/seed.ts",
-    "packages/contracts/scripts/snapshot/verify.ts"
+    "./**.ts",
   ],
-  "files": ["packages/contracts/hardhat.config.ts"]
 }

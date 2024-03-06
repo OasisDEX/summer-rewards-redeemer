@@ -1,7 +1,8 @@
 import chalk from "chalk";
-import { getEpochDayId } from "../common/utils/time.utils";
-import { getRewardDistributions } from "common";
+import { config, Network } from "common";
 import { getBuiltGraphSDK } from "graphclient";
+
+import { getEpochDayId } from "../common/utils/time.utils";
 
 export async function fetchDailyData(dayId: number, url: string) {
   try {
@@ -39,9 +40,10 @@ export async function fetchDailyDataPartners(dayId: number, url: string, rewardD
 const url1 = "https://api.thegraph.com/subgraphs/name/halaprix/gajna5";
 const url2 = "https://graph.staging.summer.fi/subgraphs/id/QmXz5sZSUt7EdQKCjFnbqkqVGdF53NwuE6xA1dj2ADe25j";
 
+// TDO : fix this
 export async function verify(dayId: number, reverseOrder = false) {
   const weekId = Math.floor(dayId / 7);
-  const rewardDistributions = getRewardDistributions(weekId);
+  const rewardDistributions = config.getRewardDistributions(weekId, Network.Mainnet);
 
   let earnMatched = 0;
   let earnMismatched = 0;
@@ -59,8 +61,8 @@ export async function verify(dayId: number, reverseOrder = false) {
   } else {
     console.log(`Match for id: ${baseData.day?.id} === ${newData.day?.id}`);
   }
-  const countBase = baseData.day?.borrowDailyRewards?.length! + baseData.day?.earnDailyRewards?.length!;
-  const countNew = newData.day?.borrowDailyRewards?.length! + newData.day?.earnDailyRewards?.length!;
+  const countBase = (baseData.day?.borrowDailyRewards?.length ?? 0) + (baseData.day?.earnDailyRewards?.length ?? 0);
+  const countNew = (newData.day?.borrowDailyRewards?.length ?? 0) + (newData.day?.earnDailyRewards?.length ?? 0);
   if (countBase !== countNew) {
     console.log(chalk.red(`Mismatch for count: ${countBase} !== ${countNew}`));
   } else {
@@ -69,14 +71,14 @@ export async function verify(dayId: number, reverseOrder = false) {
   console.log(
     chalk.dim(
       `Found ${
-        baseData.day?.borrowDailyRewards?.length! + baseData.day?.earnDailyRewards?.length!
+        (baseData.day?.borrowDailyRewards?.length ?? 0) + (baseData.day?.earnDailyRewards?.length ?? 0)
       } rewards in the base subgraph ${baseUrl}`
     )
   );
   console.log(
     chalk.dim(
       `Found ${
-        newData.day?.borrowDailyRewards?.length! + newData.day?.earnDailyRewards?.length!
+        (newData.day?.borrowDailyRewards?.length ?? 0) + (newData.day?.earnDailyRewards?.length ?? 0)
       } rewards in the new subgraph ${newUrl}`
     )
   );
@@ -167,9 +169,9 @@ async function main() {
   const previousDay = today - 1;
   const amountOfDays = previousDay - firstDayOfRewards;
   console.log(previousDay);
-   let days = new Array(amountOfDays).fill(0).map((_, index) => firstDayOfRewards + index);
+  let days = new Array(amountOfDays).fill(0).map((_, index) => firstDayOfRewards + index);
   // console.log(days)
-  days = [...days, 19599]
+  days = [...days, 19599];
   for (const day of days) {
     await verify(day);
   }

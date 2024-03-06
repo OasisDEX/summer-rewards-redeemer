@@ -35,11 +35,12 @@
       }
     ],
     "@typescript-eslint/no-unused-vars": "warn",
-    "node/no-unsupported-features/es-syntax": ["error", { "ignores": ["modules"] }],
+    "node/no-unsupported-features/es-syntax": ["warn", { "ignores": ["modules"] }],
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "node/no-missing-import": "off",
-    "import/no-unresolved": "error",
-    "node/no-unpublished-import": "off"
+    "import/no-unresolved": "warn",
+    "node/no-unpublished-import": "off",
+    "node/no-extraneous-import": "off"
   }
 }
