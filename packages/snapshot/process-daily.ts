@@ -89,10 +89,11 @@ export async function processDailyClaims(
  * @returns A Promise that resolves when all daily claims have been processed.
  */
 export async function processAllNetworksDailyClaims(dayIds = [getEpochDayId() - 1]): Promise<void> {
-  for (const network of Object.values(TestNetwork)) {
-    config.currentlyConfiguredNetwork = network;
-    await processDailyClaims(dayIds, [...Object.values(TestNetwork)] as unknown as Network[]);
-  }
+  /* Goerli rewards turned off */
+  // for (const network of Object.values(TestNetwork)) {
+  //   config.currentlyConfiguredNetwork = network;
+  //   await processDailyClaims(dayIds, [...Object.values(TestNetwork)] as unknown as Network[]);
+  // }
   await processEligibleNetworksDailyClaims(dayIds);
 }
 
