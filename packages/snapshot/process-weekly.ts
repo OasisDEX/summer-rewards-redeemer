@@ -113,6 +113,7 @@ function sumUserSnapshot(userSnapshot: ParsedUserSnapshot): UserSnapshot {
 }
 
 export async function processAllNetworksWeeklyClaims(weekIds = [getEpochWeekId() - 1]): Promise<void> {
-  await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
+  /* Goerli processing is turned off */
+  // await processWeeklyClaims(weekIds, Network.Goerli, [...Object.values(TestNetwork)] as unknown as Network[]);
   await processWeeklyClaims(weekIds, Network.Mainnet, [...Object.values(EligibleNetwork)] as unknown as Network[]);
 }
