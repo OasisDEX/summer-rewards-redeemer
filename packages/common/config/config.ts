@@ -177,11 +177,9 @@ export const config: Config = {
             { name: "CBETH-ETH", address: "0xCB1953EE28f89731C0ec088dA0720FC282fCFa9c", share: 0.04, lendRatio: 0.95 },
             { name: "ETH-USDC", address: "0x0B17159F2486f669a1F930926638008E2ccB4287", share: 0.04 },
             { name: "WSTETH-ETH", address: "0x63A366fc5976FF72999C89f69366F388b7D233e8", share: 0.02, lendRatio: 0.95 },
-            { name: "DEGEN-USDC", address: "0x52e69a7cf5076a769e11fffc2e99e837b575f65e", share: 0.02 },
-            { name: "DEGEN-cUSDCv3", address: "0x343F462B050975005c388AE3eA62e4C1FC418C64", share: 0.02 },
-            { name: "USDC-DEGEN", address: "0x1dec31e6550c958af3e116f23472fe1493476496", share: 0.02 },
-            { name: "SNX-USDC", address: "0xd784b2ee3cd12a93e7ed592e583f6929f2d4e0b2", share: 0.0325 },
-            { name: "SNX-cUSDCv3", address: "0x7B1a82Ac53935884c22187B5fd219d310428D9b5", share: 0.0325 },
+            { name: "DEGEN-USDC", address: "0x52e69a7cf5076a769e11fffc2e99e837b575f65e", share: 0.04 },
+            { name: "USDC-DEGEN", address: "0x1dec31e6550c958af3e116f23472fe1493476496", share: 0.04 },
+            { name: "SNX-USDC", address: "0xd784b2ee3cd12a93e7ed592e583f6929f2d4e0b2", share: 0.045 },
           ];
           break;
         case Network.Goerli:
