@@ -179,7 +179,7 @@ export const config: Config = {
             { name: "WSTETH-ETH", address: "0x63A366fc5976FF72999C89f69366F388b7D233e8", share: 0.02, lendRatio: 0.95 },
             { name: "DEGEN-USDC", address: "0x52e69a7cf5076a769e11fffc2e99e837b575f65e", share: 0.04 },
             { name: "USDC-DEGEN", address: "0x1dec31e6550c958af3e116f23472fe1493476496", share: 0.04 },
-            { name: "SNX-USDC", address: "0xd784b2ee3cd12a93e7ed592e583f6929f2d4e0b2", share: 0.045 },
+            { name: "SNX-USDC", address: "0x92c85b18e7f0df000bbfab4ce76c28a4ddbae64a", share: 0.045 },
           ];
           break;
         case Network.Goerli:
