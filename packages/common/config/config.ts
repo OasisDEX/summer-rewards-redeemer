@@ -181,7 +181,7 @@ export const config: Config = {
             { name: "DEGEN-cUSDCv3", address: "0x343F462B050975005c388AE3eA62e4C1FC418C64", share: 0.02 },
             { name: "USDC-DEGEN", address: "0x1dec31e6550c958af3e116f23472fe1493476496", share: 0.02 },
             { name: "SNX-USDC", address: "0xd784b2ee3cd12a93e7ed592e583f6929f2d4e0b2", share: 0.0325 },
-            { name: "SNX-cUSDCv3", address: "0x7B1a82Ac53935884c2218+8D9b5", share: 0.0325 },
+            { name: "SNX-cUSDCv3", address: "0x7B1a82Ac53935884c22187B5fd219d310428D9b5", share: 0.0325 },
           ];
           break;
         case Network.Goerli:
