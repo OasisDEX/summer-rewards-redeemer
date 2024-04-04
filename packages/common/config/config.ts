@@ -159,13 +159,13 @@ export const config: Config = {
             { name: "USDC-ETH", address: "0x2Ceb74Bb7a92D652C850C16F48547aa49F8bca31", share: 0.02 },
             { name: "USDC-WBTC", address: "0xE92Cd0ACF334D1133551bC4c87eA73BbC49Ce711", share: 0.02 },
             { name: "WSTETH-ETH", address: "0x3BA6A019eD5541b5F5555d8593080042Cf3ae5f4", share: 0.08, lendRatio: 0.95 },
-            { name: "RETH-ETH", address: "0xE300B3A6b24cB3c5c87034155F7ffF7F77C862a0", share: 0.04, lendRatio: 0.95 },
+            { name: "RETH-ETH", address: "0xE300B3A6b24cB3c5c87034155F7ffF7F77C862a0", share: 0.05, lendRatio: 0.95 },
             { name: "SDAI-USDC", address: "0x90Ac6604aE71B5D978f3fC6074078987249119Ea", share: 0.06, lendRatio: 0.95 },
             { name: "YFI-DAI", address: "0x66ea46c6e7f9e5bb065bd3b1090fff229393ba51", share: 0.02 },
             { name: "st-yETH-DAI", address: "0x304375e4890146dc575b894b35a42608fab823a8", share: 0.02 },
             { name: "Ajna-DAI", address: "0x2feef99a711d684e00a017c4ac587bea31f12875", share: 0.03 },
             { name: "MKR-DAI", address: "0x0598c1FeDa47535FF5248E2Bd08703ACE4E740C4", share: 0.03 },
-            { name: "SUSDE-DAI", address: "0x0598c1FeDa47535FF5248E2Bd08703ACE4E740C4", share: 0.03 },
+            { name: "SUSDE-DAI", address: "0x0598c1FeDa47535FF5248E2Bd08703ACE4E740C4", share: 0.035 },
             { name: "mwstETH-WPUNKS:20/wstETH", address: "0x1b3ca2a7b12859fe34cefd7072d770fb6a1e7679", share: 0.02 },
             { name: "mwstETH-WPUNKS:40/wstETH", address: "0x7a2f9d2610ab99952dfb44f8aa3707584baacb8d", share: 0.02 },
             { name: "ENA-sDAI", address: "0x4176747Bc01BE99f9e8FE78A7b2303d4662a2244", share: 0.0075 },
@@ -181,7 +181,7 @@ export const config: Config = {
             { name: "DEGEN-cUSDCv3", address: "0x343F462B050975005c388AE3eA62e4C1FC418C64", share: 0.02 },
             { name: "USDC-DEGEN", address: "0x1dec31e6550c958af3e116f23472fe1493476496", share: 0.02 },
             { name: "SNX-USDC", address: "0xd784b2ee3cd12a93e7ed592e583f6929f2d4e0b2", share: 0.0325 },
-            { name: "SNX-cUSDCv3", address: "0x7B1a82Ac53935884c22187B5fd219d310428D9b5", share: 0.0325 },
+            { name: "SNX-cUSDCv3", address: "0x7B1a82Ac53935884c2218+8D9b5", share: 0.0325 },
           ];
           break;
         case Network.Goerli:
