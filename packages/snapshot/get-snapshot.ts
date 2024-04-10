@@ -99,9 +99,9 @@ export function calculateWeeklySnapshot(
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
-    const total = BigNumber.from(pool.share * 1000)
+    const total = BigNumber.from(Math.floor(pool.share * config.multiplier))
       .mul(totalWeeklyDistribution)
-      .div(1000);
+      .div(config.multiplier);
     totalWeeklyDistributionPerPool[pool.address] = {
       total,
       lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
@@ -196,9 +196,9 @@ export function calculateDailySnapshot(
     if (pool.address === ZERO_ADDRESS) {
       throw new Error(`Invalid pool address: ${pool.address}. Fix the config`);
     }
-    const total = BigNumber.from(pool.share * 1000)
+    const total = BigNumber.from(Math.floor(pool.share * config.multiplier))
       .mul(totalWeeklyDistribution)
-      .div(1000);
+      .div(config.multiplier);
     totalWeeklyDistributionPerPool[pool.address] = {
       total,
       lendRatio: pool.lendRatio ? pool.lendRatio : config.earnRewardsRatio,
