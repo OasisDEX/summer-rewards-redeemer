@@ -168,7 +168,6 @@ export const config: Config = {
             { name: "SUSDE-DAI", address: "0x0598c1FeDa47535FF5248E2Bd08703ACE4E740C4", share: 0.035 },
             { name: "mwstETH-WPUNKS:20/wstETH", address: "0x1b3ca2a7b12859fe34cefd7072d770fb6a1e7679", share: 0.01 },
             { name: "mwstETH-WPUNKS:40/wstETH", address: "0x7a2f9d2610ab99952dfb44f8aa3707584baacb8d", share: 0.01 },
-            { name: "UNI-V2 LP ajnaweth/dai", address: "0x0598c1FeDa47535FF5248E2Bd08703ACE4E740C4", share: 0.03 },
           ];
           break;
         case Network.Base:
