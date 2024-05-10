@@ -1,0 +1,47 @@
+name: Deploy Lambda function
+on:
+  push:
+    branches:
+      - master
+      - TECH-1903-add-action
+
+jobs:
+  deploy:
+    name: Deploy Lambda function from ZIP file
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      ENV: staging
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install yarn
+        run: |
+              npm install yarn --global
+
+      - name: Install dependencies
+        run: |
+              npm install
+
+      - name: Create bundle
+        run: |
+              npm run generate:lambda:daily
+
+      - name: Deploy to Lambda
+        uses: appleboy/lambda-action@v0.1.9
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: oasis-ajna-rewards-redeemer-${{ env.ENV }}
+          zip_file: ./daily.zip
+          dry_run: true
