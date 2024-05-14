@@ -1,18 +1,18 @@
 import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { ethers, network } from "hardhat";
-
+import { createMerkleTree } from "common";
 import { config } from "common/config/config";
 import { WEEK } from "common/constants/constants";
-import { deployContract } from "../scripts/utils/hardhat.utils";
-import { createMerkleTree } from "common";
 import { BASE_WEEKLY_AMOUNT, dummyProcessedSnaphot } from "common/utils/data";
+import { BigNumber } from "ethers";
+import { ethers, network } from "hardhat";
 import { AjnaDripper, AjnaRedeemer, AjnaToken } from "typechain-types";
+
+import { deployContract } from "../scripts/utils/hardhat.utils";
 
 const { leaves, tree, root } = createMerkleTree(dummyProcessedSnaphot);
 
-const dataForFirstUser = [dummyProcessedSnaphot[1].address, dummyProcessedSnaphot[1].amount];
+const dataForFirstUser = [dummyProcessedSnaphot[1].userAddress, dummyProcessedSnaphot[1].amount];
 
 /* leaf and proof with index 1 -> address is the firstUser address from hardhat accounts 
  0 indexed user is saved for the owner */
@@ -260,9 +260,9 @@ describe("AjnaRedeemer", () => {
       for (let i = 0; i < dummyProcessedSnaphot.length; i++) {
         await network.provider.request({
           method: "hardhat_impersonateAccount",
-          params: [dummyProcessedSnaphot[i].address],
+          params: [dummyProcessedSnaphot[i].userAddress],
         });
-        const randomUser = ethers.provider.getSigner(dummyProcessedSnaphot[i].address);
+        const randomUser = ethers.provider.getSigner(dummyProcessedSnaphot[i].userAddress);
         const randomUserAddress = await randomUser.getAddress();
         const proofForRandomUserFromDummyProcessedSnaphot = tree.getHexProof(leaves[i]);
         await expect(
@@ -289,7 +289,7 @@ describe("AjnaRedeemer", () => {
         );
         await network.provider.request({
           method: "hardhat_stopImpersonatingAccount",
-          params: [dummyProcessedSnaphot[i].address],
+          params: [dummyProcessedSnaphot[i].userAddress],
         });
       }
       expect(await ajnaToken.balanceOf(ajnaRedeemer.address)).to.eql(BigNumber.from(0));

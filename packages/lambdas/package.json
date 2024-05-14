@@ -21,6 +21,8 @@
     "bundle:rewards": "esbuild rewards/src/index.ts --bundle --minify --loader:.node=file --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
     "generate:lambda:daily:nozip": "cp ../database/dist/* ./dist -r && cp ../database/dist/prisma/client/schema.prisma ./dist  &&  yarn bundle:lambda:daily",
     "generate:lambda:daily": "mkdir dist && yarn generate:lambda:daily:nozip && cd dist && zip -r ../daily.zip . && cd .. && rm -rf dist",
+    "generate:lambda:weekly:nozip": "cp ../database/dist/* ./dist -r && cp ../database/dist/prisma/client/schema.prisma ./dist  &&  yarn bundle:lambda:weekly",
+    "generate:lambda:weekly": "mkdir dist && yarn generate:lambda:weekly:nozip && cd dist && zip -r ../weekly.zip . && cd .. && rm -rf dist",
     "generate:rewards": "mkdir dist && yarn bundle:rewards && cd dist && zip -r ../rewards.zip . && cd .. && rm -rf dist",
     "test": "DOTENV_CONFIG_PATH=../../.env jest ./rewards/src --setupFiles dotenv/config"
   }

@@ -1,33 +1,44 @@
+import { AjnaRewardsPositionType } from "database";
 import { BigNumber, ethers } from "ethers";
+import { Account, BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
 import { Options } from "merkletreejs/dist/MerkleTree";
 
-import { BorrowDailyReward, Day, EarnDailyReward, Maybe, Pool, User, Week } from "graphclient";
-import { type } from "os";
-
-export interface ParsedSnapshotEntry {
-  address: string;
-  amount: string;
+export enum Network {
+  Mainnet = "mainnet",
+  Goerli = "goerli",
+  Base = "base",
 }
-export type ParsedSnapshot = ParsedSnapshotEntry[];
 
-export interface SnapshotEntry {
-  address: string;
+export interface UserSnapshotEntry {
+  userAddress: string;
   amount: BigNumber;
 }
-export type Snapshot = SnapshotEntry[];
-
-export type SnapshotWithProofsEntry = {
-  address: string;
-  amount: BigNumber;
+export interface PositionSnapshotEntry extends UserSnapshotEntry {
+  accountAddress: string;
+  poolAddress: string;
+  positionType: AjnaRewardsPositionType;
+}
+export interface UserSnapshotWithProofsEntry extends UserSnapshotEntry {
   proof: string[];
-};
-export type SnapshotWithProofs = SnapshotWithProofsEntry[];
+}
 
-export type ParsedSnapshotWithProofsEntry = Omit<SnapshotWithProofsEntry, "amount"> & {
+export type ParsedUserSnapshotEntry = Omit<UserSnapshotEntry, "amount"> & {
+  amount: string;
+};
+export type ParsedPositionSnapshotEntry = Omit<PositionSnapshotEntry, "amount"> & {
+  amount: string;
+};
+export type ParsedUserSnapshotWithProofsEntry = Omit<UserSnapshotWithProofsEntry, "amount"> & {
   amount: string;
 };
 
-export type ParsedSnapshotWithProofs = ParsedSnapshotWithProofsEntry[];
+export type UserSnapshot = UserSnapshotEntry[];
+export type PositionSnapshot = PositionSnapshotEntry[];
+export type UserSnapshotWithProofs = UserSnapshotWithProofsEntry[];
+
+export type ParsedUserSnapshot = ParsedUserSnapshotEntry[];
+export type ParsedPositionSnapshot = ParsedPositionSnapshotEntry[];
+export type ParsedUserSnapshotWithProofs = ParsedUserSnapshotWithProofsEntry[];
 
 export interface Distribution {
   name: string;
@@ -35,14 +46,41 @@ export interface Distribution {
   share: number;
   lendRatio?: number;
 }
+
+export interface DistributionWithNetwork extends Distribution {
+  network: Network;
+}
+
 export interface DistributionAmount {
   [poolAddress: string]: { total: BigNumber; lendRatio?: number };
 }
-export interface UserRewardsAmount {
-  [userAddress: string]: BigNumber;
+export interface DistributionAmountWithLendRatio extends DistributionAmount {
+  [poolAddress: string]: { total: BigNumber; lendRatio: number };
 }
-export enum Network {
+export interface UserRewardDetails {
+  [userAddress: string]: { amount: BigNumber };
+}
+
+export interface PositionRewardDetails {
+  accountAddress: string;
+  userAddress: string;
+  poolAddress: string;
+  positionType: AjnaRewardsPositionType;
+  amount: BigNumber;
+}
+
+/**
+ * Enum representing networks eligible for Ajan rewards.
+ */
+export enum EligibleNetwork {
   Mainnet = "mainnet",
+  Base = "base",
+}
+
+/**
+ * Enum representing the test networks.
+ */
+export enum TestNetwork {
   Goerli = "goerli",
 }
 
@@ -57,19 +95,23 @@ export interface Config {
   loggingEnabled: boolean;
   earnRewardsRatio: number;
   borrowRewardsRatio: number;
+  bonusRewardsDuration: number;
   rewardStartWeek: number;
+  bonusRewardsEndWeek: number;
   multiplier: number;
   dryRun: boolean;
-  usedNetwork: string | undefined;
+  currentlyConfiguredNetwork: string | undefined;
   network: Network;
   weeksCount: number;
   merkleTreeOptions: Options;
   addresses: { [key: string]: string };
   chainId: number;
   subgraphUrl: string;
-  rpcUrl: string | undefined;
+  rpcUrl: string;
   signer: Promise<ethers.Signer>;
   provider: Promise<ethers.providers.JsonRpcProvider>;
+  debug: boolean;
+  getRewardDistributions: (weekId: number, network: Network) => Distribution[];
 }
 
 export type EthersError = {
@@ -93,32 +135,35 @@ export type EthersError = {
 export type BorrowDailyRewards = (Pick<BorrowDailyReward, "id" | "reward"> & {
   pool: Pick<Pool, "id">;
   user?: Maybe<Pick<User, "id">> | undefined;
+  account?: Maybe<Pick<Account, "id">> | undefined;
 })[];
 
 export type EarnDailyRewards = (Pick<EarnDailyReward, "id" | "reward"> & {
   pool: Pick<Pool, "id">;
   user?: Maybe<Pick<User, "id">> | undefined;
+  account?: Maybe<Pick<Account, "id">> | undefined;
 })[];
 
 export type WeekDay = Pick<Day, "id"> & {
-  borrowDailyRewards?:
-    | Maybe<
-        (Pick<BorrowDailyReward, "id" | "reward"> & {
-          pool: Pick<Pool, "id">;
-          user?: Maybe<Pick<User, "id">> | undefined;
-        })[]
-      >
-    | undefined;
+  borrowDailyRewards?: BorrowDailyRewards | null;
   earnDailyRewards?: EarnDailyRewards | null;
   week: Pick<Week, "id">;
 };
 
 export interface DailyRewards {
   id: string;
-  dailyRewards: {
-    [userAddress: string]: BigNumber;
-  };
+  dailyUserRewards: UserRewardDetails;
+  dailyPositionRewards: PositionRewardDetails[];
   totalDailyRewards: BigNumber;
+  dailyUserBonusRewards: UserRewardDetails;
+  dailyPositionBonusRewards: PositionRewardDetails[];
+  totalDailyBonusRewards: BigNumber;
+}
+export interface DailyBonusRewards {
+  id: string;
+  dailyUserBonusRewards: UserRewardDetails;
+  dailyPositionBonusRewards: PositionRewardDetails[];
+  totalDailyBonusRewards: BigNumber;
 }
 
 export type WeeklyRewards = DailyRewards[];

@@ -1,4 +1,10 @@
+import { calculateDailySnapshot, calculateWeeklySnapshot } from "ajna-rewards-snapshot/get-snapshot";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { createMerkleTree, Distribution, ParsedUserSnapshotWithProofs, validateRewardDistributions } from "common";
+import { fetchDailyData, fetchWeeklyData, graphClient } from "common/utils/graph.utils";
+import { BigNumber } from "ethers";
+import { Maybe, Pool, Token } from "graphclient";
+
 import {
   CuratedTokensRequestBody,
   DailySnapshotRequestBody,
@@ -6,12 +12,7 @@ import {
   TokenRequestBody,
   WeeklySnapshotRequestBody,
 } from "../types/requests";
-import { Distribution, createMerkleTree, ParsedSnapshotWithProofs } from "common";
-import { fetchWeeklyData, fetchDailyData, graphClient } from "common/utils/graph.utils";
-import { BigNumber } from "ethers";
-import { createErrorResponse, validateRequestBody, createSuccessResponse } from "../utils";
-import { calculateWeeklySnapshot, calculateDailySnapshot } from "ajna-rewards-snapshot/get-snapshot";
-import { Pool, Token } from "graphclient";
+import { createErrorResponse, createSuccessResponse, validateRequestBody } from "../utils";
 
 export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
@@ -26,34 +27,34 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     if (!validatedBody) {
       return createErrorResponse("Invalid body provided");
     }
-    const graphRes = await fetchWeeklyData(
-      validatedBody.weekId,
-      validatedBody.distribution.map((pool: any) => pool.address.toLowerCase())
-    );
-    let parsedSnapshot = calculateWeeklySnapshot(
+    validateRewardDistributions(validatedBody.distribution);
+    const graphRes = await fetchWeeklyData(validatedBody.weekId, validatedBody.distribution);
+    const parsedSnapshot = calculateWeeklySnapshot(
       graphRes,
       validatedBody.weekId,
       validatedBody.distribution.map((distribution: Distribution) => ({
         ...distribution,
-        address: distribution.address.toLowerCase(),
+        userAddress: distribution.address.toLowerCase(),
       })),
       BigNumber.from(validatedBody.totalWeeklyRewards)
     );
     // uncomment for testing
-    // parsedSnapshot[0].address = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
+    // parsedSnapshot[0].userAddress = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
     // parsedSnapshot[0].amount = BigNumber.from("10000000000").toHexString();
-    // parsedSnapshot[1].address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+    // parsedSnapshot[1].userAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
     // parsedSnapshot[1].amount = BigNumber.from("10000000000").toHexString();
     const { tree, leaves, root } = createMerkleTree(
-      parsedSnapshot.map((entry) => ({
-        address: entry.address,
+      parsedSnapshot.weeklyCoreRewardsSnaphot.map((entry) => ({
+        userAddress: entry.userAddress,
         amount: BigNumber.from(entry.amount),
       }))
     );
-    const parsedSnapshotWithProofs: ParsedSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
-      ...entry,
-      proof: tree.getHexProof(leaves[index]),
-    }));
+    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.weeklyCoreRewardsSnaphot.map(
+      (entry, index) => ({
+        ...entry,
+        proof: tree.getHexProof(leaves[index]),
+      })
+    );
     const responseBody = JSON.stringify({ root, parsedSnapshotWithProofs });
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -74,11 +75,9 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
     if (!validatedBody) {
       return createErrorResponse("Invalid body provided");
     }
-    const graphRes = await fetchDailyData(
-      validatedBody.dayId,
-      validatedBody.distribution.map((pool: any) => pool.address.toLowerCase())
-    );
-    let parsedSnapshot = calculateDailySnapshot(
+    validateRewardDistributions(validatedBody.distribution);
+    const graphRes = await fetchDailyData(validatedBody.dayId, validatedBody.distribution);
+    const parsedSnapshot = calculateDailySnapshot(
       graphRes,
       validatedBody.dayId,
       validatedBody.distribution.map((distribution: Distribution) => ({
@@ -88,20 +87,22 @@ export async function handleDailySnapshot(event: APIGatewayProxyEvent): Promise<
       BigNumber.from(validatedBody.totalWeeklyRewards)
     );
     // uncomment for testing
-    // parsedSnapshot[0].address = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
+    // parsedSnapshot[0].userAddress = "0xaaf00613a099deae24eeb2c21ad2965cadeac244";
     // parsedSnapshot[0].amount = BigNumber.from("10000000000").toHexString();
-    // parsedSnapshot[1].address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
+    // parsedSnapshot[1].userAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
     // parsedSnapshot[1].amount = BigNumber.from("10000000000").toHexString();
     const { tree, leaves, root } = createMerkleTree(
-      parsedSnapshot.map((entry) => ({
-        address: entry.address,
+      parsedSnapshot.parsedUserSnapshot.map((entry) => ({
+        userAddress: entry.userAddress,
         amount: BigNumber.from(entry.amount),
       }))
     );
-    const parsedSnapshotWithProofs: ParsedSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
-      ...entry,
-      proof: tree.getHexProof(leaves[index]),
-    }));
+    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.parsedUserSnapshot.map(
+      (entry, index) => ({
+        ...entry,
+        proof: tree.getHexProof(leaves[index]),
+      })
+    );
     const responseBody = JSON.stringify({ root, parsedSnapshotWithProofs });
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -134,6 +135,7 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
       )
     );
     const poolsRes = graphRes.reduce((acc, val) => acc.concat(val), []);
+
     const responseBody = prepareResponse(poolsRes);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -159,6 +161,7 @@ export async function handleToken(event: APIGatewayProxyEvent): Promise<APIGatew
     const graphRes = await graphClient.Token({
       token: validatedBody.token.toLowerCase(),
     });
+
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -182,6 +185,7 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
     const graphRes = await graphClient.CuratedTokens({
       tokens: validatedBody.tokens.map((token) => token.toLowerCase()),
     });
+
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -191,17 +195,16 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
 }
 
 function prepareResponse(
-  graphRes: (Pick<Pool, "id"> & {
-    collateralToken: Pick<Token, "symbol">;
-    quoteToken: Pick<Token, "symbol">;
-  })[]
+  graphRes: Array<
+    Pick<Pool, "id"> & { collateralToken?: Maybe<Pick<Token, "symbol">>; quoteToken?: Maybe<Pick<Token, "symbol">> }
+  >
 ) {
   const poolCount = graphRes.length;
   const poolShare = (Math.floor((1 / poolCount) * 1000) / 1000).toFixed(3);
   const remainder = (1 - (poolCount - 1) * +poolShare).toFixed(3);
   const pools = graphRes.map((pool, index) => {
     return {
-      name: `${pool.collateralToken.symbol}-${pool.quoteToken.symbol}`,
+      name: `${pool.collateralToken!.symbol}-${pool.quoteToken!.symbol}`,
       address: pool.id,
       share: index == poolCount - 1 ? remainder : poolShare,
       lendRatio: 0.6,

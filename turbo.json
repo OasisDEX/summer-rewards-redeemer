@@ -8,6 +8,9 @@
     "build": {},
     "generate:lambda:daily": {
       "dependsOn": ["database#build", "graphclient#build"]
+    },
+    "generate:rewards": {
+      "dependsOn": ["database#build", "graphclient#build"]
     }
   }
 }

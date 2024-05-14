@@ -1,10 +1,10 @@
 import { ContractReceipt } from "@ethersproject/contracts";
-
-import { prisma } from "database";
-import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "typechain-types";
 import { config } from "common/config/config";
 import { TX_STATUS } from "common/types/types";
+import { AjnaRewardsSource, prisma } from "database";
 import { ethers } from "ethers";
+// eslint-disable-next-line camelcase
+import { AjnaDripper__factory, AjnaRedeemer__factory, AjnaToken__factory } from "typechain-types";
 
 export async function processTransaction(weekId: number, root: string, signer?: ethers.Signer) {
   const contracts = await getContracts(signer);
@@ -21,7 +21,13 @@ export async function processTransaction(weekId: number, root: string, signer?: 
 async function updateAjnaRewardsMerkleTree(receipt: ContractReceipt, weekId: number) {
   if (receipt.status === TX_STATUS.SUCCESSFUL) {
     await prisma.ajnaRewardsMerkleTree.update({
-      where: { week_number_chain_id_unique_id: { week_number: Number(weekId), chain_id: config.chainId } },
+      where: {
+        week_number_chain_id_source_unique_id: {
+          week_number: Number(weekId),
+          chain_id: config.chainId,
+          source: AjnaRewardsSource.core,
+        },
+      },
       data: { tx_processed: true },
     });
   } else {
