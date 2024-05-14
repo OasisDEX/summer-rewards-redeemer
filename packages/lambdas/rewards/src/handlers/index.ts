@@ -44,15 +44,17 @@ export async function handleWeeklySnapshot(event: APIGatewayProxyEvent): Promise
     // parsedSnapshot[1].userAddress = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
     // parsedSnapshot[1].amount = BigNumber.from("10000000000").toHexString();
     const { tree, leaves, root } = createMerkleTree(
-      parsedSnapshot.map((entry) => ({
+      parsedSnapshot.weeklyCoreRewardsSnaphot.map((entry) => ({
         userAddress: entry.userAddress,
         amount: BigNumber.from(entry.amount),
       }))
     );
-    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.map((entry, index) => ({
-      ...entry,
-      proof: tree.getHexProof(leaves[index]),
-    }));
+    const parsedSnapshotWithProofs: ParsedUserSnapshotWithProofs = parsedSnapshot.weeklyCoreRewardsSnaphot.map(
+      (entry, index) => ({
+        ...entry,
+        proof: tree.getHexProof(leaves[index]),
+      })
+    );
     const responseBody = JSON.stringify({ root, parsedSnapshotWithProofs });
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -133,7 +135,7 @@ export async function handleTokenPairs(event: APIGatewayProxyEvent): Promise<API
       )
     );
     const poolsRes = graphRes.reduce((acc, val) => acc.concat(val), []);
-    // @ts-ignore
+
     const responseBody = prepareResponse(poolsRes);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -159,7 +161,7 @@ export async function handleToken(event: APIGatewayProxyEvent): Promise<APIGatew
     const graphRes = await graphClient.Token({
       token: validatedBody.token.toLowerCase(),
     });
-    // @ts-ignore
+
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
@@ -183,7 +185,7 @@ export async function handleCuratedTokens(event: APIGatewayProxyEvent): Promise<
     const graphRes = await graphClient.CuratedTokens({
       tokens: validatedBody.tokens.map((token) => token.toLowerCase()),
     });
-    // @ts-ignore
+
     const responseBody = prepareResponse(graphRes.pools);
     return createSuccessResponse(responseBody);
   } catch (error) {
