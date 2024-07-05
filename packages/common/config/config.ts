@@ -667,12 +667,13 @@ export const getWeeklyReward = (weekNumber: number) => {
   return ethers.utils.parseEther(reward.toString());
 };
 
-export const getWeeklyRewardForNetwork = (rewardDistributions: Distribution[], reward: BigNumber) => {
+export const getWeeklyRewardForNetwork = (weekNumber: number, rewardDistributions: Distribution[]) => {
   let totalShares = 0;
   for (const distribution of rewardDistributions) {
     totalShares += distribution.share;
   }
   totalShares = parseFloat(totalShares.toFixed(5));
+  const reward = getWeeklyReward(weekNumber);
   return BigNumber.from(totalShares * 1000)
     .mul(reward)
     .div(1000);
