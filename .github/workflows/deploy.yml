@@ -30,11 +30,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-              npm install
+              yarn install
 
       - name: Create bundle
         run: |
-              npm run generate:lambda:daily
+              yarn generate:lambda:daily
 
       - name: Deploy to Lambda
         uses: appleboy/lambda-action@v0.1.9
